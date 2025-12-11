@@ -11,22 +11,18 @@ export default function Game() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Focus the iframe when the game loads to ensure keyboard controls work immediately
-    const focusIframe = () => {
-      if (iframeRef.current) {
-        iframeRef.current.focus();
+    // Attempt to focus iframe safely
+    const timer = setTimeout(() => {
+      if (iframeRef.current && document.activeElement !== iframeRef.current) {
+        try {
+          iframeRef.current.focus();
+        } catch (e) {
+          console.log("Autofocus blocked, waiting for user interaction");
+        }
       }
-    };
+    }, 500);
 
-    // Set up interval to keep focus on game (optional, but helps if user clicks away)
-    const focusInterval = setInterval(() => {
-      if (document.activeElement !== iframeRef.current && iframeRef.current) {
-        // Only auto-focus if we want to be aggressive, but for now let's just do it on load
-        // and maybe on click
-      }
-    }, 1000);
-
-    return () => clearInterval(focusInterval);
+    return () => clearTimeout(timer);
   }, []);
 
   const handleLoad = () => {
@@ -51,7 +47,7 @@ export default function Game() {
       
       <iframe
         ref={iframeRef}
-        src="/index.html"
+        src="/game.html"
         title="3D Space Shooter"
         className="w-full h-full border-none block"
         onLoad={handleLoad}

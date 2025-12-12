@@ -11811,6 +11811,11 @@
                 this.updateLoadingProgress(10, 'Creating renderer...');
                 this.initRenderer();
                 
+                if (!this.renderer) {
+                    console.error('Renderer initialization failed, stopping game initialization');
+                    return;
+                }
+
                 this.updateLoadingProgress(20, 'Setting up scene...');
                 this.initScene();
                 
@@ -11887,12 +11892,33 @@
             }
 
             initRenderer() {
-                this.renderer = new THREE.WebGLRenderer({
-                    antialias: true,
-                    alpha: false,
-                    powerPreference: 'high-performance'
-                });
+                try {
+                    // Try high performance settings first
+                    this.renderer = new THREE.WebGLRenderer({
+                        antialias: true,
+                        alpha: false,
+                        powerPreference: 'high-performance'
+                    });
+                } catch (e) {
+                    console.warn('High performance WebGL initialization failed, retrying with default settings...', e);
+                    try {
+                        // Fallback to default settings
+                        this.renderer = new THREE.WebGLRenderer({
+                            antialias: false,
+                            alpha: false
+                        });
+                    } catch (e2) {
+                        console.error('WebGL initialization failed:', e2);
+                        this.showWebGLError();
+                        return;
+                    }
+                }
                 
+                if (!this.renderer) {
+                    this.showWebGLError();
+                    return;
+                }
+
                 this.renderer.setSize(window.innerWidth, window.innerHeight);
                 this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
                 this.renderer.outputEncoding = THREE.sRGBEncoding;
@@ -11901,6 +11927,29 @@
                 this.renderer.setClearColor(0x000011, 1);
                 
                 document.getElementById('game-container').appendChild(this.renderer.domElement);
+            }
+
+            showWebGLError() {
+                const errorDiv = document.createElement('div');
+                errorDiv.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: rgba(0, 0, 0, 0.9);
+                    border: 2px solid #ff0000;
+                    color: #ff0000;
+                    padding: 20px;
+                    text-align: center;
+                    font-family: monospace;
+                    z-index: 10000;
+                `;
+                errorDiv.innerHTML = `
+                    <h2>WebGL Error</h2>
+                    <p>Failed to initialize graphics engine.</p>
+                    <p>Please check if hardware acceleration is enabled in your browser settings.</p>
+                `;
+                document.body.appendChild(errorDiv);
             }
 
             initScene() {

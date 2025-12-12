@@ -11909,6 +11909,11 @@
                     }
                 }
                 
+                if (!this.renderer) {
+                    this.showWebGLError();
+                    return;
+                }
+
                 this.renderer.setSize(window.innerWidth, window.innerHeight);
                 this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
                 this.renderer.outputEncoding = THREE.sRGBEncoding;
@@ -12050,7 +12055,7 @@
                     const starMaterial = new THREE.ShaderMaterial({
                         uniforms: {
                             time: { value: 0 },
-                            pixelRatio: { value: this.renderer.getPixelRatio() }
+                            pixelRatio: { value: this.renderer ? this.renderer.getPixelRatio() : 1.0 }
                         },
                         vertexShader: `
                             attribute float size;

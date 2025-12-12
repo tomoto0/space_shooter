@@ -11,18 +11,33 @@ export default function Game() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Attempt to focus iframe safely
+    // Focus iframe on click to ensure keyboard events are captured
+    const handleClick = () => {
+      if (iframeRef.current) {
+        iframeRef.current.focus();
+      }
+    };
+
+    window.addEventListener('click', handleClick);
+    
+    // Initial focus attempt with error suppression
     const timer = setTimeout(() => {
       if (iframeRef.current && document.activeElement !== iframeRef.current) {
         try {
-          iframeRef.current.focus();
+          // Check if document already has focus to avoid error
+          if (!document.activeElement || document.activeElement === document.body) {
+            iframeRef.current.focus();
+          }
         } catch (e) {
-          console.log("Autofocus blocked, waiting for user interaction");
+          // Ignore autofocus errors
         }
       }
-    }, 500);
+    }, 1000);
 
-    return () => clearTimeout(timer);
+    return () => {
+      window.removeEventListener('click', handleClick);
+      clearTimeout(timer);
+    };
   }, []);
 
   const handleLoad = () => {

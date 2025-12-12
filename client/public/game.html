@@ -12056,15 +12056,14 @@
                     geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
                     geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
 
-                                    // Custom shader for space dust
+                               // Custom shader for space dust
                     const dustMaterial = new THREE.ShaderMaterial({
                         uniforms: {
                             time: { value: 0 },
                             pixelRatio: { value: this.renderer ? this.renderer.getPixelRatio() : 1.0 }
                         },
-                        vertexShader: `exShader: `
-                            attribute float size;
-                            attribute vec3 color;
+                        vertexShader: `
+                            attribute float size;                            attribute vec3 color;
                             varying vec3 vColor;
                             varying float vBrightness;
                             uniform float time;

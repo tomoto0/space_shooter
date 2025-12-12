@@ -1239,39 +1239,75 @@
             display: block;
         }
 
-        /* Joystick Area */
-        #joystick-zone {
+        /* D-Pad Area */
+        #dpad-container {
             position: absolute;
             bottom: 40px;
             left: 40px;
-            width: 160px;
-            height: 160px;
-            pointer-events: auto;
+            width: 180px;
+            height: 180px;
+            pointer-events: none; /* Container passes through, buttons catch events */
         }
 
-        #joystick-knob {
+        .dpad-btn {
             position: absolute;
-            top: 50%;
-            left: 50%;
+            background: rgba(0, 245, 255, 0.15);
+            border: 2px solid rgba(0, 245, 255, 0.4);
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(0, 245, 255, 0.8);
+            font-size: 1.5rem;
+            font-weight: bold;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            transition: background 0.1s;
+        }
+
+        .dpad-btn:active, .dpad-btn.active {
+            background: rgba(0, 245, 255, 0.4);
+            box-shadow: 0 0 10px rgba(0, 245, 255, 0.3);
+        }
+
+        /* D-Pad Layout (Cross shape) */
+        #dpad-up {
+            top: 0;
+            left: 60px;
             width: 60px;
             height: 60px;
-            background: rgba(0, 245, 255, 0.3);
-            border: 2px solid rgba(0, 245, 255, 0.6);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            box-shadow: 0 0 15px rgba(0, 245, 255, 0.4);
-            pointer-events: none;
+            border-radius: 10px 10px 0 0;
         }
-
-        #joystick-base {
-            position: absolute;
-            top: 0;
+        #dpad-down {
+            bottom: 0;
+            left: 60px;
+            width: 60px;
+            height: 60px;
+            border-radius: 0 0 10px 10px;
+        }
+        #dpad-left {
+            top: 60px;
             left: 0;
-            width: 100%;
-            height: 100%;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            background: rgba(0, 0, 0, 0.1);
-            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            border-radius: 10px 0 0 10px;
+        }
+        #dpad-right {
+            top: 60px;
+            right: 0;
+            width: 60px;
+            height: 60px;
+            border-radius: 0 10px 10px 0;
+        }
+        /* Center filler for visual completeness */
+        #dpad-center {
+            top: 60px;
+            left: 60px;
+            width: 60px;
+            height: 60px;
+            background: rgba(0, 245, 255, 0.1);
+            position: absolute;
             pointer-events: none;
         }
 
@@ -1335,9 +1371,12 @@
     
     <!-- Touch Controls -->
     <div id="touch-controls">
-        <div id="joystick-zone">
-            <div id="joystick-base"></div>
-            <div id="joystick-knob"></div>
+        <div id="dpad-container">
+            <div id="dpad-up" class="dpad-btn">▲</div>
+            <div id="dpad-left" class="dpad-btn">◀</div>
+            <div id="dpad-center"></div>
+            <div id="dpad-right" class="dpad-btn">▶</div>
+            <div id="dpad-down" class="dpad-btn">▼</div>
         </div>
         <button id="btn-fire" class="touch-btn">FIRE</button>
         <button id="btn-bomb" class="touch-btn">BOMB</button>
@@ -2323,64 +2362,49 @@
                     document.body.classList.add('touch-active');
                 }, { once: true });
 
-                // Joystick logic
-                const zone = document.getElementById('joystick-zone');
-                const knob = document.getElementById('joystick-knob');
-                let stickId = null;
+                // D-Pad logic
+                this.dpadState = { up: false, down: false, left: false, right: false };
 
-                const updateJoystick = (touchX, touchY) => {
-                    const rect = zone.getBoundingClientRect();
-                    const centerX = rect.left + rect.width / 2;
-                    const centerY = rect.top + rect.height / 2;
-                    const maxDist = rect.width / 2 - 30; // Knob radius approx
-
-                    let dx = touchX - centerX;
-                    let dy = touchY - centerY;
-                    const dist = Math.sqrt(dx*dx + dy*dy);
-                    
-                    if (dist > maxDist) {
-                        const ratio = maxDist / dist;
-                        dx *= ratio;
-                        dy *= ratio;
-                    }
-                    
-                    knob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
-                    
-                    this.virtualStick.x = dx / maxDist;
-                    this.virtualStick.y = -dy / maxDist;
+                const updateDpadVector = () => {
+                    this.virtualStick.x = 0;
+                    this.virtualStick.y = 0;
+                    if (this.dpadState.left) this.virtualStick.x -= 1;
+                    if (this.dpadState.right) this.virtualStick.x += 1;
+                    if (this.dpadState.up) this.virtualStick.y += 1;
+                    if (this.dpadState.down) this.virtualStick.y -= 1;
                 };
 
-                zone.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    const touch = e.changedTouches[0];
-                    stickId = touch.identifier;
-                    updateJoystick(touch.clientX, touch.clientY);
-                }, { passive: false });
+                const bindDpad = (id, dir) => {
+                    const btn = document.getElementById(id);
+                    
+                    const handleStart = (e) => {
+                        e.preventDefault();
+                        this.dpadState[dir] = true;
+                        btn.classList.add('active');
+                        updateDpadVector();
+                    };
 
-                zone.addEventListener('touchmove', (e) => {
-                    e.preventDefault();
-                    for (let i = 0; i < e.changedTouches.length; i++) {
-                        if (e.changedTouches[i].identifier === stickId) {
-                            updateJoystick(e.changedTouches[i].clientX, e.changedTouches[i].clientY);
-                            break;
-                        }
-                    }
-                }, { passive: false });
+                    const handleEnd = (e) => {
+                        e.preventDefault();
+                        this.dpadState[dir] = false;
+                        btn.classList.remove('active');
+                        updateDpadVector();
+                    };
 
-                const endJoystick = (e) => {
-                    for (let i = 0; i < e.changedTouches.length; i++) {
-                        if (e.changedTouches[i].identifier === stickId) {
-                            stickId = null;
-                            this.virtualStick.x = 0;
-                            this.virtualStick.y = 0;
-                            knob.style.transform = `translate(-50%, -50%)`;
-                            break;
-                        }
-                    }
+                    btn.addEventListener('touchstart', handleStart, { passive: false });
+                    btn.addEventListener('touchend', handleEnd);
+                    btn.addEventListener('touchcancel', handleEnd);
+                    
+                    // Also handle mouse for testing on PC if needed, though touch-controls are hidden
+                    btn.addEventListener('mousedown', (e) => { handleStart(e); });
+                    btn.addEventListener('mouseup', (e) => { handleEnd(e); });
+                    btn.addEventListener('mouseleave', (e) => { if(this.dpadState[dir]) handleEnd(e); });
                 };
 
-                zone.addEventListener('touchend', endJoystick);
-                zone.addEventListener('touchcancel', endJoystick);
+                bindDpad('dpad-up', 'up');
+                bindDpad('dpad-down', 'down');
+                bindDpad('dpad-left', 'left');
+                bindDpad('dpad-right', 'right');
 
                 // Buttons
                 const bindBtn = (id, key) => {

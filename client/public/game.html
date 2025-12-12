@@ -1243,9 +1243,9 @@
         #dpad-container {
             position: absolute;
             bottom: 40px;
-            left: 20px;
-            width: 150px;
-            height: 150px;
+            left: 40px;
+            width: 180px;
+            height: 180px;
             pointer-events: none; /* Container passes through, buttons catch events */
         }
 
@@ -1274,38 +1274,38 @@
         /* D-Pad Layout (Cross shape) */
         #dpad-up {
             top: 0;
-            left: 50px;
-            width: 50px;
-            height: 50px;
-            border-radius: 8px;
+            left: 60px;
+            width: 60px;
+            height: 60px;
+            border-radius: 10px 10px 0 0;
         }
         #dpad-down {
             bottom: 0;
-            left: 50px;
-            width: 50px;
-            height: 50px;
-            border-radius: 8px;
+            left: 60px;
+            width: 60px;
+            height: 60px;
+            border-radius: 0 0 10px 10px;
         }
         #dpad-left {
-            top: 50px;
+            top: 60px;
             left: 0;
-            width: 50px;
-            height: 50px;
-            border-radius: 8px;
+            width: 60px;
+            height: 60px;
+            border-radius: 10px 0 0 10px;
         }
         #dpad-right {
-            top: 50px;
+            top: 60px;
             right: 0;
-            width: 50px;
-            height: 50px;
-            border-radius: 8px;
+            width: 60px;
+            height: 60px;
+            border-radius: 0 10px 10px 0;
         }
         /* Center filler for visual completeness */
         #dpad-center {
-            top: 50px;
-            left: 50px;
-            width: 50px;
-            height: 50px;
+            top: 60px;
+            left: 60px;
+            width: 60px;
+            height: 60px;
             background: rgba(0, 245, 255, 0.1);
             position: absolute;
             pointer-events: none;
@@ -11811,11 +11811,6 @@
                 this.updateLoadingProgress(10, 'Creating renderer...');
                 this.initRenderer();
                 
-                if (!this.renderer) {
-                    console.error('Renderer initialization failed, aborting game init');
-                    return;
-                }
-
                 this.updateLoadingProgress(20, 'Setting up scene...');
                 this.initScene();
                 
@@ -11892,28 +11887,12 @@
             }
 
             initRenderer() {
-                const configs = [
-                    { antialias: true, alpha: false, powerPreference: 'high-performance', failIfMajorPerformanceCaveat: true },
-                    { antialias: false, alpha: false, powerPreference: 'default' },
-                    { antialias: false, alpha: false, powerPreference: 'low-power', precision: 'lowp' }
-                ];
-
-                for (const config of configs) {
-                    try {
-                        this.renderer = new THREE.WebGLRenderer(config);
-                        console.log('WebGL initialized with config:', config);
-                        break;
-                    } catch (e) {
-                        console.warn('WebGL init failed with config:', config, e);
-                    }
-                }
+                this.renderer = new THREE.WebGLRenderer({
+                    antialias: true,
+                    alpha: false,
+                    powerPreference: 'high-performance'
+                });
                 
-                if (!this.renderer) {
-                    console.error('All WebGL configurations failed');
-                    this.showWebGLError();
-                    return;
-                }
-
                 this.renderer.setSize(window.innerWidth, window.innerHeight);
                 this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
                 this.renderer.outputEncoding = THREE.sRGBEncoding;
@@ -11922,29 +11901,6 @@
                 this.renderer.setClearColor(0x000011, 1);
                 
                 document.getElementById('game-container').appendChild(this.renderer.domElement);
-            }
-
-            showWebGLError() {
-                const errorDiv = document.createElement('div');
-                errorDiv.style.cssText = `
-                    position: fixed;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    background: rgba(0, 0, 0, 0.9);
-                    border: 2px solid #ff0000;
-                    padding: 20px;
-                    color: #fff;
-                    text-align: center;
-                    z-index: 10000;
-                    font-family: sans-serif;
-                `;
-                errorDiv.innerHTML = `
-                    <h2 style="color: #ff0000; margin-bottom: 10px;">WebGL Error</h2>
-                    <p>Your browser or device does not support WebGL, which is required to play this game.</p>
-                    <p style="margin-top: 10px; font-size: 0.8em; color: #aaa;">Try updating your graphics drivers or using a different browser.</p>
-                `;
-                document.body.appendChild(errorDiv);
             }
 
             initScene() {
@@ -12051,14 +12007,15 @@
                     geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
                     geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
 
-                               // Custom shader for space dust
-                    const dustMaterial = new THREE.ShaderMaterial({
+                    // Custom shader for twinkling stars
+                    const starMaterial = new THREE.ShaderMaterial({
                         uniforms: {
                             time: { value: 0 },
-                            pixelRatio: { value: this.renderer ? this.renderer.getPixelRatio() : 1.0 }
+                            pixelRatio: { value: this.renderer.getPixelRatio() }
                         },
                         vertexShader: `
-                            attribute float size;                            attribute vec3 color;
+                            attribute float size;
+                            attribute vec3 color;
                             varying vec3 vColor;
                             varying float vBrightness;
                             uniform float time;

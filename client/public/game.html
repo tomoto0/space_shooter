@@ -11812,7 +11812,7 @@
                 this.initRenderer();
                 
                 if (!this.renderer) {
-                    console.error('Renderer initialization failed, stopping game initialization');
+                    console.error('Renderer initialization failed, aborting game init');
                     return;
                 }
 
@@ -11938,16 +11938,16 @@
                     transform: translate(-50%, -50%);
                     background: rgba(0, 0, 0, 0.9);
                     border: 2px solid #ff0000;
-                    color: #ff0000;
                     padding: 20px;
+                    color: #fff;
                     text-align: center;
-                    font-family: monospace;
                     z-index: 10000;
+                    font-family: sans-serif;
                 `;
                 errorDiv.innerHTML = `
-                    <h2>WebGL Error</h2>
-                    <p>Failed to initialize graphics engine.</p>
-                    <p>Please check if hardware acceleration is enabled in your browser settings.</p>
+                    <h2 style="color: #ff0000; margin-bottom: 10px;">WebGL Error</h2>
+                    <p>Your browser or device does not support WebGL, which is required to play this game.</p>
+                    <p style="margin-top: 10px; font-size: 0.8em; color: #aaa;">Try updating your graphics drivers or using a different browser.</p>
                 `;
                 document.body.appendChild(errorDiv);
             }
@@ -12056,15 +12056,14 @@
                     geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
                     geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
 
-                    // Custom shader for twinkling stars
-                    const starMaterial = new THREE.ShaderMaterial({
+                               // Custom shader for space dust
+                    const dustMaterial = new THREE.ShaderMaterial({
                         uniforms: {
                             time: { value: 0 },
-                            pixelRatio: { value: this.renderer.getPixelRatio() }
+                            pixelRatio: { value: this.renderer ? this.renderer.getPixelRatio() : 1.0 }
                         },
                         vertexShader: `
-                            attribute float size;
-                            attribute vec3 color;
+                            attribute float size;                            attribute vec3 color;
                             varying vec3 vColor;
                             varying float vBrightness;
                             uniform float time;

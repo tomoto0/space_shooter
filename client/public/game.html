@@ -11892,29 +11892,24 @@
             }
 
             initRenderer() {
-                try {
-                    // Try high performance settings first
-                    this.renderer = new THREE.WebGLRenderer({
-                        antialias: true,
-                        alpha: false,
-                        powerPreference: 'high-performance'
-                    });
-                } catch (e) {
-                    console.warn('High performance WebGL initialization failed, retrying with default settings...', e);
+                const configs = [
+                    { antialias: true, alpha: false, powerPreference: 'high-performance', failIfMajorPerformanceCaveat: true },
+                    { antialias: false, alpha: false, powerPreference: 'default' },
+                    { antialias: false, alpha: false, powerPreference: 'low-power', precision: 'lowp' }
+                ];
+
+                for (const config of configs) {
                     try {
-                        // Fallback to default settings
-                        this.renderer = new THREE.WebGLRenderer({
-                            antialias: false,
-                            alpha: false
-                        });
-                    } catch (e2) {
-                        console.error('WebGL initialization failed:', e2);
-                        this.showWebGLError();
-                        return;
+                        this.renderer = new THREE.WebGLRenderer(config);
+                        console.log('WebGL initialized with config:', config);
+                        break;
+                    } catch (e) {
+                        console.warn('WebGL init failed with config:', config, e);
                     }
                 }
                 
                 if (!this.renderer) {
+                    console.error('All WebGL configurations failed');
                     this.showWebGLError();
                     return;
                 }

@@ -1223,10 +1223,126 @@
                 font-size: 0.9rem;
             }
         }
+        /* Touch Controls */
+        #touch-controls {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+        }
+
+        .touch-active #touch-controls {
+            display: block;
+        }
+
+        /* Joystick Area */
+        #joystick-zone {
+            position: absolute;
+            bottom: 40px;
+            left: 40px;
+            width: 160px;
+            height: 160px;
+            pointer-events: auto;
+        }
+
+        #joystick-knob {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 60px;
+            height: 60px;
+            background: rgba(0, 245, 255, 0.3);
+            border: 2px solid rgba(0, 245, 255, 0.6);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 15px rgba(0, 245, 255, 0.4);
+            pointer-events: none;
+        }
+
+        #joystick-base {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        /* Action Buttons */
+        .touch-btn {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: bold;
+            font-family: monospace;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            transition: transform 0.1s, background 0.1s;
+        }
+
+        .touch-btn:active {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(0.95);
+        }
+
+        #btn-fire {
+            bottom: 60px;
+            right: 40px;
+            width: 90px;
+            height: 90px;
+            border-color: rgba(0, 245, 255, 0.6);
+            background: rgba(0, 245, 255, 0.1);
+            font-size: 1.2rem;
+        }
+
+        #btn-bomb {
+            bottom: 180px;
+            right: 40px;
+            width: 70px;
+            height: 70px;
+            border-color: rgba(255, 50, 50, 0.6);
+            background: rgba(255, 50, 50, 0.1);
+            font-size: 0.9rem;
+        }
+
+        #btn-roll {
+            bottom: 60px;
+            right: 160px;
+            width: 70px;
+            height: 70px;
+            border-color: rgba(255, 255, 0, 0.6);
+            background: rgba(255, 255, 0, 0.1);
+            font-size: 0.9rem;
+        }
     </style>
 </head>
 <body>
     <div id="game-container"></div>
+    
+    <!-- Touch Controls -->
+    <div id="touch-controls">
+        <div id="joystick-zone">
+            <div id="joystick-base"></div>
+            <div id="joystick-knob"></div>
+        </div>
+        <button id="btn-fire" class="touch-btn">FIRE</button>
+        <button id="btn-bomb" class="touch-btn">BOMB</button>
+        <button id="btn-roll" class="touch-btn">ROLL</button>
+    </div>
     
     <!-- Scan Lines Overlay -->
     <div class="scanlines"></div>
@@ -2134,7 +2250,10 @@
                     y: 0
                 };
                 
+                this.virtualStick = { x: 0, y: 0 };
+                this.virtualButtons = { fire: false, bomb: false, roll: false };
                 this.setupEventListeners();
+                this.setupTouchControls();
             }
 
             setupEventListeners() {
@@ -2198,8 +2317,99 @@
                 });
             }
 
+            setupTouchControls() {
+                // Touch detection
+                window.addEventListener('touchstart', () => {
+                    document.body.classList.add('touch-active');
+                }, { once: true });
+
+                // Joystick logic
+                const zone = document.getElementById('joystick-zone');
+                const knob = document.getElementById('joystick-knob');
+                let stickId = null;
+
+                const updateJoystick = (touchX, touchY) => {
+                    const rect = zone.getBoundingClientRect();
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+                    const maxDist = rect.width / 2 - 30; // Knob radius approx
+
+                    let dx = touchX - centerX;
+                    let dy = touchY - centerY;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    
+                    if (dist > maxDist) {
+                        const ratio = maxDist / dist;
+                        dx *= ratio;
+                        dy *= ratio;
+                    }
+                    
+                    knob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+                    
+                    this.virtualStick.x = dx / maxDist;
+                    this.virtualStick.y = -dy / maxDist;
+                };
+
+                zone.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    const touch = e.changedTouches[0];
+                    stickId = touch.identifier;
+                    updateJoystick(touch.clientX, touch.clientY);
+                }, { passive: false });
+
+                zone.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                    for (let i = 0; i < e.changedTouches.length; i++) {
+                        if (e.changedTouches[i].identifier === stickId) {
+                            updateJoystick(e.changedTouches[i].clientX, e.changedTouches[i].clientY);
+                            break;
+                        }
+                    }
+                }, { passive: false });
+
+                const endJoystick = (e) => {
+                    for (let i = 0; i < e.changedTouches.length; i++) {
+                        if (e.changedTouches[i].identifier === stickId) {
+                            stickId = null;
+                            this.virtualStick.x = 0;
+                            this.virtualStick.y = 0;
+                            knob.style.transform = `translate(-50%, -50%)`;
+                            break;
+                        }
+                    }
+                };
+
+                zone.addEventListener('touchend', endJoystick);
+                zone.addEventListener('touchcancel', endJoystick);
+
+                // Buttons
+                const bindBtn = (id, key) => {
+                    const btn = document.getElementById(id);
+                    btn.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        this.virtualButtons[key] = true;
+                        btn.style.transform = 'scale(0.9)';
+                        btn.style.background = 'rgba(255, 255, 255, 0.3)';
+                    }, { passive: false });
+                    btn.addEventListener('touchend', (e) => {
+                        e.preventDefault();
+                        this.virtualButtons[key] = false;
+                        btn.style.transform = 'scale(1)';
+                        btn.style.background = '';
+                    });
+                };
+
+                bindBtn('btn-fire', 'fire');
+                bindBtn('btn-bomb', 'bomb');
+                bindBtn('btn-roll', 'roll');
+            }
+
             isKeyPressed(code) {
-                return this.keys[code] === true;
+                if (this.keys[code]) return true;
+                if (code === 'Space' && this.virtualButtons.fire) return true;
+                if (code === 'KeyB' && this.virtualButtons.bomb) return true;
+                if ((code === 'KeyQ' || code === 'KeyE') && this.virtualButtons.roll) return true;
+                return false;
             }
 
             getMovementVector() {
@@ -2216,6 +2426,8 @@
                     movement.y = -movement.y;
                 }
                 
+                if (Math.abs(this.virtualStick.x) > 0.1) movement.x = this.virtualStick.x;
+                if (Math.abs(this.virtualStick.y) > 0.1) movement.y = this.virtualStick.y;
                 return movement;
             }
         }

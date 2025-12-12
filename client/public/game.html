@@ -11887,27 +11887,11 @@
             }
 
             initRenderer() {
-                try {
-                    // Try high performance settings first
-                    this.renderer = new THREE.WebGLRenderer({
-                        antialias: true,
-                        alpha: false,
-                        powerPreference: 'high-performance'
-                    });
-                } catch (e) {
-                    console.warn('High performance WebGL initialization failed, retrying with default settings...', e);
-                    try {
-                        // Fallback to default settings
-                        this.renderer = new THREE.WebGLRenderer({
-                            antialias: false,
-                            alpha: false
-                        });
-                    } catch (e2) {
-                        console.error('WebGL initialization failed:', e2);
-                        this.showWebGLError();
-                        return;
-                    }
-                }
+                this.renderer = new THREE.WebGLRenderer({
+                    antialias: true,
+                    alpha: false,
+                    powerPreference: 'high-performance'
+                });
                 
                 this.renderer.setSize(window.innerWidth, window.innerHeight);
                 this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -11917,29 +11901,6 @@
                 this.renderer.setClearColor(0x000011, 1);
                 
                 document.getElementById('game-container').appendChild(this.renderer.domElement);
-            }
-
-            showWebGLError() {
-                const errorDiv = document.createElement('div');
-                errorDiv.style.cssText = `
-                    position: fixed;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    background: rgba(0, 0, 0, 0.9);
-                    border: 2px solid #ff0000;
-                    padding: 20px;
-                    color: #fff;
-                    text-align: center;
-                    z-index: 10000;
-                    font-family: sans-serif;
-                `;
-                errorDiv.innerHTML = `
-                    <h2 style="color: #ff0000; margin-bottom: 10px;">WebGL Error</h2>
-                    <p>Your browser or device does not support WebGL, which is required to play this game.</p>
-                    <p style="margin-top: 10px; font-size: 0.8em; color: #aaa;">Try updating your graphics drivers or using a different browser.</p>
-                `;
-                document.body.appendChild(errorDiv);
             }
 
             initScene() {

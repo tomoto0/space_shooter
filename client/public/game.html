@@ -12056,8 +12056,8 @@
                     geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
                     geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
 
-                               // Custom shader for space dust
-                    const dustMaterial = new THREE.ShaderMaterial({
+                               // Custom shader for stars
+                    const starMaterial = new THREE.ShaderMaterial({
                         uniforms: {
                             time: { value: 0 },
                             pixelRatio: { value: this.renderer ? this.renderer.getPixelRatio() : 1.0 }

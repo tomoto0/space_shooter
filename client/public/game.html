@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="STELLAR ASSAULT is an immersive 3D space shooter game. Battle through waves of enemies and bosses in this intense arcade experience. Play now in your browser!">
+    <meta name="keywords" content="space shooter, 3D game, arcade, webgl, three.js, browser game, action">
     <title>STELLAR ASSAULT - 3D Space Shooter</title>
     <style>
         * {
@@ -1383,13 +1385,18 @@
         <button id="btn-roll" class="touch-btn">ROLL</button>
     </div>
     
-    <!-- Scan Lines Overlay -->
-    <div class="scanlines"></div>
+    <!-- Scan Lines Overlay -->    <div id="game-container"></div>
+
+    <!-- SEO Content (Hidden visually but accessible to crawlers) -->
+    <div style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;">
+        <h1>STELLAR ASSAULT - 3D Space Shooter</h1>
+        <h2>Experience intense space combat in your browser</h2>
+        <p>Pilot your ship through dangerous nebulas, fight alien fleets, and defeat massive bosses in this WebGL-powered arcade shooter.</p>
+    </div>
 
     <!-- Loading Screen -->
     <div id="loading-screen">
-        <h1 class="loading-title">STELLAR ASSAULT</h1>
-        <div class="loading-bar-container">
+        <div class="loading-title">STELLAR ASSAULT</div>      <div class="loading-bar-container">
             <div class="loading-bar" id="loading-bar"></div>
         </div>
         <p class="loading-text" id="loading-text">INITIALIZING SYSTEMS...</p>

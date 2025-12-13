@@ -598,15 +598,21 @@
         }
 
         /* Barrel Roll Indicator */
-        #barrel-roll-indicator {
-            position: fixed;
-            bottom: 100px;
+       #barrel-roll-indicator {
+            position: absolute;
+            bottom: 120px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
             gap: 20px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            #barrel-roll-indicator {
+                display: none !important;
+            }
+        }n: opacity 0.3s ease;
             z-index: 50;
         }
 

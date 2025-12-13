@@ -1789,6 +1789,7 @@
                 </div>
             </div>
             <div class="game-over-buttons">
+                <button class="menu-btn" id="btn-submit-score">SUBMIT SCORE</button>
                 <button class="menu-btn" id="btn-restart">PLAY AGAIN</button>
                 <button class="menu-btn secondary" id="btn-to-menu">MAIN MENU</button>
             </div>
@@ -10629,12 +10630,16 @@
                 const video = document.getElementById('ending-video');
                 
                 // ゲーム状態をGAME_OVERに変更して更新ループを停止させる
-                // (animateメソッド内でこの状態かつ動画表示中の場合は更新をスキップする処理が入っている)
                 this.state = GameState.GAME_OVER;
-
+                
                 // BGMを停止
                 if (this.audioManager) {
                     this.audioManager.stopBGM();
+                }
+                
+                // WaveManagerの更新を停止させる
+                if (this.waveManager) {
+                    this.waveManager.paused = true;
                 }
                 
                 // フェードインして表示
@@ -10658,6 +10663,7 @@
                     }, 2000); // フェードアウト時間と合わせる
                 };
             }
+
 
             showGameClearAnnouncement() {
                 const announcement = document.getElementById('wave-announcement');
@@ -12655,9 +12661,8 @@
                 this.state = GameState.GAME_OVER;
                 
                 // BGMを停止
-                if (this.audioManager) {
-                    this.audioManager.stopBGM();
-                }
+                if (this.audi            showGameOver() {
+                this.state = GameState.GAME_OVER;
                 
                 // Hide game UI
                 document.getElementById('crosshair').classList.remove('visible');
@@ -12669,6 +12674,13 @@
                 document.getElementById('final-waves').textContent = this.waveManager.currentWave;
                 document.getElementById('final-asteroids').textContent = this.waveManager.asteroidsDestroyed;
                 document.getElementById('final-enemies').textContent = this.waveManager.enemiesDestroyed;
+                
+                // Store score for later submission
+                this.lastGameScore = {
+                    score: this.waveManager.score,
+                    waveReached: this.waveManager.currentWave,
+                    difficulty: GameSettings.difficulty,
+                };
                 
                 // Show game over screen
                 document.getElementById('game-over-screen').classList.add('visible');
@@ -12925,5 +12937,6 @@
             window.game = new StellarAssault();
         });
     </script>
+    <script src="/score-submission.js"></script>
 </body>
 </html>

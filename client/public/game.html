@@ -12868,6 +12868,17 @@
                 
                 // Update environment
                 this.updateEnvironment(this.deltaTime, this.elapsedTime);
+
+                // エンディングムービー再生中はゲームの更新を停止
+                if (this.state === GameState.GAME_OVER && document.getElementById('ending-movie-container').classList.contains('visible')) {
+                    // レンダリングだけは続ける（背景として）
+                    if (this.composer) {
+                        this.composer.render();
+                    } else {
+                        this.renderer.render(this.scene, this.camera);
+                    }
+                    return;
+                }
                 
                 // Update based on game state
                 if (this.state === GameState.MENU) {

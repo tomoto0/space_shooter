@@ -10709,35 +10709,6 @@
                     }, 2000); // フェードアウト時間と合わせる
                 };
             }
-            
-            playOpeningMovie() {
-                const container = document.getElementById('opening-movie-container');
-                const video = document.getElementById('opening-video');
-                
-                // オープニングムービー再生中はゲームを一時停止
-                this.state = GameState.GAME_OVER;
-                
-                // フェードインして表示
-                container.style.display = 'flex';
-                requestAnimationFrame(() => {
-                    container.classList.add('visible');
-                });
-                
-                video.currentTime = 0;
-                video.play().catch(e => console.error('Opening video play failed:', e));
-                
-                // 動画終了時の処理
-                video.onended = () => {
-                    // フェードアウト
-                    container.classList.remove('visible');
-                    
-                    setTimeout(() => {
-                        container.style.display = 'none';
-                        // ゲーム開始
-                        this.actuallyStartGame();
-                    }, 1000); // フェードアウト時間と合わせる
-                };
-            }
 
             showGameClearAnnouncement() {
                 const announcement = document.getElementById('wave-announcement');
@@ -12660,6 +12631,35 @@
                 }
                 
                 console.log('Game started!');
+            }
+            
+            playOpeningMovie() {
+                const container = document.getElementById('opening-movie-container');
+                const video = document.getElementById('opening-video');
+                
+                // オープニングムービー再生中はゲームを一時停止
+                this.state = GameState.GAME_OVER;
+                
+                // フェードインして表示
+                container.style.display = 'flex';
+                requestAnimationFrame(() => {
+                    container.classList.add('visible');
+                });
+                
+                video.currentTime = 0;
+                video.play().catch(e => console.error('Opening video play failed:', e));
+                
+                // 動画終了時の処理
+                video.onended = () => {
+                    // フェードアウト
+                    container.classList.remove('visible');
+                    
+                    setTimeout(() => {
+                        container.style.display = 'none';
+                        // ゲーム開始
+                        this.actuallyStartGame();
+                    }, 1000); // フェードアウト時間と合わせる
+                };
             }
 
             pauseGame() {

@@ -10628,6 +10628,10 @@
                 const container = document.getElementById('ending-movie-container');
                 const video = document.getElementById('ending-video');
                 
+                // ゲーム状態をGAME_OVERに変更して更新ループを停止させる
+                // (animateメソッド内でこの状態かつ動画表示中の場合は更新をスキップする処理が入っている)
+                this.state = GameState.GAME_OVER;
+
                 // BGMを停止
                 if (this.audioManager) {
                     this.audioManager.stopBGM();

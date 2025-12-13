@@ -32,6 +32,31 @@
             display: block;
         }
 
+        /* Ending Movie */
+        #ending-movie-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 2000;
+            display: none;
+            opacity: 0;
+            transition: opacity 2s ease;
+        }
+
+        #ending-movie-container.visible {
+            display: flex;
+            opacity: 1;
+        }
+
+        #ending-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
         /* Loading Screen */
         #loading-screen {
             position: fixed;
@@ -1379,6 +1404,13 @@
 </head>
 <body>
     <div id="game-container"></div>
+
+    <!-- Ending Movie Container -->
+    <div id="ending-movie-container">
+        <video id="ending-video" playsinline>
+            <source src="ending.mp4" type="video/mp4">
+        </video>
+    </div>
     
     <!-- Touch Controls -->
     <div id="touch-controls">
@@ -10591,12 +10623,43 @@
                 }, 3000);
             }
             
+            playEndingMovie() {
+                const container = document.getElementById('ending-movie-container');
+                const video = document.getElementById('ending-video');
+                
+                // BGMを停止
+                if (this.audioManager) {
+                    this.audioManager.stopBGM();
+                }
+                
+                // フェードインして表示
+                container.style.display = 'flex';
+                // ブラウザの再描画を待ってからopacityを変更してフェードインさせる
+                requestAnimationFrame(() => {
+                    container.classList.add('visible');
+                });
+                
+                video.currentTime = 0;
+                video.play().catch(e => console.error('Video play failed:', e));
+                
+                // 動画終了時の処理
+                video.onended = () => {
+                    // フェードアウト
+                    container.classList.remove('visible');
+                    
+                    setTimeout(() => {
+                        container.style.display = 'none';
+                        this.showGameClearAnnouncement();
+                    }, 2000); // フェードアウト時間と合わせる
+                };
+            }
+
             showGameClearAnnouncement() {
                 const announcement = document.getElementById('wave-announcement');
                 const text = document.getElementById('announcement-text');
                 const sub = document.getElementById('announcement-sub');
                 
-                // BGMを停止
+                // BGMを停止（念のため）
                 if (this.audioManager) {
                     this.audioManager.stopBGM();
                 }
@@ -10879,7 +10942,10 @@
                         // Wave 5のボスを倒したらゲームクリア
                         if (this.boss.isFinalBoss || this.currentWave === 5) {
                             this.gameCleared = true;
-                            this.showGameClearAnnouncement();
+                            // 少し遅延させてからエンディング再生
+                            setTimeout(() => {
+                                this.playEndingMovie();
+                            }, 3000);
                         }
                         
                         this.boss.destroy();

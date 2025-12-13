@@ -10637,6 +10637,11 @@
                     this.audioManager.stopBGM();
                 }
                 
+                // WaveManagerの更新を停止させる
+                if (this.waveManager) {
+                    this.waveManager.paused = true;
+                }
+                
                 // フェードインして表示
                 container.style.display = 'flex';
                 // ブラウザの再描画を待ってからopacityを変更してフェードインさせる

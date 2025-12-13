@@ -11,3 +11,6 @@
 ## Critical Bug Fix
 - [x] エンディングムービー再生中のゲーム完全停止ロジックの実装（isMoviePlayingフラグが機能していない問題を修正）
 - [x] Wave 5ボス撃类時にエンディングムービー再生前に自動的に「中断」ボタンを押すロジックを追加
+
+## New Issues
+- [x] Wave 5ボス撃破時にplayEndingMovieメソッドが呼ばれず、Wave 6に自動遷移してしまう問題を修正

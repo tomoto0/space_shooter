@@ -10716,6 +10716,9 @@
                 const text = document.getElementById('announcement-text');
                 const sub = document.getElementById('announcement-sub');
                 
+                // ムービー再生終了フラグをリセット
+                this.isMoviePlaying = false;
+                
                 // BGMを停止（念のため）
                 if (this.audioManager) {
                     this.audioManager.stopBGM();
@@ -12957,6 +12960,17 @@
 
             animate() {
                 requestAnimationFrame(() => this.animate());
+                
+                // エンディングムービー再生中は即座に戻る（最優先チェック）
+                if (this.isMoviePlaying) {
+                    // レンダリングのみ実行（背景として表示）
+                    if (this.composer) {
+                        this.composer.render();
+                    } else {
+                        this.renderer.render(this.scene, this.camera);
+                    }
+                    return;
+                }
                 
                 this.deltaTime = this.clock.getDelta();
                 this.elapsedTime = this.clock.getElapsedTime();

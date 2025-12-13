@@ -56,6 +56,31 @@
             height: 100%;
             object-fit: cover;
         }
+        
+        /* Opening Movie */
+        #opening-movie-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 3000;
+            display: none;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        #opening-movie-container.visible {
+            display: flex;
+            opacity: 1;
+        }
+
+        #opening-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
 
         /* Loading Screen */
         #loading-screen {
@@ -1412,6 +1437,13 @@
         </video>
     </div>
     
+    <!-- Opening Movie Container -->
+    <div id="opening-movie-container">
+        <video id="opening-video" playsinline>
+            <source src="opening.mp4" type="video/mp4">
+        </video>
+    </div>
+    
     <!-- Touch Controls -->
     <div id="touch-controls">
         <div id="dpad-container">
@@ -2570,89 +2602,102 @@
             createShip() {
                 this.mesh = new THREE.Group();
                 
-                // Main body - sleek futuristic design
-                const bodyGeometry = new THREE.ConeGeometry(0.8, 4, 8);
-                const bodyMaterial = new THREE.MeshStandardMaterial({
-                    color: 0x2244aa,
+                // 白いメタリック素材
+                const whiteMaterial = new THREE.MeshStandardMaterial({
+                    color: 0xeeeeee,
                     metalness: 0.9,
-                    roughness: 0.2,
-                    emissive: 0x112244,
-                    emissiveIntensity: 0.2
-                });
-                const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
-                body.rotation.x = Math.PI / 2;
-                body.position.z = 0.5;
-                this.mesh.add(body);
-
-                // Cockpit
-                const cockpitGeometry = new THREE.SphereGeometry(0.5, 16, 16);
-                const cockpitMaterial = new THREE.MeshStandardMaterial({
-                    color: 0x00ffff,
-                    metalness: 0.1,
                     roughness: 0.1,
-                    emissive: 0x00ffff,
-                    emissiveIntensity: 0.5,
-                    transparent: true,
-                    opacity: 0.8
-                });
-                const cockpit = new THREE.Mesh(cockpitGeometry, cockpitMaterial);
-                cockpit.scale.set(1, 0.6, 1.2);
-                cockpit.position.set(0, 0.3, -0.5);
-                this.mesh.add(cockpit);
-
-                // Wings
-                const wingGeometry = new THREE.BoxGeometry(4, 0.1, 1.5);
-                const wingMaterial = new THREE.MeshStandardMaterial({
-                    color: 0x334488,
-                    metalness: 0.8,
-                    roughness: 0.3,
-                    emissive: 0x112233,
+                    emissive: 0x222222,
                     emissiveIntensity: 0.1
                 });
                 
-                const leftWing = new THREE.Mesh(wingGeometry, wingMaterial);
-                leftWing.position.set(-1.5, 0, 0.5);
-                leftWing.rotation.z = 0.1;
-                this.mesh.add(leftWing);
+                // Main body - 三角形の胴体
+                const bodyGeometry = new THREE.ConeGeometry(0.9, 4.5, 3);
+                const body = new THREE.Mesh(bodyGeometry, whiteMaterial);
+                body.rotation.x = Math.PI / 2;
+                body.rotation.y = Math.PI;
+                body.position.z = 0.3;
+                this.mesh.add(body);
 
-                const rightWing = new THREE.Mesh(wingGeometry, wingMaterial);
-                rightWing.position.set(1.5, 0, 0.5);
-                rightWing.rotation.z = -0.1;
+                // Cockpit - 前方のコックピット
+                const cockpitGeometry = new THREE.SphereGeometry(0.4, 16, 16);
+                const cockpitMaterial = new THREE.MeshStandardMaterial({
+                    color: 0x00aaff,
+                    metalness: 0.1,
+                    roughness: 0.05,
+                    emissive: 0x0088cc,
+                    emissiveIntensity: 0.6,
+                    transparent: true,
+                    opacity: 0.85
+                });
+                const cockpit = new THREE.Mesh(cockpitGeometry, cockpitMaterial);
+                cockpit.scale.set(1, 0.7, 1.3);
+                cockpit.position.set(0, 0.2, -1.5);
+                this.mesh.add(cockpit);
+
+                // 三角ウィング - 左右対称
+                const wingShape = new THREE.Shape();
+                wingShape.moveTo(0, 0);
+                wingShape.lineTo(3.5, 0);
+                wingShape.lineTo(0.5, 2);
+                wingShape.lineTo(0, 0);
+                
+                const wingGeometry = new THREE.ExtrudeGeometry(wingShape, {
+                    depth: 0.15,
+                    bevelEnabled: true,
+                    bevelThickness: 0.05,
+                    bevelSize: 0.05,
+                    bevelSegments: 2
+                });
+                
+                // 左ウィング
+                const leftWing = new THREE.Mesh(wingGeometry, whiteMaterial);
+                leftWing.position.set(-0.5, -0.05, 0);
+                leftWing.rotation.x = Math.PI / 2;
+                leftWing.rotation.z = Math.PI;
+                this.mesh.add(leftWing);
+                
+                // 右ウィング（左ウィングをミラー）
+                const rightWing = new THREE.Mesh(wingGeometry, whiteMaterial);
+                rightWing.position.set(0.5, -0.05, 0);
+                rightWing.rotation.x = Math.PI / 2;
+                rightWing.scale.x = -1;
                 this.mesh.add(rightWing);
 
-                // Wing tips with lights
-                const wingTipGeometry = new THREE.SphereGeometry(0.15, 8, 8);
+                // ウィングチップライト
+                const wingTipGeometry = new THREE.SphereGeometry(0.12, 8, 8);
                 const wingTipMaterialLeft = new THREE.MeshBasicMaterial({
-                    color: 0xff0000,
+                    color: 0xff3333,
                     transparent: true,
-                    opacity: 0.9
+                    opacity: 0.95
                 });
                 const wingTipMaterialRight = new THREE.MeshBasicMaterial({
-                    color: 0x00ff00,
+                    color: 0x33ff33,
                     transparent: true,
-                    opacity: 0.9
+                    opacity: 0.95
                 });
 
                 const leftTip = new THREE.Mesh(wingTipGeometry, wingTipMaterialLeft);
-                leftTip.position.set(-3.5, 0, 0.5);
+                leftTip.position.set(-3.8, 0, 0);
                 this.mesh.add(leftTip);
 
                 const rightTip = new THREE.Mesh(wingTipGeometry, wingTipMaterialRight);
-                rightTip.position.set(3.5, 0, 0.5);
+                rightTip.position.set(3.8, 0, 0);
                 this.mesh.add(rightTip);
 
-                // Engine housings
-                const engineGeometry = new THREE.CylinderGeometry(0.3, 0.4, 1.2, 8);
+                // 3つのエンジンハウジング（後部）
+                const engineGeometry = new THREE.CylinderGeometry(0.35, 0.45, 1.3, 8);
                 const engineMaterial = new THREE.MeshStandardMaterial({
-                    color: 0x444466,
-                    metalness: 0.9,
-                    roughness: 0.3
+                    color: 0x555566,
+                    metalness: 0.95,
+                    roughness: 0.25
                 });
 
+                // エンジン配置：中央1つ、左右に各1つ
                 const engines = [
-                    { x: -1, y: -0.1, z: 1.5 },
-                    { x: 1, y: -0.1, z: 1.5 },
-                    { x: 0, y: -0.2, z: 1.8 }
+                    { x: -1.2, y: -0.15, z: 1.8 },  // 左エンジン
+                    { x: 0, y: -0.1, z: 2.1 },      // 中央エンジン
+                    { x: 1.2, y: -0.15, z: 1.8 }    // 右エンジン
                 ];
 
                 engines.forEach(pos => {
@@ -2662,22 +2707,22 @@
                     this.mesh.add(engine);
                 });
 
-                // Weapon mounts
-                const weaponGeometry = new THREE.CylinderGeometry(0.1, 0.1, 1.5, 6);
+                // 武器マウント（ウィング下部）
+                const weaponGeometry = new THREE.CylinderGeometry(0.12, 0.12, 1.6, 6);
                 const weaponMaterial = new THREE.MeshStandardMaterial({
-                    color: 0x666688,
+                    color: 0x888899,
                     metalness: 0.9,
-                    roughness: 0.2
+                    roughness: 0.15
                 });
 
                 const leftWeapon = new THREE.Mesh(weaponGeometry, weaponMaterial);
                 leftWeapon.rotation.x = Math.PI / 2;
-                leftWeapon.position.set(-2.5, -0.1, 0);
+                leftWeapon.position.set(-2.2, -0.15, 0.2);
                 this.mesh.add(leftWeapon);
 
                 const rightWeapon = new THREE.Mesh(weaponGeometry, weaponMaterial);
                 rightWeapon.rotation.x = Math.PI / 2;
-                rightWeapon.position.set(2.5, -0.1, 0);
+                rightWeapon.position.set(2.2, -0.15, 0.2);
                 this.mesh.add(rightWeapon);
                 
                 // Tomoto Logo on wings using text texture
@@ -2687,6 +2732,7 @@
                 this.mesh.position.copy(this.position);
                 this.scene.add(this.mesh);
             }
+
             
             addTomotoLogo() {
                 // Create canvas texture for "Tomoto" logo
@@ -10663,6 +10709,35 @@
                     }, 2000); // フェードアウト時間と合わせる
                 };
             }
+            
+            playOpeningMovie() {
+                const container = document.getElementById('opening-movie-container');
+                const video = document.getElementById('opening-video');
+                
+                // オープニングムービー再生中はゲームを一時停止
+                this.state = GameState.GAME_OVER;
+                
+                // フェードインして表示
+                container.style.display = 'flex';
+                requestAnimationFrame(() => {
+                    container.classList.add('visible');
+                });
+                
+                video.currentTime = 0;
+                video.play().catch(e => console.error('Opening video play failed:', e));
+                
+                // 動画終了時の処理
+                video.onended = () => {
+                    // フェードアウト
+                    container.classList.remove('visible');
+                    
+                    setTimeout(() => {
+                        container.style.display = 'none';
+                        // ゲーム開始
+                        this.actuallyStartGame();
+                    }, 1000); // フェードアウト時間と合わせる
+                };
+            }
 
             showGameClearAnnouncement() {
                 const announcement = document.getElementById('wave-announcement');
@@ -12532,6 +12607,11 @@
             }
 
             startGame() {
+                // オープニングムービーを再生
+                this.playOpeningMovie();
+            }
+            
+            actuallyStartGame() {
                 this.hideMainMenu();
                 this.state = GameState.PLAYING;
                 
@@ -12559,7 +12639,7 @@
                     this.player.shields = this.player.maxShields;
                     this.player.invincible = false;
                     this.player.isBarrelRolling = false;
-                    this.player.powerLevel = 0; // パワーレベルをリセット
+                    this.player.powerLevel = 0;
                     if (this.player.mesh) {
                         this.player.mesh.position.set(0, 0, 0);
                         this.player.mesh.rotation.set(0, 0, 0);
@@ -12576,7 +12656,7 @@
                     this.waveManager.maxCombo = 1;
                     this.waveManager.waveActive = false;
                     this.waveManager.waveTimer = 0;
-                    this.waveManager.updatePowerLevelUI(); // パワーレベルUIを更新
+                    this.waveManager.updatePowerLevelUI();
                 }
                 
                 console.log('Game started!');

@@ -1000,26 +1000,29 @@
         }
 
         /* Sound Toggle Button */
-        #sound-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            background: rgba(0, 0, 0, 0.6);
-            border: 2px solid rgba(0, 245, 255, 0.5);
-            border-radius: 50%;
-            cursor: pointer;
-            z-index: 200;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        #sound-toggle.visible {
+        #sound-toggl.key-hint {
+                position: absolute;
+                top: -15px;
+                right: -15px;
+                width: 20px;
+                height: 20px;
+                background: rgba(0, 0, 0, 0.8);
+                border: 1px solid rgba(0, 255, 255, 0.5);
+                border-radius: 50%;
+                color: #0ff;
+                font-size: 10px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                pointer-events: none;
+            }
+            
+            /* モバイル端末ではキーボードヒントを非表示にする */
+            @media (max-width: 768px) {
+                .key-hint {
+                    display: none !important;
+                }
+            } #sound-toggle.visible {
             opacity: 1;
             pointer-events: auto;
         }

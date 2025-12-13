@@ -2607,8 +2607,8 @@
                     color: 0xffffff,
                     metalness: 0.9,
                     roughness: 0.1,
-                    emissive: 0x222222,
-                    emissiveIntensity: 0.1
+                    emissive: 0xffffff,
+                    emissiveIntensity: 0.05
                 });
                 
                 // Main body - 三角形の胴体
@@ -2793,9 +2793,9 @@
             createEngineEffects() {
                 // Engine glow lights
                 const glowPositions = [
-                    { x: -1, y: -0.1, z: 2.1 },
-                    { x: 1, y: -0.1, z: 2.1 },
-                    { x: 0, y: -0.2, z: 2.4 }
+                    { x: -1.2, y: -0.15, z: 1.8 },  // 左エンジン
+                    { x: 0, y: -0.1, z: 2.1 },      // 中央エンジン
+                    { x: 1.2, y: -0.15, z: 1.8 }    // 右エンジン
                 ];
 
                 glowPositions.forEach(pos => {
@@ -2805,7 +2805,7 @@
                         uniforms: {
                             time: { value: 0 },
                             intensity: { value: 1.0 },
-                            color: { value: new THREE.Color(0x00aaff) }
+                            color: { value: new THREE.Color(0xaaddff) }
                         },
                         vertexShader: `
                             varying vec2 vUv;

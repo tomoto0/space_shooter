@@ -10710,8 +10710,13 @@
                 const text = document.getElementById('announcement-text');
                 const sub = document.getElementById('announcement-sub');
                 
-                text.textContent = 'PHASE 1 COMPLETE!';
-                sub.textContent = 'PREPARE FOR NEXT WAVE!';
+                // BGMを停止（念のため）
+                if (this.audioManager) {
+                    this.audioManager.stopBGM();
+                }
+                
+                text.textContent = 'CONGRATULATIONS!';
+                sub.textContent = 'YOU SAVED THE GALAXY!';
                 
                 text.style.color = '#ffff00';
                 text.style.textShadow = '0 0 30px #ffff00, 0 0 60px #ff8800';
@@ -10722,16 +10727,15 @@
                     this.audioManager.playWaveStart();
                 }
                 
-                // アナウンス終了後、ゲームを再開してWave 6に進む
+                // アナウンス終了後、ゲームオーバー画面を表示
                 setTimeout(() => {
                     announcement.classList.remove('visible');
                     text.style.color = '';
                     text.style.textShadow = '';
                     
-                    // ゲーム状態をPLAYINGに戻してWave 6に進む
-                    this.state = GameState.PLAYING;
-                    this.waveManager.gameCleared = false;
-                }, 3000);
+                    // ゲームオーバー画面を表示（ゲームクリア扱い）
+                    this.showGameOver();
+                }, 5000);
             }
 
             showWaveAnnouncement(waveNumber) {
@@ -10989,12 +10993,20 @@
                             }
                         }
                         
+                        // Wave 5のボスを倒したらゲームクリア
+                        if (this.boss.isFinalBoss || this.currentWave === 5) {
+                            this.gameCleared = true;
+                            // 少し遅延させてからエンディング再生
+                            setTimeout(() => {
+                                this.playEndingMovie();
+                            }, 3000);
+                        }
+                        
                         this.boss.destroy();
                         this.boss = null;
                         
                         // Wave完了
                         this.waveActive = false;
-                        this.bossDefeated = true;
                     }
                     
                     this.updateUI();

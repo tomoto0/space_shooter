@@ -10669,6 +10669,9 @@
                 const container = document.getElementById('ending-movie-container');
                 const video = document.getElementById('ending-video');
                 
+                // ムービー再生中フラグを設定（最も確実な停止方法）
+                this.isMoviePlaying = true;
+                
                 // ゲーム状態をGAME_OVERに変更して更新ループを停止させる
                 // (animateメソッド内でこの状態かつ動画表示中の場合は更新をスキップする処理が入っている)
                 this.state = GameState.GAME_OVER;
@@ -10695,6 +10698,9 @@
                 
                 // 動画終了時の処理
                 video.onended = () => {
+                    // ムービー再生中フラグを解除
+                    this.isMoviePlaying = false;
+                    
                     // フェードアウト
                     container.classList.remove('visible');
                     

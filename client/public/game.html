@@ -10727,14 +10727,19 @@
                     this.audioManager.playWaveStart();
                 }
                 
-                // アナウンス終了後、ゲームオーバー画面を表示
+                // アナウンス終了後、ゲームを再開
                 setTimeout(() => {
                     announcement.classList.remove('visible');
                     text.style.color = '';
                     text.style.textShadow = '';
                     
-                    // ゲームオーバー画面を表示（ゲームクリア扱い）
-                    this.showGameOver();
+                    // ゲーム状態をPLAYINGに戻す
+                    this.state = GameState.PLAYING;
+                    
+                    // WaveManagerの一時停止を解除
+                    if (this.waveManager) {
+                        this.waveManager.paused = false;
+                    }
                 }, 5000);
             }
 

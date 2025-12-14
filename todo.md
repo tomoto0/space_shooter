@@ -30,3 +30,7 @@
 - [x] Wave 5\u7d42\u4e86\u6642\u306e\u30b2\u30fc\u30e0\u72b6\u614b\u7ba1\u7406\u3092\u6574\u7406\uff08\u8907\u6570\u306e\u30ed\u30b8\u30c3\u30af\u6df7\u5728\u3092\u89e3\u6c7a\uff09
 - [x] showGameClearAnnouncement\u30e1\u30bd\u30c3\u30c9\u3092\u7c97\u3044\u30ed\u30b8\u30c3\u30af\u3067\u518d\u5b9f\u88c2
 - [x] Wave 6\u958b\u59cb\u6642\u306e\u30b2\u30fc\u30e0\u72b6\u614b\u3092\u6b63\u3057\u304f\u521d\u671f\u5316
+
+## Wave 6 Transition Logic - Second Attempt
+- [x] playEndingMovieメソッドを修正してムービー終了後にWave 6を開始
+- [x] showGameClearAnnouncementメソッドを修正してアナウンス表示のみに専念（5秒後にゲーム再開）

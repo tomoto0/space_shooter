@@ -10734,16 +10734,26 @@
                 
                 // 動画終了時の処理
                 video.onended = () => {
-                    // ムービー再生中フラグを解除
                     this.isMoviePlaying = false;
-                    
-                    // フェードアウト
                     container.classList.remove('visible');
                     
                     setTimeout(() => {
                         container.style.display = 'none';
-                        this.showGameClearAnnouncement();
-                    }, 2000); // フェードアウト時間と合わせる
+                        
+                        // Wave 6を開始
+                        this.state = GameState.PLAYING;
+                        this.gameCleared = false;
+                        
+                        if (this.waveManager) {
+                            this.waveManager.paused = false;
+                            this.waveManager.startWave(6);
+                        }
+                        
+                        // 400ms後にCongratulationsを表示
+                        setTimeout(() => {
+                            this.showGameClearAnnouncement();
+                        }, 400);
+                    }, 2000);
                 };
             }
 
@@ -10752,7 +10762,6 @@
                 const text = document.getElementById('announcement-text');
                 const sub = document.getElementById('announcement-sub');
                 
-                // ムービー再生終了フラグをリセット
                 this.isMoviePlaying = false;
                 
                 // 音量を元に戻す
@@ -10765,44 +10774,31 @@
                     }
                 }
                 
-                // BGMを停止（念のため）
-                if (this.audioManager) {
-                    this.audioManager.stopBGM();
-                }
-                
-                // Wave 6背景を事前ロードしない（アナウンス終了後に設定）
-                
+                // Congratulationsを表示
                 text.textContent = 'CONGRATULATIONS!';
                 sub.textContent = 'YOU SAVED THE GALAXY!';
-                
                 text.style.color = '#ffff00';
                 text.style.textShadow = '0 0 30px #ffff00, 0 0 60px #ff8800';
-                
                 announcement.classList.add('visible');
                 
                 if (this.audioManager) {
                     this.audioManager.playWaveStart();
                 }
                 
-                // 5秒後にWave 6へ遷移
+                // 5秒後にアナウンスを非表示にしてゲームを再開
                 setTimeout(() => {
                     announcement.classList.remove('visible');
                     text.style.color = '';
                     text.style.textShadow = '';
                     
-                    // Wave 6背景を設定
-                    if (this.waveManager) {
-                        this.waveManager.setEarthSpaceBackground();
+                    // Wave 6のBGMを再生
+                    if (this.audioManager) {
+                        this.audioManager.playBGM(6);
                     }
                     
-                    // ゲーム状態を初期化
-                    this.state = GameState.PLAYING;
-                    this.gameCleared = false;
-                    
-                    // Wave 6を開始
+                    // ゲームを再開（既にWave 6は開始されている）
                     if (this.waveManager) {
                         this.waveManager.paused = false;
-                        this.waveManager.startWave(6);
                     }
                 }, 5000);
             }

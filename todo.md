@@ -47,3 +47,9 @@
 - [x] バレルロール操作のキーアサインをQ/EからV/Nに変更
 - [x] ゲーム説明のテキストをQ/EからV/Nに更新
 - [x] V/Nゲージ表示のUIを右端の機体行動範囲枠外に移動
+
+## Critical Bug - Wave 6 Transition Failed
+- [x] Wave 6への遷移が失敗している問題を修正（Congratulations表示がWave 5のまま）
+- [x] WebGLコンテキストロストエラーを解決（背景切り替え時のリソース削除問題）
+- [x] setEarthSpaceBackgroundメソッドのリソース削除ロジックをシンプル化
+- [x] Wave 6遷移タイミングを最適化

@@ -10730,30 +10730,28 @@
                 video.currentTime = 0;
                 video.play().catch(e => console.error('Video play failed:', e));
                 
-                // ムービー再生開始後、1秒後にWave 6を開始
-                setTimeout(() => {
-                    console.log('[playEndingMovie] Starting Wave 6 during movie...');
-                    this.state = GameState.PLAYING;
-                    this.gameCleared = false;
-                    
-                    if (this.waveManager) {
-                        this.waveManager.paused = false;
-                        this.waveManager.startWave(6);
-                    }
-                }, 1000);
-                
                 // 動画終了時の処理
                 video.onended = () => {
+                    console.log('[playEndingMovie] Movie ended, starting Wave 6 transition...');
                     this.isMoviePlaying = false;
                     container.classList.remove('visible');
                     
                     setTimeout(() => {
                         container.style.display = 'none';
                         
-                        // 400ms後にCongratulationsを表示
+                        // Wave 6を開始
+                        this.state = GameState.PLAYING;
+                        this.gameCleared = false;
+                        
+                        if (this.waveManager) {
+                            this.waveManager.paused = false;
+                            this.waveManager.startWave(6);
+                        }
+                        
+                        // 500ms後にCongratulationsを表示
                         setTimeout(() => {
                             this.showGameClearAnnouncement();
-                        }, 400);
+                        }, 500);
                     }, 2000);
                 };
             }
@@ -11325,26 +11323,9 @@
                     this.scene.fog.color.setHex(0x000510);
                 }
                 
-                // 異次元の裂け目を削除（安全に）
+                // 異次元の裂け目を削除（シンプルに）
                 if (this.dimensionalRift) {
                     try {
-                        // 子オブジェクトを先に削除
-                        while (this.dimensionalRift.children.length > 0) {
-                            const child = this.dimensionalRift.children[0];
-                            this.dimensionalRift.remove(child);
-                            
-                            if (child.geometry) {
-                                child.geometry.dispose();
-                            }
-                            if (child.material) {
-                                if (Array.isArray(child.material)) {
-                                    child.material.forEach(m => m.dispose());
-                                } else {
-                                    child.material.dispose();
-                                }
-                            }
-                        }
-                        
                         this.scene.remove(this.dimensionalRift);
                         this.dimensionalRift = null;
                     } catch (e) {

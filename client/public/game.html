@@ -3860,11 +3860,12 @@
         // Asteroid Class
         // ============================================
         class Asteroid {
-            constructor(scene, position, size = 'medium') {
+            constructor(scene, position, size = 'medium', highSpeed = false) {
                 this.scene = scene;
                 this.alive = true;
                 this.size = size;
                 this.type = 'asteroid';
+                this.highSpeed = highSpeed;
                 
                 // Size configurations
                 const sizeConfig = {
@@ -3879,6 +3880,11 @@
                 this.maxHealth = config.health;
                 this.score = config.score;
                 this.baseSpeed = config.speed;
+                
+                // Wave 6以降の高速モード
+                if (highSpeed) {
+                    this.baseSpeed *= 3.5; // 3.5倍の速度
+                }
                 
                 this.position = position.clone();
                 // 前方からプレイヤーに向かって流れてくる
@@ -10402,9 +10408,11 @@
                     this.audioManager.playBGM(waveNumber);
                 }
                 
-                // Wave 5以降は異次元空間の背景に変更
-                if (waveNumber >= 5 && this.scene) {
+                // Wave 5は異次元空間、Wave 6以降は地球背景
+                if (waveNumber === 5 && this.scene) {
                     this.setDimensionalRiftBackground();
+                } else if (waveNumber >= 6 && this.scene) {
+                    this.setEarthSpaceBackground();
                 }
                 
                 // Get difficulty multipliers
@@ -10461,21 +10469,36 @@
                 // Wave 4+: + Sniper
                 // Wave 5+: + Carrier
                 
-                // 基本確率（Wave進行で強敵の出現率UP）
-                const asteroidChance = Math.max(0.2, 0.5 - waveNumber * 0.03);
-                const fighterChance = 0.2;
-                const interceptorChance = waveNumber >= 2 ? 0.1 + (waveNumber - 2) * 0.02 : 0;
-                const swarmChance = waveNumber >= 2 ? 0.15 + (waveNumber - 2) * 0.02 : 0;
-                const bomberChance = waveNumber >= 2 ? 0.08 + (waveNumber - 2) * 0.02 : 0;
-                const tankChance = waveNumber >= 3 ? 0.06 + (waveNumber - 3) * 0.02 : 0;
-                const sniperChance = waveNumber >= 4 ? 0.05 + (waveNumber - 4) * 0.02 : 0;
-                const carrierChance = waveNumber >= 5 ? 0.03 + (waveNumber - 5) * 0.015 : 0;
+                // Wave 6以降は全種類の敵が均等に出現
+                let asteroidChance, fighterChance, interceptorChance, swarmChance, bomberChance, tankChance, sniperChance, carrierChance;
+                
+                if (waveNumber >= 6) {
+                    // Wave 6以降: 全種類が均等に出現（隙石は少なめ）
+                    asteroidChance = 0.15;
+                    fighterChance = 0.12;
+                    interceptorChance = 0.12;
+                    swarmChance = 0.12;
+                    bomberChance = 0.12;
+                    tankChance = 0.12;
+                    sniperChance = 0.12;
+                    carrierChance = 0.13;
+                } else {
+                    // Wave 1-5: 既存の確率
+                    asteroidChance = Math.max(0.2, 0.5 - waveNumber * 0.03);
+                    fighterChance = 0.2;
+                    interceptorChance = waveNumber >= 2 ? 0.1 + (waveNumber - 2) * 0.02 : 0;
+                    swarmChance = waveNumber >= 2 ? 0.15 + (waveNumber - 2) * 0.02 : 0;
+                    bomberChance = waveNumber >= 2 ? 0.08 + (waveNumber - 2) * 0.02 : 0;
+                    tankChance = waveNumber >= 3 ? 0.06 + (waveNumber - 3) * 0.02 : 0;
+                    sniperChance = waveNumber >= 4 ? 0.05 + (waveNumber - 4) * 0.02 : 0;
+                    carrierChance = waveNumber >= 5 ? 0.03 + (waveNumber - 5) * 0.015 : 0;
+                }
                 
                 let cumulative = 0;
                 
                 // Carrier (Wave 5+) - 最も希少
                 cumulative += carrierChance;
-                if (roll < cumulative && waveNumber >= 5) {
+                if (roll < cumulative && (waveNumber >= 5 || waveNumber >= 6)) {
                     const enemy = new EnemyCarrier(this.scene, pos, this.player, waveNumber);
                     this.applyDifficultyToEnemy(enemy);
                     this.enemies.push(enemy);
@@ -10485,7 +10508,7 @@
                 
                 // Sniper (Wave 4+)
                 cumulative += sniperChance;
-                if (roll < cumulative && waveNumber >= 4) {
+                if (roll < cumulative && (waveNumber >= 4 || waveNumber >= 6)) {
                     const enemy = new EnemySniper(this.scene, pos, this.player, waveNumber);
                     this.applyDifficultyToEnemy(enemy);
                     this.enemies.push(enemy);
@@ -10495,7 +10518,7 @@
                 
                 // Tank (Wave 3+)
                 cumulative += tankChance;
-                if (roll < cumulative && waveNumber >= 3) {
+                if (roll < cumulative && (waveNumber >= 3 || waveNumber >= 6)) {
                     const enemy = new EnemyTank(this.scene, pos, this.player, waveNumber);
                     this.applyDifficultyToEnemy(enemy);
                     this.enemies.push(enemy);
@@ -10505,7 +10528,7 @@
                 
                 // Bomber (Wave 2+)
                 cumulative += bomberChance;
-                if (roll < cumulative && waveNumber >= 2) {
+                if (roll < cumulative && (waveNumber >= 2 || waveNumber >= 6)) {
                     const enemy = new EnemyBomber(this.scene, pos, this.player, waveNumber);
                     this.applyDifficultyToEnemy(enemy);
                     this.enemies.push(enemy);
@@ -10515,7 +10538,7 @@
                 
                 // Swarm (Wave 2+) - 群れで出現
                 cumulative += swarmChance;
-                if (roll < cumulative && waveNumber >= 2) {
+                if (roll < cumulative && (waveNumber >= 2 || waveNumber >= 6)) {
                     // 3-5体の群れでスポーン
                     const swarmSize = 3 + Math.floor(Math.random() * 3);
                     for (let i = 0; i < swarmSize; i++) {
@@ -10534,7 +10557,7 @@
                 
                 // Interceptor (Wave 2+)
                 cumulative += interceptorChance;
-                if (roll < cumulative && waveNumber >= 2) {
+                if (roll < cumulative && (waveNumber >= 2 || waveNumber >= 6)) {
                     const enemy = new EnemyInterceptor(this.scene, pos, this.player, waveNumber);
                     this.applyDifficultyToEnemy(enemy);
                     this.enemies.push(enemy);
@@ -10555,7 +10578,8 @@
                 // Asteroid (デフォルト)
                 const sizeRoll = Math.random();
                 const size = sizeRoll < 0.2 ? 'large' : (sizeRoll < 0.5 ? 'medium' : 'small');
-                const asteroid = new Asteroid(this.scene, pos, size);
+                const highSpeed = waveNumber >= 6; // Wave 6以降は高速モード
+                const asteroid = new Asteroid(this.scene, pos, size, highSpeed);
                 this.applyDifficultyToEnemy(asteroid);
                 this.asteroids.push(asteroid);
                 this.totalSpawned++;
@@ -10684,6 +10708,13 @@
                 // BGMを停止
                 if (this.audioManager) {
                     this.audioManager.stopBGM();
+                    // エンディングムービー再生中はすべてのゲーム音をオフにする
+                    this.savedMasterVolume = this.audioManager.masterVolume;
+                    this.savedSfxVolume = this.audioManager.sfxVolume;
+                    this.audioManager.setMasterVolume(0);
+                    if (this.audioManager.sfxGain) {
+                        this.audioManager.sfxGain.gain.value = 0;
+                    }
                 }
                 
                 // WaveManagerの更新を停止させる
@@ -10724,6 +10755,16 @@
                 // ムービー再生終了フラグをリセット
                 this.isMoviePlaying = false;
                 
+                // 音量を元に戻す
+                if (this.audioManager) {
+                    if (this.savedMasterVolume !== undefined) {
+                        this.audioManager.setMasterVolume(this.savedMasterVolume);
+                    }
+                    if (this.savedSfxVolume !== undefined && this.audioManager.sfxGain) {
+                        this.audioManager.sfxGain.gain.value = this.savedSfxVolume;
+                    }
+                }
+                
                 // BGMを停止（念のため）
                 if (this.audioManager) {
                     this.audioManager.stopBGM();
@@ -10741,7 +10782,7 @@
                     this.audioManager.playWaveStart();
                 }
                 
-                // アナウンス終了後、ゲームを再開
+                // アナウンス終了後、Wave 6へ自動遷移
                 setTimeout(() => {
                     announcement.classList.remove('visible');
                     text.style.color = '';
@@ -10753,7 +10794,16 @@
                     // WaveManagerの一時停止を解除
                     if (this.waveManager) {
                         this.waveManager.paused = false;
+                        // Wave 6へ進む
+                        this.waveManager.currentWave = 5; // startWaveが+1するので5に設定
+                        this.waveManager.waveActive = false;
+                        this.waveManager.waveTimer = this.waveManager.waveDelay; // 即座に次のWaveを開始
                     }
+                    
+                    // Wave 6開始のアナウンスを表示
+                    setTimeout(() => {
+                        this.showWaveAnnouncement(6);
+                    }, 500);
                 }, 5000);
             }
 
@@ -11269,6 +11319,79 @@
             updateKillsDisplay() {
                 document.getElementById('asteroid-kills').textContent = this.asteroidsDestroyed;
                 document.getElementById('enemy-kills').textContent = this.enemiesDestroyed;
+            }
+            
+            // Wave 6以降の地球背景を設定
+            setEarthSpaceBackground() {
+                // フォグを深い宇宙の黒に変更
+                if (this.scene.fog) {
+                    this.scene.fog.color.setHex(0x000510);
+                }
+                
+                // 異次元の裂け目を削除
+                if (this.dimensionalRift) {
+                    this.scene.remove(this.dimensionalRift);
+                    this.dimensionalRift = null;
+                }
+                
+                // 地球を作成
+                this.createEarth();
+                
+                console.log('[Wave 6+] Earth space background activated!');
+            }
+            
+            // 地球を作成
+            createEarth() {
+                const earthGroup = new THREE.Group();
+                
+                // 地球本体（大きめ）
+                const earthGeo = new THREE.SphereGeometry(300, 64, 64);
+                const earthMat = new THREE.MeshPhongMaterial({
+                    color: 0x2233ff,
+                    emissive: 0x001133,
+                    emissiveIntensity: 0.3,
+                    shininess: 30
+                });
+                const earth = new THREE.Mesh(earthGeo, earthMat);
+                earth.position.set(0, -500, -1200);
+                earthGroup.add(earth);
+                
+                // 大気光（青いオーラ）
+                const atmosphereGeo = new THREE.SphereGeometry(320, 64, 64);
+                const atmosphereMat = new THREE.MeshBasicMaterial({
+                    color: 0x4488ff,
+                    transparent: true,
+                    opacity: 0.15,
+                    side: THREE.BackSide
+                });
+                const atmosphere = new THREE.Mesh(atmosphereGeo, atmosphereMat);
+                atmosphere.position.copy(earth.position);
+                earthGroup.add(atmosphere);
+                
+                // 雲の層
+                const cloudGeo = new THREE.SphereGeometry(305, 64, 64);
+                const cloudMat = new THREE.MeshPhongMaterial({
+                    color: 0xffffff,
+                    transparent: true,
+                    opacity: 0.3,
+                    emissive: 0x444444,
+                    emissiveIntensity: 0.1
+                });
+                const clouds = new THREE.Mesh(cloudGeo, cloudMat);
+                clouds.position.copy(earth.position);
+                earthGroup.add(clouds);
+                
+                // 地球を照らすライト
+                const earthLight = new THREE.DirectionalLight(0xffffff, 1.5);
+                earthLight.position.set(500, 300, 200);
+                earthGroup.add(earthLight);
+                
+                // 地球の回転アニメーション用のデータを保存
+                earth.userData.isEarth = true;
+                clouds.userData.isClouds = true;
+                
+                this.scene.add(earthGroup);
+                this.earthGroup = earthGroup;
             }
             
             // Wave 5以降の異次元空間背景を設定
@@ -12949,7 +13072,7 @@
                     this.spaceDust.material.uniforms.time.value = elapsedTime * 10;
                 }
                 
-                // Update dimensional rift (Wave 5+)
+                // Update dimensional rift (Wave 5)
                 if (this.waveManager && this.waveManager.dimensionalRift) {
                     this.waveManager.dimensionalRift.traverse(child => {
                         if (child.userData.isDimensionalRing) {
@@ -12958,6 +13081,18 @@
                         if (child.userData.isDimensionalParticles && child.geometry) {
                             // パーティクルを回転させる
                             child.rotation.y += deltaTime * 0.1;
+                        }
+                    });
+                }
+                
+                // Update Earth rotation (Wave 6+)
+                if (this.waveManager && this.waveManager.earthGroup) {
+                    this.waveManager.earthGroup.traverse(child => {
+                        if (child.userData.isEarth) {
+                            child.rotation.y += deltaTime * 0.05; // 地球の自転
+                        }
+                        if (child.userData.isClouds) {
+                            child.rotation.y += deltaTime * 0.08; // 雲は少し速く
                         }
                     });
                 }

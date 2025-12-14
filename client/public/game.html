@@ -2604,19 +2604,13 @@
                     emissiveIntensity: 0.15 // 発光強度を7.5倍に強化
                 });
                 
-                // Main body - 丸みと膝らみを帯びた三角形胴体
-                const bodyGeometry = new THREE.SphereGeometry(1.2, 32, 32);
+                // Main body - ステルス戦闘機風の三角形胴体
+                const bodyGeometry = new THREE.ConeGeometry(1.1, 5.0, 3);
                 const body = new THREE.Mesh(bodyGeometry, whiteMaterial);
-                body.scale.set(0.9, 0.6, 2.2);  // 前後に伸ばして流線形に
-                body.position.z = 0.3;
+                body.rotation.x = Math.PI / 2;
+                body.rotation.y = Math.PI;
+                body.position.z = 0.5;
                 this.mesh.add(body);
-                
-                // 前方の尖ったノーズ
-                const noseGeometry = new THREE.ConeGeometry(0.5, 1.5, 32);
-                const nose = new THREE.Mesh(noseGeometry, whiteMaterial);
-                nose.rotation.x = -Math.PI / 2;
-                nose.position.z = -2.0;
-                this.mesh.add(nose);
 
                 // Cockpit - 前方のコックピット
                 const cockpitGeometry = new THREE.SphereGeometry(0.4, 16, 16);
@@ -2634,32 +2628,32 @@
                 cockpit.position.set(0, 0.2, -1.5);
                 this.mesh.add(cockpit);
 
-                // 丸みを帯びた三角ウィング - お尻まで伸びる流線形
+                // ステルス戦闘機風の三角ウィング - お尻まで伸びる三角形の底辺
                 const wingShape = new THREE.Shape();
-                wingShape.moveTo(0, -1.5);      // 先端（機首側）
-                wingShape.quadraticCurveTo(5.0, -0.5, 5.5, 0.5);  // 外側の先端（曲線）
-                wingShape.quadraticCurveTo(3.5, 2.5, 0.8, 2.8);   // お尻側の外側（曲線）
-                wingShape.lineTo(0, 2.5);       // お尻側の内側
-                wingShape.lineTo(0, -1.5);      // 先端に戻る
+                wingShape.moveTo(0, 0);         // 先端（機首側）
+                wingShape.lineTo(4.5, 0);       // 外側の先端
+                wingShape.lineTo(2.2, 4.0);     // お尻側の外側
+                wingShape.lineTo(0, 3.5);       // お尻側の内側
+                wingShape.lineTo(0, 0);         // 先端に戻る
                 
                 const wingGeometry = new THREE.ExtrudeGeometry(wingShape, {
-                    depth: 0.25,              // 厚みを持たせる
+                    depth: 0.12,
                     bevelEnabled: true,
-                    bevelThickness: 0.08,     // 丸みを強化
-                    bevelSize: 0.08,
-                    bevelSegments: 5          // 滑らかな丸み
+                    bevelThickness: 0.03,
+                    bevelSize: 0.03,
+                    bevelSegments: 3
                 });
                 
                 // 左ウィング
                 const leftWing = new THREE.Mesh(wingGeometry, whiteMaterial);
-                leftWing.position.set(-0.9, -0.15, 0.0);
+                leftWing.position.set(-0.6, -0.08, 0.2);
                 leftWing.rotation.x = Math.PI / 2;
                 leftWing.rotation.z = Math.PI;
                 this.mesh.add(leftWing);
                 
                 // 右ウィング（左ウィングをミラー）
                 const rightWing = new THREE.Mesh(wingGeometry, whiteMaterial);
-                rightWing.position.set(0.9, -0.15, 0.0);
+                rightWing.position.set(0.6, -0.08, 0.2);
                 rightWing.rotation.x = Math.PI / 2;
                 rightWing.scale.x = -1;
                 this.mesh.add(rightWing);
@@ -2791,7 +2785,7 @@
             }
 
             createEngineEffects() {
-                // Engine glow lights - サイズを大幅に強化
+                // Engine glow lights - 丁寧に作り込んだエフェクト
                 const glowPositions = [
                     { x: -1.2, y: -0.15, z: 1.8 },  // 左エンジン
                     { x: 0, y: -0.1, z: 2.1 },      // 中央エンジン
@@ -2799,8 +2793,8 @@
                 ];
 
                 glowPositions.forEach(pos => {
-                    // Glow sprite - サイズを3倍に
-                    const glowGeometry = new THREE.PlaneGeometry(3.6, 3.6);
+                    // Glow sprite - 適度なサイズ
+                    const glowGeometry = new THREE.PlaneGeometry(1.8, 1.8);
                     const glowMaterial = new THREE.ShaderMaterial({
                         uniforms: {
                             time: { value: 0 },
@@ -2827,14 +2821,14 @@
                                 // Flickering effect
                                 float flicker = 0.9 + 0.1 * sin(time * 20.0) * sin(time * 13.0);
                                 
-                                // Core glow - 強度を2倍に
-                                float glow = exp(-dist * 3.0) * intensity * flicker * 2.0;
+                                // Core glow - 明るく鮮明な中心
+                                float glow = exp(-dist * 4.5) * intensity * flicker * 1.8;
                                 
-                                // Outer halo - 強度を3倍に
-                                float halo = exp(-dist * 1.5) * 0.9 * intensity;
+                                // Outer halo - 柔らかな外側の光
+                                float halo = exp(-dist * 2.0) * 0.5 * intensity;
                                 
-                                vec3 finalColor = color * (glow + halo) * 1.5;
-                                float alpha = (glow + halo * 0.8) * 1.2;
+                                vec3 finalColor = color * (glow + halo) * 1.3;
+                                float alpha = (glow + halo * 0.6) * 1.1;
                                 
                                 gl_FragColor = vec4(finalColor, alpha);
                             }
@@ -12833,17 +12827,13 @@
                 const container = document.getElementById('ending-movie-container');
                 const video = document.getElementById('ending-video');
                 
-                // エンディングムービー再生前に自動的に「中断」ボタンを押す
-                if (this.state === GameState.PLAYING) {
-                    this.pauseGame();
-                }
-                
-                // ムービー再生中フラグを設定（最も確実な停止方法）
+                // ムービー再生中フラグを設定
                 if (this.waveManager) {
                     this.waveManager.isMoviePlaying = true;
                 }
                 
-                // ゲーム状態をGAME_OVERに変更して更新ループを停止させる
+                // ゲーム状態を保存してからGAME_OVERに変更（pause画面を表示しない）
+                this.savedGameState = this.state;
                 this.state = GameState.GAME_OVER;
 
                 // BGMを停止

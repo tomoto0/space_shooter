@@ -100,3 +100,12 @@
 ## Player Ship Design Final Improvement
 - [x] 機体デザインを三角形で丸みと膝らみを帯びたデザインに変更
 - [x] 三つの噴出口ジェットエフェクトを見えるように改善（サイズを3倍、強度を2-3倍に強化）
+
+## Critical - Wave 6 starts but then Game Over and restarts from Wave 1
+- [x] playEndingMovie後にPlayer destroyed!とGame started!が発生する原因を特定（pauseGame呼び出しが原因）
+- [x] pauseGame/resumeGameの処理を見直してゲーム状態を正しく管理（pauseGame呼び出しを削除）
+- [x] Wave 6が正常に開始され、プレイヤーが破壊されないように修正
+
+## Revert Player Ship Design to Two Versions Ago
+- [x] 機体デザインを二つ前のバージョン（ステルス戦闘機風の三角形ウィング）に戻す
+- [x] 三つの噴出口ジェットエフェクトを丁寧に作り込む（サイズ1.8、強度を最適化）

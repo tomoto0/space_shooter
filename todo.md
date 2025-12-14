@@ -34,3 +34,7 @@
 ## Wave 6 Transition Logic - Second Attempt
 - [x] playEndingMovieメソッドを修正してムービー終了後にWave 6を開始
 - [x] showGameClearAnnouncementメソッドを修正してアナウンス表示のみに専念（5秒後にゲーム再開）
+
+## Critical Bug - WebGL Context Lost on Wave 6 Transition
+- [x] setEarthSpaceBackgroundメソッドのリソース管理を改善してWebGLコンテキストロストを防止
+- [x] 異次元の裂け目削除時のジオメトリとマテリアルの適切な解放

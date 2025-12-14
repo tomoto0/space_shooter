@@ -11324,22 +11324,37 @@
                     this.scene.fog.color.setHex(0x000510);
                 }
                 
-                // 異次元の裂け目を削除してWebGLリソースを解放
+                // 異次元の裂け目を削除（安全に）
                 if (this.dimensionalRift) {
-                    this.dimensionalRift.traverse(child => {
-                        if (child.geometry) {
-                            child.geometry.dispose();
-                        }
-                        if (child.material) {
-                            if (Array.isArray(child.material)) {
-                                child.material.forEach(m => m.dispose());
-                            } else {
-                                child.material.dispose();
+                    try {
+                        // 子オブジェクトを先に削除
+                        while (this.dimensionalRift.children.length > 0) {
+                            const child = this.dimensionalRift.children[0];
+                            this.dimensionalRift.remove(child);
+                            
+                            if (child.geometry) {
+                                child.geometry.dispose();
+                            }
+                            if (child.material) {
+                                if (Array.isArray(child.material)) {
+                                    child.material.forEach(m => m.dispose());
+                                } else {
+                                    child.material.dispose();
+                                }
                             }
                         }
-                    });
-                    this.scene.remove(this.dimensionalRift);
-                    this.dimensionalRift = null;
+                        
+                        this.scene.remove(this.dimensionalRift);
+                        this.dimensionalRift = null;
+                    } catch (e) {
+                        console.error('Error removing dimensional rift:', e);
+                    }
+                }
+                
+                // 既存の地球グループを削除
+                if (this.earthGroup) {
+                    this.scene.remove(this.earthGroup);
+                    this.earthGroup = null;
                 }
                 
                 // 地球を作成

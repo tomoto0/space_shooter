@@ -2628,12 +2628,13 @@
                 cockpit.position.set(0, 0.2, -1.5);
                 this.mesh.add(cockpit);
 
-                // ステルス戦闘機風の三角ウィング - 左右対称
+                // ステルス戦闘機風の三角ウィング - お尻まで伸びる三角形の底辺
                 const wingShape = new THREE.Shape();
-                wingShape.moveTo(0, 0);
-                wingShape.lineTo(4.2, 0);
-                wingShape.lineTo(0.8, 2.5);
-                wingShape.lineTo(0, 0);
+                wingShape.moveTo(0, 0);         // 先端（機首側）
+                wingShape.lineTo(4.5, 0);       // 外側の先端
+                wingShape.lineTo(2.2, 4.0);     // お尻側の外側
+                wingShape.lineTo(0, 3.5);       // お尻側の内側
+                wingShape.lineTo(0, 0);         // 先端に戻る
                 
                 const wingGeometry = new THREE.ExtrudeGeometry(wingShape, {
                     depth: 0.12,
@@ -3218,28 +3219,28 @@
                 // 基本のスラスト強度
                 const thrustIntensity = 0.5 + Math.abs(movement.z) * 0.5;
                 
-                // 左右移動時の青白いジェットエフェクト
+                // 左右移動時の青白いジェットエフェクト（より明確に）
                 const lateralThrust = Math.abs(movement.x);
                 
                 this.engineGlows.forEach((glow, index) => {
-                    // 左右移動時に青白い色に変化
-                    if (lateralThrust > 0.1) {
+                    // 左右移動時に青白い炎がはっきり見える
+                    if (lateralThrust > 0.05) {  // しきい値を下げて反応を良く
                         // 左エンジン（index 0）は右移動時に強く光る
                         // 右エンジン（index 2）は左移動時に強く光る
                         let lateralIntensity = 1.0;
                         if (index === 0 && movement.x > 0) { // 左エンジン、右移動
-                            lateralIntensity = 1.0 + lateralThrust * 1.5;
+                            lateralIntensity = 1.5 + lateralThrust * 3.0;  // 強度を3倍に
                         } else if (index === 2 && movement.x < 0) { // 右エンジン、左移動
-                            lateralIntensity = 1.0 + lateralThrust * 1.5;
+                            lateralIntensity = 1.5 + lateralThrust * 3.0;  // 強度を3倍に
                         }
                         
-                        // 青白い色に変化
+                        // 鮮やかな青白い炎の色
                         glow.material.uniforms.color.value.setRGB(
-                            0.6 + lateralIntensity * 0.3,
-                            0.8 + lateralIntensity * 0.2,
-                            1.0
+                            0.7 + lateralIntensity * 0.3,  // 白さを強化
+                            0.9 + lateralIntensity * 0.1,  // 明るさを強化
+                            1.0                            // 青は最大
                         );
-                        glow.material.uniforms.intensity.value = (thrustIntensity + lateralIntensity) * 0.8;
+                        glow.material.uniforms.intensity.value = (thrustIntensity + lateralIntensity) * 1.5;  // 強度を2倍に
                     } else {
                         // 通常時は元の色（青白）
                         glow.material.uniforms.color.value.setRGB(0.67, 0.87, 1.0);
@@ -10768,12 +10769,13 @@
                 video.play().catch(e => console.error('Video play failed:', e));
                 
                 // thisの参照を保持（アロー関数内でthisが失われるのを防ぐ）
-                const game = this;
+                const waveManager = this;  // WaveManagerインスタンス
+                const game = this.gameRef;  // Gameクラスインスタンス
                 
                 // 動画終了時の処理
                 video.onended = () => {
                     console.log('[playEndingMovie] Movie ended, starting Wave 6 transition...');
-                    game.isMoviePlaying = false;
+                    waveManager.isMoviePlaying = false;
                     container.classList.remove('visible');
                     
                     setTimeout(() => {
@@ -10782,16 +10784,18 @@
                         
                         // Wave 6を開始
                         console.log('[playEndingMovie] Setting game state to PLAYING...');
-                        game.state = GameState.PLAYING;
-                        game.gameCleared = false;
+                        if (game) {
+                            game.state = GameState.PLAYING;
+                        }
+                        waveManager.gameCleared = false;
                         console.log('[playEndingMovie] gameCleared set to false');
                         
-                        console.log('[playEndingMovie] Checking waveManager...', game.waveManager);
-                        if (game.waveManager) {
+                        console.log('[playEndingMovie] Checking waveManager...', waveManager);
+                        if (waveManager) {
                             console.log('[playEndingMovie] WaveManager found, unpausing and starting Wave 6...');
-                            game.waveManager.paused = false;
+                            waveManager.paused = false;
                             console.log('[playEndingMovie] Calling waveManager.startWave(6)...');
-                            game.waveManager.startWave(6);
+                            waveManager.startWave(6);
                             console.log('[playEndingMovie] waveManager.startWave(6) called successfully');
                         } else {
                             console.error('[playEndingMovie] ERROR: waveManager is null or undefined!');
@@ -10800,7 +10804,7 @@
                         // 500ms後にCongratulationsを表示
                         setTimeout(() => {
                             console.log('[playEndingMovie] Showing game clear announcement...');
-                            game.showGameClearAnnouncement();
+                            waveManager.showGameClearAnnouncement();
                         }, 500);
                     }, 2000);
                 };
@@ -11111,9 +11115,14 @@
                         if (this.boss.isFinalBoss || this.currentWave === 5 || this.boss.waveNumber === 5) {
                             this.gameCleared = true;
                             // 少し遅延させてからエンディング再生
-                            setTimeout(() => {
-                                this.playEndingMovie();
-                            }, 3000);
+                            // GameクラスのplayEndingMovieを呼び出す
+                            if (this.gameRef) {
+                                setTimeout(() => {
+                                    this.gameRef.playEndingMovie();
+                                }, 3000);
+                            } else {
+                                console.error('[WaveManager] gameRef is not set!');
+                            }
                         } else {
                             // Wave完了
                             this.waveActive = false;
@@ -12196,6 +12205,7 @@
                 
                 this.updateLoadingProgress(88, 'Initializing wave manager...');
                 this.waveManager = new WaveManager(this.scene, this.player);
+                this.waveManager.gameRef = this;  // Gameクラスへの参照を設定
                 this.waveManager.vfxManager = this.vfxManager;
                 this.waveManager.audioManager = this.audioManager;
                 this.vfxManager.audioManager = this.audioManager;

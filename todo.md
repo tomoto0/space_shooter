@@ -82,3 +82,12 @@
 ## Player Ship Color Too Dark
 - [x] 機体の色をより白っぽく変更（0xf5f5f5から0xffffffに）
 - [x] emissiveIntensityを上げて発光を強化（0.02から0.15に）
+
+## Critical - waveManager still undefined in playEndingMovie
+- [x] playEndingMovie呼び出し元でwaveManagerがundefinedになる原因を特定（WaveManagerクラス内でthis.waveManagerを参照）
+- [x] WaveManagerクラスからGameクラスへの参照を修正（gameRefを追加）
+- [x] Wave 6への遷移を正常に実行（waveManager.startWave(6)を呼び出し）
+
+## Player Ship Wing Design Improvement
+- [x] ウィングをお尻まで伸ばして三角形の底辺のようなデザインに
+- [x] 三つの噴出口のエフェクトをより明確に（左右移動時に青白い炎がはっきり見える）

@@ -651,8 +651,7 @@
        #barrel-roll-indicator {
             position: absolute;
             bottom: 120px;
-            left: 50%;
-            transform: translateX(-50%);
+            right: 10px;
             display: flex;
             gap: 20px;
             pointer-events: none;
@@ -1483,7 +1482,7 @@
             <span><span class="key">↑</span><span class="key">↓</span><span class="key">←</span><span class="key">→</span> / <span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span> Move</span>
             <span><span class="key">SPACE</span> / <span class="key">CLICK</span> Fire</span>
             <span><span class="key">B</span> Bomb (×3/Wave)</span>
-            <span><span class="key">Q</span><span class="key">E</span> Barrel Roll</span>
+            <span><span class="key">V</span><span class="key">N</span> Barrel Roll</span>
         </div>
     </div>
 
@@ -1552,13 +1551,13 @@
                 <div class="control-row">
                     <span class="control-action">Barrel Roll Left</span>
                     <div class="control-keys">
-                        <span class="key">Q</span>
+                        <span class="key">V</span>
                     </div>
                 </div>
                 <div class="control-row">
                     <span class="control-action">Barrel Roll Right</span>
                     <div class="control-keys">
-                        <span class="key">E</span>
+                        <span class="key">N</span>
                     </div>
                 </div>
             </div>
@@ -1691,8 +1690,8 @@
 
     <!-- Barrel Roll Indicator -->
     <div id="barrel-roll-indicator">
-        <div class="roll-charge ready" id="roll-left">Q</div>
-        <div class="roll-charge ready" id="roll-right">E</div>
+        <div class="roll-charge ready" id="roll-left">V</div>
+        <div class="roll-charge ready" id="roll-right">N</div>
     </div>
 
     <!-- Bomb Indicator -->
@@ -2375,7 +2374,7 @@
                 window.addEventListener('keydown', (e) => {
                     this.keys[e.code] = true;
                     // Prevent default for game keys
-                    if (['Space', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyQ', 'KeyE'].includes(e.code)) {
+                    if (['Space', 'KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyV', 'KeyN'].includes(e.code)) {
                         e.preventDefault();
                     }
                 });
@@ -2507,7 +2506,7 @@
                 if (this.keys[code]) return true;
                 if (code === 'Space' && this.virtualButtons.fire) return true;
                 if (code === 'KeyB' && this.virtualButtons.bomb) return true;
-                if ((code === 'KeyQ' || code === 'KeyE') && this.virtualButtons.roll) return true;
+                if ((code === 'KeyV' || code === 'KeyN') && this.virtualButtons.roll) return true;
                 return false;
             }
 
@@ -3145,9 +3144,9 @@
                 
                 // Start barrel roll
                 if (!this.isBarrelRolling && this.barrelRollCharges > 0) {
-                    if (input.isKeyPressed('KeyQ')) {
+                    if (input.isKeyPressed('KeyV')) {
                         this.startBarrelRoll(-1);
-                    } else if (input.isKeyPressed('KeyE')) {
+                    } else if (input.isKeyPressed('KeyN')) {
                         this.startBarrelRoll(1);
                     }
                 }

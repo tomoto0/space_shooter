@@ -3963,7 +3963,7 @@
                 
                 // Wave 6以降の高速モード
                 if (highSpeed) {
-                    this.baseSpeed *= 3.5; // 3.5倍の速度
+                    this.baseSpeed *= 4.0; // 4倍の速度（少し上げる）
                 }
                 
                 this.position = position.clone();
@@ -10562,8 +10562,8 @@
                 let asteroidChance, fighterChance, interceptorChance, swarmChance, bomberChance, tankChance, sniperChance, carrierChance;
                 
                 if (waveNumber >= 6) {
-                    // Wave 6以降: 全種類が均等に出現（隙石は少なめ）
-                    asteroidChance = 0.15;
+                    // Wave 6以降: 全種類が均等に出現（雙石を2倍に増やし）
+                    asteroidChance = 0.30;
                     fighterChance = 0.12;
                     interceptorChance = 0.12;
                     swarmChance = 0.12;
@@ -11385,32 +11385,59 @@
             // 3D背景素材を読み込んで設定
             loadSpaceEarthBackground() {
                 console.log('[loadSpaceEarthBackground] Loading background texture...');
-                const textureLoader = new THREE.TextureLoader();
-                textureLoader.load(
-                    '/images/space_earth_background.jpg',
-                    (texture) => {
-                        console.log('[loadSpaceEarthBackground] Texture loaded successfully');
-                        
-                        // 背景用の大きな平面を作成
-                        const bgGeometry = new THREE.PlaneGeometry(2000, 1500);
-                        const bgMaterial = new THREE.MeshBasicMaterial({
-                            map: texture,
-                            side: THREE.DoubleSide,
-                            depthWrite: false
-                        });
-                        const bgMesh = new THREE.Mesh(bgGeometry, bgMaterial);
-                        bgMesh.position.set(0, -200, -1500);
-                        bgMesh.renderOrder = -1;
-                        
-                        this.scene.add(bgMesh);
-                        this.earthGroup = bgMesh;
-                        console.log('[loadSpaceEarthBackground] Background mesh added to scene');
-                    },
-                    undefined,
-                    (error) => {
-                        console.error('[loadSpaceEarthBackground] Error loading texture:', error);
-                    }
-                );
+                
+                // 地球を画面下部5分の1に配置（大きな球体）
+                const earthGroup = new THREE.Group();
+                
+                // 地球本体（大きめ）
+                const earthGeo = new THREE.SphereGeometry(400, 64, 64);
+                const earthMat = new THREE.MeshPhongMaterial({
+                    color: 0x2244ff,
+                    emissive: 0x001133,
+                    emissiveIntensity: 0.3,
+                    shininess: 30
+                });
+                const earth = new THREE.Mesh(earthGeo, earthMat);
+                earth.position.set(0, -600, -1500);
+                earthGroup.add(earth);
+                
+                // 大気光（青いオーラ）
+                const atmosphereGeo = new THREE.SphereGeometry(420, 64, 64);
+                const atmosphereMat = new THREE.MeshBasicMaterial({
+                    color: 0x4488ff,
+                    transparent: true,
+                    opacity: 0.15,
+                    side: THREE.BackSide
+                });
+                const atmosphere = new THREE.Mesh(atmosphereGeo, atmosphereMat);
+                atmosphere.position.copy(earth.position);
+                earthGroup.add(atmosphere);
+                
+                // 雲の層
+                const cloudGeo = new THREE.SphereGeometry(405, 64, 64);
+                const cloudMat = new THREE.MeshPhongMaterial({
+                    color: 0xffffff,
+                    transparent: true,
+                    opacity: 0.3,
+                    emissive: 0x444444,
+                    emissiveIntensity: 0.1
+                });
+                const clouds = new THREE.Mesh(cloudGeo, cloudMat);
+                clouds.position.copy(earth.position);
+                earthGroup.add(clouds);
+                
+                // 地球を照らすライト
+                const earthLight = new THREE.DirectionalLight(0xffffff, 1.5);
+                earthLight.position.set(500, 300, 200);
+                earthGroup.add(earthLight);
+                
+                // 地球の回転アニメーション用のデータを保存
+                earth.userData.isEarth = true;
+                clouds.userData.isClouds = true;
+                
+                this.scene.add(earthGroup);
+                this.earthGroup = earthGroup;
+                console.log('[loadSpaceEarthBackground] Earth added to scene');
             }
             
             // Wave 5以降の異次元空間背景を設定
@@ -12268,29 +12295,30 @@
             }
 
             initLights() {
-                // Ambient light for base illumination
-                const ambientLight = new THREE.AmbientLight(0x222244, 0.5);
+                // Ambient light for base illumination - 強化して左右対称に
+                const ambientLight = new THREE.AmbientLight(0x444466, 0.8);
                 this.scene.add(ambientLight);
 
-                // Main directional light (sun-like)
-                const mainLight = new THREE.DirectionalLight(0xffffff, 1.0);
-                mainLight.position.set(50, 30, 50);
+                // Main directional light (sun-like) - 中央から照らす
+                const mainLight = new THREE.DirectionalLight(0xffffff, 1.2);
+                mainLight.position.set(0, 50, 50);
                 mainLight.castShadow = false;
                 this.scene.add(mainLight);
 
-                // Accent lights for atmosphere
-                const blueLight = new THREE.PointLight(0x0066ff, 0.5, 500);
-                blueLight.position.set(-100, 50, -100);
-                this.scene.add(blueLight);
+                // Left accent light - 左側から照らす
+                const leftLight = new THREE.PointLight(0x6699ff, 0.6, 500);
+                leftLight.position.set(-100, 30, 0);
+                this.scene.add(leftLight);
 
-                const purpleLight = new THREE.PointLight(0x9900ff, 0.3, 500);
-                purpleLight.position.set(100, -50, 100);
-                this.scene.add(purpleLight);
+                // Right accent light - 右側から照らす（左と対称）
+                const rightLight = new THREE.PointLight(0x6699ff, 0.6, 500);
+                rightLight.position.set(100, 30, 0);
+                this.scene.add(rightLight);
 
-                // Rim light for dramatic effect
-                const rimLight = new THREE.DirectionalLight(0x00ffff, 0.3);
-                rimLight.position.set(-50, 0, -50);
-                this.scene.add(rimLight);
+                // Front rim light for dramatic effect
+                const frontRimLight = new THREE.DirectionalLight(0x00ffff, 0.4);
+                frontRimLight.position.set(0, 20, 100);
+                this.scene.add(frontRimLight);
             }
 
             createStarfield() {

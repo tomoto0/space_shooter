@@ -2618,45 +2618,94 @@
                     roughness: 0.25
                 });
                 
-                // 胴体と翼を一体化させた大きな三角形（ステルス爆撃機風）
+                // 丸みを帯びた三角形の胴体（スペースシャトル風）
                 const bodyShape = new THREE.Shape();
                 // 先端（尖ったノーズ）
-                bodyShape.moveTo(0, -3.0);
-                // 左側の線（大きく広がる）
-                bodyShape.lineTo(-5.0, 2.8);
-                // 後部の線
-                bodyShape.lineTo(5.0, 2.8);
-                // 右側の線
-                bodyShape.lineTo(0, -3.0);
+                bodyShape.moveTo(0, -3.2);
+                // 左側の曲線（丸みを帯びた形）
+                bodyShape.quadraticCurveTo(-2.5, -1.5, -4.8, 0.5);
+                bodyShape.quadraticCurveTo(-5.2, 1.5, -4.5, 2.8);
+                // 後部の線（少し丸みを帯びた）
+                bodyShape.quadraticCurveTo(0, 3.0, 4.5, 2.8);
+                // 右側の曲線（左右対称）
+                bodyShape.quadraticCurveTo(5.2, 1.5, 4.8, 0.5);
+                bodyShape.quadraticCurveTo(2.5, -1.5, 0, -3.2);
                 
                 const bodyGeometry = new THREE.ExtrudeGeometry(bodyShape, {
-                    depth: 0.5,
+                    depth: 0.6,
                     bevelEnabled: true,
-                    bevelThickness: 0.12,
-                    bevelSize: 0.12,
-                    bevelSegments: 5
+                    bevelThickness: 0.18,
+                    bevelSize: 0.15,
+                    bevelSegments: 8
                 });
                 
                 const body = new THREE.Mesh(bodyGeometry, whiteMaterial);
                 body.rotation.x = Math.PI / 2;
                 body.position.set(0, 0, 0);
                 this.mesh.add(body);
+                
+                // 中央の隆起（スペースシャトルの胴体のような丸み）
+                const ridgeGeometry = new THREE.CylinderGeometry(0.5, 0.4, 4.5, 16);
+                const ridge = new THREE.Mesh(ridgeGeometry, whiteMaterial);
+                ridge.rotation.x = Math.PI / 2;
+                ridge.position.set(0, 0.35, -0.3);
+                this.mesh.add(ridge);
 
-                // Cockpit - 前方のコックピット
-                const cockpitGeometry = new THREE.SphereGeometry(0.4, 16, 16);
+                // Cockpit - 前方のコックピット（スペースシャトル風）
+                const cockpitGeometry = new THREE.SphereGeometry(0.5, 24, 24);
                 const cockpitMaterial = new THREE.MeshStandardMaterial({
-                    color: 0x00aaff,
-                    metalness: 0.1,
+                    color: 0x0099dd,
+                    metalness: 0.2,
                     roughness: 0.05,
-                    emissive: 0x0088cc,
-                    emissiveIntensity: 0.6,
+                    emissive: 0x006699,
+                    emissiveIntensity: 0.7,
                     transparent: true,
-                    opacity: 0.85
+                    opacity: 0.9
                 });
                 const cockpit = new THREE.Mesh(cockpitGeometry, cockpitMaterial);
-                cockpit.scale.set(1, 0.7, 1.3);
-                cockpit.position.set(0, 0.2, -1.5);
+                cockpit.scale.set(1.2, 0.6, 1.5);
+                cockpit.position.set(0, 0.45, -1.8);
                 this.mesh.add(cockpit);
+                
+                // パネルライン（胴体上部の装飾）
+                const panelLineMaterial = new THREE.MeshStandardMaterial({
+                    color: 0x666677,
+                    metalness: 0.85,
+                    roughness: 0.35
+                });
+                
+                // 中央のパネルライン
+                const centerLineGeometry = new THREE.BoxGeometry(0.08, 0.08, 5.0);
+                const centerLine = new THREE.Mesh(centerLineGeometry, panelLineMaterial);
+                centerLine.position.set(0, 0.32, 0);
+                this.mesh.add(centerLine);
+                
+                // 左右のパネルライン
+                for (let i = 1; i <= 2; i++) {
+                    const leftLine = new THREE.Mesh(centerLineGeometry, panelLineMaterial);
+                    leftLine.position.set(-i * 0.8, 0.28, 0);
+                    this.mesh.add(leftLine);
+                    
+                    const rightLine = new THREE.Mesh(centerLineGeometry, panelLineMaterial);
+                    rightLine.position.set(i * 0.8, 0.28, 0);
+                    this.mesh.add(rightLine);
+                }
+                
+                // エアインテーク（左右）
+                const intakeGeometry = new THREE.BoxGeometry(0.6, 0.25, 1.2);
+                const intakeMaterial = new THREE.MeshStandardMaterial({
+                    color: 0x333344,
+                    metalness: 0.9,
+                    roughness: 0.3
+                });
+                
+                const leftIntake = new THREE.Mesh(intakeGeometry, intakeMaterial);
+                leftIntake.position.set(-2.2, 0.15, 0.5);
+                this.mesh.add(leftIntake);
+                
+                const rightIntake = new THREE.Mesh(intakeGeometry, intakeMaterial);
+                rightIntake.position.set(2.2, 0.15, 0.5);
+                this.mesh.add(rightIntake);
 
                 // 翼は胴体と一体化されているので、別途翼は作成しない
 
@@ -2681,31 +2730,47 @@
                 rightTip.position.set(4.5, 0, 1.5);
                 this.mesh.add(rightTip);
 
-                // 3つのエンジン噴出口（同じ丸いデザインに統一）
-                const engineNozzleGeometry = new THREE.CylinderGeometry(0.35, 0.35, 0.8, 32);
-                const engineNozzleMaterial = new THREE.MeshStandardMaterial({
-                    color: 0x222233,
-                    metalness: 0.95,
-                    roughness: 0.2,
-                    emissive: 0x111122,
-                    emissiveIntensity: 0.3
-                });
-                
-                // エンジン配置：中央1つ、左右に各1つ
+                // 3つの丸いエンジン噴出口（丁寧なデザイン）
                 const enginePositions = [
-                    { x: -1.5, y: -0.15, z: 2.2 },  // 左エンジン
-                    { x: 0, y: -0.1, z: 2.5 },       // 中央エンジン
-                    { x: 1.5, y: -0.15, z: 2.2 }    // 右エンジン
+                    { x: -1.8, y: -0.12, z: 2.4 },  // 左エンジン
+                    { x: 0, y: -0.08, z: 2.6 },      // 中央エンジン
+                    { x: 1.8, y: -0.12, z: 2.4 }    // 右エンジン
                 ];
 
                 this.engineNozzles = [];
                 enginePositions.forEach(pos => {
-                    // 丸い噴出口
-                    const nozzle = new THREE.Mesh(engineNozzleGeometry, engineNozzleMaterial);
+                    // 外側ハウジング（グレー）
+                    const housingGeometry = new THREE.CylinderGeometry(0.45, 0.5, 1.0, 32);
+                    const housingMaterial = new THREE.MeshStandardMaterial({
+                        color: 0x888899,
+                        metalness: 0.9,
+                        roughness: 0.25
+                    });
+                    const housing = new THREE.Mesh(housingGeometry, housingMaterial);
+                    housing.rotation.x = Math.PI / 2;
+                    housing.position.set(pos.x, pos.y, pos.z);
+                    this.mesh.add(housing);
+                    
+                    // 内側ノズル（暗い金属）
+                    const nozzleGeometry = new THREE.CylinderGeometry(0.38, 0.42, 1.1, 32);
+                    const nozzleMaterial = new THREE.MeshStandardMaterial({
+                        color: 0x222233,
+                        metalness: 0.95,
+                        roughness: 0.15,
+                        emissive: 0x111122,
+                        emissiveIntensity: 0.4
+                    });
+                    const nozzle = new THREE.Mesh(nozzleGeometry, nozzleMaterial);
                     nozzle.rotation.x = Math.PI / 2;
-                    nozzle.position.set(pos.x, pos.y, pos.z);
+                    nozzle.position.set(pos.x, pos.y, pos.z + 0.05);
                     this.mesh.add(nozzle);
                     this.engineNozzles.push(nozzle);
+                    
+                    // エンジンマウント（接続部）
+                    const mountGeometry = new THREE.BoxGeometry(0.7, 0.35, 1.0);
+                    const mount = new THREE.Mesh(mountGeometry, whiteMaterial);
+                    mount.position.set(pos.x, pos.y, pos.z - 0.9);
+                    this.mesh.add(mount);
                 });
 
                 // 武器マウント（ウィング下部）
@@ -2792,16 +2857,16 @@
             }
 
             createEngineEffects() {
-                // Engine glow lights - 噴出口だけが発光するエフェクト
+                // Engine glow lights - 噴出口から青白い炎が噴き出すエフェクト
                 const glowPositions = [
-                    { x: -1.5, y: -0.15, z: 2.2 },  // 左エンジン
-                    { x: 0, y: -0.1, z: 2.5 },       // 中央エンジン
-                    { x: 1.5, y: -0.15, z: 2.2 }    // 右エンジン
+                    { x: -1.8, y: -0.12, z: 2.4 },  // 左エンジン
+                    { x: 0, y: -0.08, z: 2.6 },      // 中央エンジン
+                    { x: 1.8, y: -0.12, z: 2.4 }    // 右エンジン
                 ];
 
                 glowPositions.forEach(pos => {
-                    // Glow sprite - 噴出口のサイズに合わせて小さく
-                    const glowGeometry = new THREE.PlaneGeometry(0.8, 0.8);
+                    // Glow sprite - 噴出口からの炎
+                    const glowGeometry = new THREE.PlaneGeometry(1.2, 1.2);
                     const glowMaterial = new THREE.ShaderMaterial({
                         uniforms: {
                             time: { value: 0 },
@@ -2828,15 +2893,18 @@
                                 // Flickering effect
                                 float flicker = 0.9 + 0.1 * sin(time * 20.0) * sin(time * 13.0);
                                 
-                                // 噴出口だけが光るように範囲を小さく
-                                // Core glow - 青白い明るい中心
-                                float glow = exp(-dist * 8.0) * intensity * flicker * 2.5;
+                                // 噴出口から青白い炎が噴き出すエフェクト
+                                // Core glow - 青白い炎の中心
+                                float glow = exp(-dist * 5.5) * intensity * flicker * 3.0;
                                 
-                                // Outer halo - 小さな外側の光
-                                float halo = exp(-dist * 5.0) * 0.3 * intensity;
+                                // Outer halo - 炎の外側
+                                float halo = exp(-dist * 3.0) * 0.5 * intensity;
                                 
-                                vec3 finalColor = color * (glow + halo) * 1.5;
-                                float alpha = (glow + halo * 0.5) * 1.3;
+                                // 炎の延び（後ろに流れる）
+                                float trail = exp(-dist * 2.0) * 0.3 * intensity;
+                                
+                                vec3 finalColor = color * (glow + halo + trail) * 1.8;
+                                float alpha = (glow + halo * 0.6 + trail * 0.3) * 1.5;
                                 
                                 gl_FragColor = vec4(finalColor, alpha);
                             }
@@ -11392,27 +11460,44 @@
                 this.scene.add(stars);
                 this.stars = stars;
                 
-                // 3. 地球を作成（画面下部約5分の1を覆う水平線）
-                const earthRadius = 120;
-                const earthGeometry = new THREE.SphereGeometry(earthRadius, 64, 64);
+                // 3. 地球を作成（画面下5分の1を水平に覆う）
+                const earthRadius = 300;
+                const earthGeometry = new THREE.SphereGeometry(earthRadius, 128, 128);
                 
-                // 地球のテクスチャを作成（青い海と緑の大地）
+                // 地球のテクスチャを作成（青い海、緑の大地、白い雲）
                 const earthCanvas = document.createElement('canvas');
-                earthCanvas.width = 1024;
-                earthCanvas.height = 512;
+                earthCanvas.width = 2048;
+                earthCanvas.height = 1024;
                 const ctx = earthCanvas.getContext('2d');
                 
-                // 海の青
-                ctx.fillStyle = '#1a4d8f';
+                // 海の青（深い青）
+                const gradient = ctx.createLinearGradient(0, 0, 0, earthCanvas.height);
+                gradient.addColorStop(0, '#0a2f5f');
+                gradient.addColorStop(0.5, '#1a5f9f');
+                gradient.addColorStop(1, '#0a3f7f');
+                ctx.fillStyle = gradient;
                 ctx.fillRect(0, 0, earthCanvas.width, earthCanvas.height);
                 
-                // 大陸を描画（ランダムな緑の形）
-                ctx.fillStyle = '#2d5a2d';
+                // 大陸を描画（緑の大地）
+                ctx.fillStyle = '#2d6b3d';
+                for (let i = 0; i < 80; i++) {
+                    const x = Math.random() * earthCanvas.width;
+                    const y = Math.random() * earthCanvas.height;
+                    const w = Math.random() * 300 + 150;
+                    const h = Math.random() * 200 + 100;
+                    
+                    ctx.beginPath();
+                    ctx.ellipse(x, y, w, h, Math.random() * Math.PI, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                // 山脈や砂漠（茶色）
+                ctx.fillStyle = '#8b7355';
                 for (let i = 0; i < 30; i++) {
                     const x = Math.random() * earthCanvas.width;
                     const y = Math.random() * earthCanvas.height;
-                    const w = Math.random() * 200 + 100;
-                    const h = Math.random() * 150 + 80;
+                    const w = Math.random() * 150 + 80;
+                    const h = Math.random() * 100 + 60;
                     
                     ctx.beginPath();
                     ctx.ellipse(x, y, w, h, Math.random() * Math.PI, 0, Math.PI * 2);
@@ -11423,33 +11508,33 @@
                 
                 const earthMaterial = new THREE.MeshPhongMaterial({
                     map: earthTexture,
-                    shininess: 15,
-                    specular: 0x333333
+                    shininess: 20,
+                    specular: 0x444444
                 });
                 
                 const earth = new THREE.Mesh(earthGeometry, earthMaterial);
-                // 地球を画面下部に配置（水平線のように）
-                earth.position.set(0, -earthRadius * 0.75, -200);
+                // 地球を画面下部に配置（水平線のように、画面下5分の1を覆う）
+                earth.position.set(0, -earthRadius * 0.82, -250);
                 this.earthGroup.add(earth);
                 this.earth = earth;
                 
                 // 4. 雲の層を追加
-                const cloudGeometry = new THREE.SphereGeometry(earthRadius + 2, 64, 64);
+                const cloudGeometry = new THREE.SphereGeometry(earthRadius + 5, 128, 128);
                 const cloudCanvas = document.createElement('canvas');
-                cloudCanvas.width = 1024;
-                cloudCanvas.height = 512;
+                cloudCanvas.width = 2048;
+                cloudCanvas.height = 1024;
                 const cloudCtx = cloudCanvas.getContext('2d');
                 
                 // 透明な背景
                 cloudCtx.clearRect(0, 0, cloudCanvas.width, cloudCanvas.height);
                 
-                // 白い雲を描画
-                cloudCtx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-                for (let i = 0; i < 50; i++) {
+                // 白い雲を描画（よりリアルな雲）
+                cloudCtx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                for (let i = 0; i < 120; i++) {
                     const x = Math.random() * cloudCanvas.width;
                     const y = Math.random() * cloudCanvas.height;
-                    const w = Math.random() * 150 + 80;
-                    const h = Math.random() * 100 + 50;
+                    const w = Math.random() * 200 + 100;
+                    const h = Math.random() * 120 + 70;
                     
                     cloudCtx.beginPath();
                     cloudCtx.ellipse(x, y, w, h, Math.random() * Math.PI, 0, Math.PI * 2);
@@ -11460,7 +11545,7 @@
                 const cloudMaterial = new THREE.MeshPhongMaterial({
                     map: cloudTexture,
                     transparent: true,
-                    opacity: 0.4,
+                    opacity: 0.5,
                     depthWrite: false
                 });
                 

@@ -10770,6 +10770,11 @@
                     this.audioManager.stopBGM();
                 }
                 
+                // Wave 6背景を事前ロード
+                if (this.waveManager) {
+                    this.waveManager.setEarthSpaceBackground();
+                }
+                
                 text.textContent = 'CONGRATULATIONS!';
                 sub.textContent = 'YOU SAVED THE GALAXY!';
                 
@@ -10782,7 +10787,7 @@
                     this.audioManager.playWaveStart();
                 }
                 
-                // アナウンス終了後、Wave 6へ自動遷移
+                // アナウンス終了後、Wave 6へ自動遷移してゲームを開始
                 setTimeout(() => {
                     announcement.classList.remove('visible');
                     text.style.color = '';
@@ -10791,19 +10796,12 @@
                     // ゲーム状態をPLAYINGに戻す
                     this.state = GameState.PLAYING;
                     
-                    // WaveManagerの一時停止を解除
+                    // WaveManagerの一時停止を解除してWave 6を開始
                     if (this.waveManager) {
                         this.waveManager.paused = false;
-                        // Wave 6へ進む
-                        this.waveManager.currentWave = 5; // startWaveが+1するので5に設定
-                        this.waveManager.waveActive = false;
-                        this.waveManager.waveTimer = this.waveManager.waveDelay; // 即座に次のWaveを開始
+                        // 組み込みのstartWaveを直接呼び出してWave 6を開始
+                        this.waveManager.startWave(6);
                     }
-                    
-                    // Wave 6開始のアナウンスを表示
-                    setTimeout(() => {
-                        this.showWaveAnnouncement(6);
-                    }, 500);
                 }, 5000);
             }
 
@@ -11328,8 +11326,20 @@
                     this.scene.fog.color.setHex(0x000510);
                 }
                 
-                // 異次元の裂け目を削除
+                // 異次元の裂け目を削除してWebGLリソースを解放
                 if (this.dimensionalRift) {
+                    this.dimensionalRift.traverse(child => {
+                        if (child.geometry) {
+                            child.geometry.dispose();
+                        }
+                        if (child.material) {
+                            if (Array.isArray(child.material)) {
+                                child.material.forEach(m => m.dispose());
+                            } else {
+                                child.material.dispose();
+                            }
+                        }
+                    });
                     this.scene.remove(this.dimensionalRift);
                     this.dimensionalRift = null;
                 }

@@ -2597,11 +2597,11 @@
                 
                 // 白いメタリック素材（スペースシャトルのような色）
                 const whiteMaterial = new THREE.MeshStandardMaterial({
-                    color: 0xf5f5f5,
-                    metalness: 0.7,
-                    roughness: 0.2,
+                    color: 0xffffff,
+                    metalness: 0.8,
+                    roughness: 0.15,
                     emissive: 0xffffff,
-                    emissiveIntensity: 0.05
+                    emissiveIntensity: 0.08
                 });
                 
                 // 暗いメタリック素材（エンジン、パネルライン用）
@@ -3272,28 +3272,24 @@
                 // 基本のスラスト強度
                 const thrustIntensity = 0.6 + Math.abs(movement.z) * 0.6;
                 
-                // 左右移動時の青白いジェットエフェクト（超明確に）
+                // 左右移動時の青白い発光エフェクト（シンプルな発光のみ）
                 const lateralThrust = Math.abs(movement.x);
                 
                 this.engineGlows.forEach((glow, index) => {
-                    // 左右移動時に青白い炎がはっきり見える
-                    if (lateralThrust > 0.02) {  // しきい値をさらに下げて反応を極めて良く
-                        // 左エンジン（index 0）は右移動時に強く光る
-                        // 右エンジン（index 2）は左移動時に強く光る
-                        let lateralIntensity = 1.2;
+                    // 左右移動時に丸い噴射口が青白く光る
+                    if (lateralThrust > 0.05) {
+                        // 左エンジン（index 0）は右移動時に光る
+                        // 右エンジン（index 2）は左移動時に光る
+                        let glowIntensity = thrustIntensity;
                         if (index === 0 && movement.x > 0) { // 左エンジン、右移動
-                            lateralIntensity = 2.0 + lateralThrust * 5.0;  // 強度を5倍に強化
+                            glowIntensity = thrustIntensity + lateralThrust * 2.5;
                         } else if (index === 2 && movement.x < 0) { // 右エンジン、左移動
-                            lateralIntensity = 2.0 + lateralThrust * 5.0;  // 強度を5倍に強化
+                            glowIntensity = thrustIntensity + lateralThrust * 2.5;
                         }
                         
-                        // 鮮烈な青白い炎の色（より白く、より明るく）
-                        glow.material.uniforms.color.value.setRGB(
-                            0.85 + lateralIntensity * 0.15,  // 白さを大幅強化
-                            0.95 + lateralIntensity * 0.05,  // 明るさを大幅強化
-                            1.0                              // 青は最大
-                        );
-                        glow.material.uniforms.intensity.value = (thrustIntensity + lateralIntensity) * 2.5;  // 強度を2.5倍に
+                        // 青白い発光（シンプル）
+                        glow.material.uniforms.color.value.setRGB(0.7, 0.9, 1.0);
+                        glow.material.uniforms.intensity.value = glowIntensity;
                     } else {
                         // 通常時は元の色（青白）
                         glow.material.uniforms.color.value.setRGB(0.67, 0.87, 1.0);
@@ -3963,7 +3959,7 @@
                 
                 // Wave 6以降の高速モード
                 if (highSpeed) {
-                    this.baseSpeed *= 3.5; // 3.5倍の速度
+                    this.baseSpeed *= 4.5; // 4.5倍の速度（さらに速く）
                 }
                 
                 this.position = position.clone();
@@ -10562,8 +10558,8 @@
                 let asteroidChance, fighterChance, interceptorChance, swarmChance, bomberChance, tankChance, sniperChance, carrierChance;
                 
                 if (waveNumber >= 6) {
-                    // Wave 6以降: 全種類が均等に出現（隙石は少なめ）
-                    asteroidChance = 0.15;
+                    // Wave 6以降: 全種類が均等に出現（隱石は2倍に増加）
+                    asteroidChance = 0.30;
                     fighterChance = 0.12;
                     interceptorChance = 0.12;
                     swarmChance = 0.12;
@@ -11382,24 +11378,24 @@
                 console.log('[setEarthSpaceBackground] Earth space background activated!');
             }
             
-            // 3D背景素材を読み込んで設定
+            // 3D背景素材を読み込んで設定（画面全体を覆う）
             loadSpaceEarthBackground() {
                 console.log('[loadSpaceEarthBackground] Loading background texture...');
                 const textureLoader = new THREE.TextureLoader();
                 textureLoader.load(
-                    '/images/space_earth_background.jpg',
+                    '/images/space_earth_bg.jpg',
                     (texture) => {
                         console.log('[loadSpaceEarthBackground] Texture loaded successfully');
                         
-                        // 背景用の大きな平面を作成
-                        const bgGeometry = new THREE.PlaneGeometry(2000, 1500);
+                        // 背景用の大きな平面を作成（画面全体を覆う）
+                        const bgGeometry = new THREE.PlaneGeometry(300, 200);
                         const bgMaterial = new THREE.MeshBasicMaterial({
                             map: texture,
                             side: THREE.DoubleSide,
                             depthWrite: false
                         });
                         const bgMesh = new THREE.Mesh(bgGeometry, bgMaterial);
-                        bgMesh.position.set(0, -200, -1500);
+                        bgMesh.position.set(0, 0, -150);
                         bgMesh.renderOrder = -1;
                         
                         this.scene.add(bgMesh);

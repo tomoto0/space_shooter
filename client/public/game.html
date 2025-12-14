@@ -703,9 +703,8 @@
         /* Bomb Indicator */
         #bomb-indicator {
             position: fixed;
-            bottom: 160px;
-            left: 50%;
-            transform: translateX(-50%);
+            bottom: 90px;
+            left: 20px;
             display: flex;
             gap: 15px;
             opacity: 0;
@@ -10732,6 +10731,18 @@
                 video.currentTime = 0;
                 video.play().catch(e => console.error('Video play failed:', e));
                 
+                // ムービー再生開始後、1秒後にWave 6を開始
+                setTimeout(() => {
+                    console.log('[playEndingMovie] Starting Wave 6 during movie...');
+                    this.state = GameState.PLAYING;
+                    this.gameCleared = false;
+                    
+                    if (this.waveManager) {
+                        this.waveManager.paused = false;
+                        this.waveManager.startWave(6);
+                    }
+                }, 1000);
+                
                 // 動画終了時の処理
                 video.onended = () => {
                     this.isMoviePlaying = false;
@@ -10739,15 +10750,6 @@
                     
                     setTimeout(() => {
                         container.style.display = 'none';
-                        
-                        // Wave 6を開始
-                        this.state = GameState.PLAYING;
-                        this.gameCleared = false;
-                        
-                        if (this.waveManager) {
-                            this.waveManager.paused = false;
-                            this.waveManager.startWave(6);
-                        }
                         
                         // 400ms後にCongratulationsを表示
                         setTimeout(() => {

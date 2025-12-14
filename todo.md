@@ -38,3 +38,7 @@
 ## Critical Bug - WebGL Context Lost on Wave 6 Transition
 - [x] setEarthSpaceBackgroundメソッドのリソース管理を改善してWebGLコンテキストロストを防止
 - [x] 異次元の裂け目削除時のジオメトリとマテリアルの適切な解放
+
+## New Modifications
+- [x] エンディングムービー再生中にWave 6への遷移を実行（ムービー終了後ではなく）
+- [x] 爆弾の残弾表示をSHIELDメーターの上に移動

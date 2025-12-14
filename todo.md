@@ -91,3 +91,12 @@
 ## Player Ship Wing Design Improvement
 - [x] ウィングをお尻まで伸ばして三角形の底辺のようなデザインに
 - [x] 三つの噴出口のエフェクトをより明確に（左右移動時に青白い炎がはっきり見える）
+
+## Critical - playEndingMovie is not a function
+- [x] playEndingMovieメソッドをWaveManagerからGameクラスに移動
+- [x] WaveManagerからGameクラスのplayEndingMovieを呼び出すように修正
+- [x] ending movieが正常に再生されることを確認
+
+## Player Ship Design Final Improvement
+- [x] 機体デザインを三角形で丸みと膝らみを帯びたデザインに変更
+- [x] 三つの噴出口ジェットエフェクトを見えるように改善（サイズを3倍、強度を2-3倍に強化）

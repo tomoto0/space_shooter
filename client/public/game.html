@@ -2604,13 +2604,19 @@
                     emissiveIntensity: 0.15 // 発光強度を7.5倍に強化
                 });
                 
-                // Main body - ステルス戦闘機風の三角形胴体
-                const bodyGeometry = new THREE.ConeGeometry(1.1, 5.0, 3);
+                // Main body - 丸みと膝らみを帯びた三角形胴体
+                const bodyGeometry = new THREE.SphereGeometry(1.2, 32, 32);
                 const body = new THREE.Mesh(bodyGeometry, whiteMaterial);
-                body.rotation.x = Math.PI / 2;
-                body.rotation.y = Math.PI;
-                body.position.z = 0.5;
+                body.scale.set(0.9, 0.6, 2.2);  // 前後に伸ばして流線形に
+                body.position.z = 0.3;
                 this.mesh.add(body);
+                
+                // 前方の尖ったノーズ
+                const noseGeometry = new THREE.ConeGeometry(0.5, 1.5, 32);
+                const nose = new THREE.Mesh(noseGeometry, whiteMaterial);
+                nose.rotation.x = -Math.PI / 2;
+                nose.position.z = -2.0;
+                this.mesh.add(nose);
 
                 // Cockpit - 前方のコックピット
                 const cockpitGeometry = new THREE.SphereGeometry(0.4, 16, 16);
@@ -2628,32 +2634,32 @@
                 cockpit.position.set(0, 0.2, -1.5);
                 this.mesh.add(cockpit);
 
-                // ステルス戦闘機風の三角ウィング - お尻まで伸びる三角形の底辺
+                // 丸みを帯びた三角ウィング - お尻まで伸びる流線形
                 const wingShape = new THREE.Shape();
-                wingShape.moveTo(0, 0);         // 先端（機首側）
-                wingShape.lineTo(4.5, 0);       // 外側の先端
-                wingShape.lineTo(2.2, 4.0);     // お尻側の外側
-                wingShape.lineTo(0, 3.5);       // お尻側の内側
-                wingShape.lineTo(0, 0);         // 先端に戻る
+                wingShape.moveTo(0, -1.5);      // 先端（機首側）
+                wingShape.quadraticCurveTo(5.0, -0.5, 5.5, 0.5);  // 外側の先端（曲線）
+                wingShape.quadraticCurveTo(3.5, 2.5, 0.8, 2.8);   // お尻側の外側（曲線）
+                wingShape.lineTo(0, 2.5);       // お尻側の内側
+                wingShape.lineTo(0, -1.5);      // 先端に戻る
                 
                 const wingGeometry = new THREE.ExtrudeGeometry(wingShape, {
-                    depth: 0.12,
+                    depth: 0.25,              // 厚みを持たせる
                     bevelEnabled: true,
-                    bevelThickness: 0.03,
-                    bevelSize: 0.03,
-                    bevelSegments: 3
+                    bevelThickness: 0.08,     // 丸みを強化
+                    bevelSize: 0.08,
+                    bevelSegments: 5          // 滑らかな丸み
                 });
                 
                 // 左ウィング
                 const leftWing = new THREE.Mesh(wingGeometry, whiteMaterial);
-                leftWing.position.set(-0.6, -0.08, 0.2);
+                leftWing.position.set(-0.9, -0.15, 0.0);
                 leftWing.rotation.x = Math.PI / 2;
                 leftWing.rotation.z = Math.PI;
                 this.mesh.add(leftWing);
                 
                 // 右ウィング（左ウィングをミラー）
                 const rightWing = new THREE.Mesh(wingGeometry, whiteMaterial);
-                rightWing.position.set(0.6, -0.08, 0.2);
+                rightWing.position.set(0.9, -0.15, 0.0);
                 rightWing.rotation.x = Math.PI / 2;
                 rightWing.scale.x = -1;
                 this.mesh.add(rightWing);
@@ -2785,7 +2791,7 @@
             }
 
             createEngineEffects() {
-                // Engine glow lights
+                // Engine glow lights - サイズを大幅に強化
                 const glowPositions = [
                     { x: -1.2, y: -0.15, z: 1.8 },  // 左エンジン
                     { x: 0, y: -0.1, z: 2.1 },      // 中央エンジン
@@ -2793,8 +2799,8 @@
                 ];
 
                 glowPositions.forEach(pos => {
-                    // Glow sprite
-                    const glowGeometry = new THREE.PlaneGeometry(1.2, 1.2);
+                    // Glow sprite - サイズを3倍に
+                    const glowGeometry = new THREE.PlaneGeometry(3.6, 3.6);
                     const glowMaterial = new THREE.ShaderMaterial({
                         uniforms: {
                             time: { value: 0 },
@@ -2821,14 +2827,14 @@
                                 // Flickering effect
                                 float flicker = 0.9 + 0.1 * sin(time * 20.0) * sin(time * 13.0);
                                 
-                                // Core glow
-                                float glow = exp(-dist * 4.0) * intensity * flicker;
+                                // Core glow - 強度を2倍に
+                                float glow = exp(-dist * 3.0) * intensity * flicker * 2.0;
                                 
-                                // Outer halo
-                                float halo = exp(-dist * 2.0) * 0.3 * intensity;
+                                // Outer halo - 強度を3倍に
+                                float halo = exp(-dist * 1.5) * 0.9 * intensity;
                                 
-                                vec3 finalColor = color * (glow + halo);
-                                float alpha = glow + halo * 0.5;
+                                vec3 finalColor = color * (glow + halo) * 1.5;
+                                float alpha = (glow + halo * 0.8) * 1.2;
                                 
                                 gl_FragColor = vec4(finalColor, alpha);
                             }
@@ -10725,90 +10731,7 @@
                 }, 3000);
             }
             
-            playEndingMovie() {
-                const container = document.getElementById('ending-movie-container');
-                const video = document.getElementById('ending-video');
-                
-                // エンディングムービー再生前に自動的に「中断」ボタンを押す
-                if (this.state === GameState.PLAYING) {
-                    this.pauseGame();
-                }
-                
-                // ムービー再生中フラグを設定（最も確実な停止方法）
-                this.isMoviePlaying = true;
-                
-                // ゲーム状態をGAME_OVERに変更して更新ループを停止させる
-                // (animateメソッド内でこの状態かつ動画表示中の場合は更新をスキップする処理が入っている)
-                this.state = GameState.GAME_OVER;
 
-                // BGMを停止
-                if (this.audioManager) {
-                    this.audioManager.stopBGM();
-                    // エンディングムービー再生中はすべてのゲーム音をオフにする
-                    this.savedMasterVolume = this.audioManager.masterVolume;
-                    this.savedSfxVolume = this.audioManager.sfxVolume;
-                    this.audioManager.setMasterVolume(0);
-                    if (this.audioManager.sfxGain) {
-                        this.audioManager.sfxGain.gain.value = 0;
-                    }
-                }
-                
-                // WaveManagerの更新を停止させる
-                if (this.waveManager) {
-                    this.waveManager.paused = true;
-                }
-                
-                // フェードインして表示
-                container.style.display = 'flex';
-                // ブラウザの再描画を待ってからopacityを変更してフェードインさせる
-                requestAnimationFrame(() => {
-                    container.classList.add('visible');
-                });
-                
-                video.currentTime = 0;
-                video.play().catch(e => console.error('Video play failed:', e));
-                
-                // thisの参照を保持（アロー関数内でthisが失われるのを防ぐ）
-                const waveManager = this;  // WaveManagerインスタンス
-                const game = this.gameRef;  // Gameクラスインスタンス
-                
-                // 動画終了時の処理
-                video.onended = () => {
-                    console.log('[playEndingMovie] Movie ended, starting Wave 6 transition...');
-                    waveManager.isMoviePlaying = false;
-                    container.classList.remove('visible');
-                    
-                    setTimeout(() => {
-                        console.log('[playEndingMovie] Fade out complete, hiding container...');
-                        container.style.display = 'none';
-                        
-                        // Wave 6を開始
-                        console.log('[playEndingMovie] Setting game state to PLAYING...');
-                        if (game) {
-                            game.state = GameState.PLAYING;
-                        }
-                        waveManager.gameCleared = false;
-                        console.log('[playEndingMovie] gameCleared set to false');
-                        
-                        console.log('[playEndingMovie] Checking waveManager...', waveManager);
-                        if (waveManager) {
-                            console.log('[playEndingMovie] WaveManager found, unpausing and starting Wave 6...');
-                            waveManager.paused = false;
-                            console.log('[playEndingMovie] Calling waveManager.startWave(6)...');
-                            waveManager.startWave(6);
-                            console.log('[playEndingMovie] waveManager.startWave(6) called successfully');
-                        } else {
-                            console.error('[playEndingMovie] ERROR: waveManager is null or undefined!');
-                        }
-                        
-                        // 500ms後にCongratulationsを表示
-                        setTimeout(() => {
-                            console.log('[playEndingMovie] Showing game clear announcement...');
-                            waveManager.showGameClearAnnouncement();
-                        }, 500);
-                    }, 2000);
-                };
-            }
 
             showGameClearAnnouncement() {
                 const announcement = document.getElementById('wave-announcement');
@@ -12904,6 +12827,95 @@
             quitToMenu() {
                 document.getElementById('pause-screen').classList.remove('visible');
                 this.returnToMenu();
+            }
+
+            playEndingMovie() {
+                const container = document.getElementById('ending-movie-container');
+                const video = document.getElementById('ending-video');
+                
+                // エンディングムービー再生前に自動的に「中断」ボタンを押す
+                if (this.state === GameState.PLAYING) {
+                    this.pauseGame();
+                }
+                
+                // ムービー再生中フラグを設定（最も確実な停止方法）
+                if (this.waveManager) {
+                    this.waveManager.isMoviePlaying = true;
+                }
+                
+                // ゲーム状態をGAME_OVERに変更して更新ループを停止させる
+                this.state = GameState.GAME_OVER;
+
+                // BGMを停止
+                if (this.audioManager) {
+                    this.audioManager.stopBGM();
+                    // エンディングムービー再生中はすべてのゲーム音をオフにする
+                    this.savedMasterVolume = this.audioManager.masterVolume;
+                    this.savedSfxVolume = this.audioManager.sfxVolume;
+                    this.audioManager.setMasterVolume(0);
+                    if (this.audioManager.sfxGain) {
+                        this.audioManager.sfxGain.gain.value = 0;
+                    }
+                }
+                
+                // WaveManagerの更新を停止させる
+                if (this.waveManager) {
+                    this.waveManager.paused = true;
+                }
+                
+                // フェードインして表示
+                container.style.display = 'flex';
+                // ブラウザの再描画を待ってからopacityを変更してフェードインさせる
+                requestAnimationFrame(() => {
+                    container.classList.add('visible');
+                });
+                
+                video.currentTime = 0;
+                video.play().catch(e => console.error('Video play failed:', e));
+                
+                // thisの参照を保持（アロー関数内でthisが失われるのを防ぐ）
+                const game = this;  // Gameクラスインスタンス
+                
+                // 動画終了時の処理
+                video.onended = () => {
+                    console.log('[playEndingMovie] Movie ended, starting Wave 6 transition...');
+                    if (game.waveManager) {
+                        game.waveManager.isMoviePlaying = false;
+                    }
+                    container.classList.remove('visible');
+                    
+                    setTimeout(() => {
+                        console.log('[playEndingMovie] Fade out complete, hiding container...');
+                        container.style.display = 'none';
+                        
+                        // Wave 6を開始
+                        console.log('[playEndingMovie] Setting game state to PLAYING...');
+                        game.state = GameState.PLAYING;
+                        if (game.waveManager) {
+                            game.waveManager.gameCleared = false;
+                        }
+                        console.log('[playEndingMovie] gameCleared set to false');
+                        
+                        console.log('[playEndingMovie] Checking waveManager...', game.waveManager);
+                        if (game.waveManager) {
+                            console.log('[playEndingMovie] WaveManager found, unpausing and starting Wave 6...');
+                            game.waveManager.paused = false;
+                            console.log('[playEndingMovie] Calling waveManager.startWave(6)...');
+                            game.waveManager.startWave(6);
+                            console.log('[playEndingMovie] waveManager.startWave(6) called successfully');
+                        } else {
+                            console.error('[playEndingMovie] ERROR: waveManager is null or undefined!');
+                        }
+                        
+                        // 500ms後にCongratulationsを表示
+                        setTimeout(() => {
+                            console.log('[playEndingMovie] Showing game clear announcement...');
+                            if (game.waveManager) {
+                                game.waveManager.showGameClearAnnouncement();
+                            }
+                        }, 500);
+                    }, 2000);
+                };
             }
 
             updatePlayer(deltaTime, elapsedTime) {

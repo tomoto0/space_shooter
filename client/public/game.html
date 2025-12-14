@@ -10421,6 +10421,7 @@
             }
 
             startWave(waveNumber) {
+                console.log(`[startWave] Called with waveNumber: ${waveNumber}`);
                 this.currentWave = waveNumber;
                 this.waveActive = true;
                 this.waveDuration = 0;
@@ -10428,17 +10429,25 @@
                 this.totalSpawned = 0;
                 this.wavePhase = 0;
                 this.phaseTimer = 0;
+                console.log(`[startWave] Wave ${waveNumber} initialized`);
                 
                 // ステージBGMを再生
                 if (this.audioManager) {
+                    console.log(`[startWave] Playing BGM for wave ${waveNumber}`);
                     this.audioManager.playBGM(waveNumber);
+                } else {
+                    console.error('[startWave] audioManager is null!');
                 }
                 
                 // Wave 5は異次元空間、Wave 6以降は地球背景
                 if (waveNumber === 5 && this.scene) {
+                    console.log('[startWave] Setting dimensional rift background for Wave 5');
                     this.setDimensionalRiftBackground();
                 } else if (waveNumber >= 6 && this.scene) {
+                    console.log('[startWave] Setting Earth space background for Wave 6+');
                     this.setEarthSpaceBackground();
+                } else {
+                    console.log(`[startWave] No special background for wave ${waveNumber}`);
                 }
                 
                 // Get difficulty multipliers
@@ -10765,19 +10774,28 @@
                     container.classList.remove('visible');
                     
                     setTimeout(() => {
+                        console.log('[playEndingMovie] Fade out complete, hiding container...');
                         container.style.display = 'none';
                         
                         // Wave 6を開始
+                        console.log('[playEndingMovie] Setting game state to PLAYING...');
                         this.state = GameState.PLAYING;
                         this.gameCleared = false;
+                        console.log('[playEndingMovie] gameCleared set to false');
                         
                         if (this.waveManager) {
+                            console.log('[playEndingMovie] WaveManager found, unpausing and starting Wave 6...');
                             this.waveManager.paused = false;
+                            console.log('[playEndingMovie] Calling waveManager.startWave(6)...');
                             this.waveManager.startWave(6);
+                            console.log('[playEndingMovie] waveManager.startWave(6) called successfully');
+                        } else {
+                            console.error('[playEndingMovie] ERROR: waveManager is null or undefined!');
                         }
                         
                         // 500ms後にCongratulationsを表示
                         setTimeout(() => {
+                            console.log('[playEndingMovie] Showing game clear announcement...');
                             this.showGameClearAnnouncement();
                         }, 500);
                     }, 2000);

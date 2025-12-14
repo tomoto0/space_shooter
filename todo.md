@@ -63,3 +63,13 @@
 - [x] 機体デザインをステルス戦闘機風の三角形ウィングに変更
 - [x] 白っぽいメタリック（スペースシャトルのような色）に変更
 - [x] 左右移動時に噴射口から青白いジェットエフェクトを追加
+
+## Critical - Wave 6 Transition Not Executing
+- [x] Wave 6遷移がstartWaveを呼び出さない根本原因を特定（setEarthSpaceBackgroundのログが出力されない）
+- [x] playEndingMovie後のWave 6開始ロジックに詳細なデバッグログを追加
+- [x] startWaveメソッドに詳細なデバッグログを追加
+
+## Critical - Player Ship Design Not Applied
+- [x] 機体デザインのコードをファイル横断で検索（複数箇所に存在する可能性）
+- [x] 現在の黒っぽい機体デザインコードを白いメタリックに上書き
+- [x] 全ての機体作成箇所に変更を適用（ブラウザキャッシュをクリアして確認）

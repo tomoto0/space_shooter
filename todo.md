@@ -109,3 +109,8 @@
 ## Revert Player Ship Design to Two Versions Ago
 - [x] 機体デザインを二つ前のバージョン（ステルス戦闘機風の三角形ウィング）に戻す
 - [x] 三つの噴出口ジェットエフェクトを丁寧に作り込む（サイズ1.8、強度を最適化）
+
+## Critical - Player destroyed immediately after Wave 6 starts
+- [x] Wave 6開始直後にPlayer destroyed!が表示される原因を調査（healthが0のまま）
+- [x] Wave 6開始時にプレイヤーのhealthを回復して状態をリセット（maxHealthに設定）
+- [x] Wave 6が正常に開始され、プレイヤーが破壊されないように修正

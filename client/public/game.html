@@ -12890,6 +12890,16 @@
                         if (game.waveManager) {
                             console.log('[playEndingMovie] WaveManager found, unpausing and starting Wave 6...');
                             game.waveManager.paused = false;
+                            
+                            // プレイヤーのhealthを回復して状態をリセット
+                            if (game.player) {
+                                console.log('[playEndingMovie] Resetting player health to full...');
+                                game.player.health = game.player.maxHealth;
+                                game.player.invulnerable = false;
+                                game.player.invulnerableTimer = 0;
+                                console.log('[playEndingMovie] Player health reset to:', game.player.health);
+                            }
+                            
                             console.log('[playEndingMovie] Calling waveManager.startWave(6)...');
                             game.waveManager.startWave(6);
                             console.log('[playEndingMovie] waveManager.startWave(6) called successfully');

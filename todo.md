@@ -73,3 +73,12 @@
 - [x] 機体デザインのコードをファイル横断で検索（複数箇所に存在する可能性）
 - [x] 現在の黒っぽい機体デザインコードを白いメタリックに上書き
 - [x] 全ての機体作成箇所に変更を適用（ブラウザキャッシュをクリアして確認）
+
+## Critical - waveManager is null after ending movie
+- [x] playEndingMovie実行時にwaveManagerがnullになる根本原因を特定（this参照が失われる）
+- [x] waveManager参照を保持するように修正（const game = thisで保持）
+- [x] Wave 6への遷移を正常に実行
+
+## Player Ship Color Too Dark
+- [x] 機体の色をより白っぽく変更（0xf5f5f5から0xffffffに）
+- [x] emissiveIntensityを上げて発光を強化（0.02から0.15に）

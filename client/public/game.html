@@ -2597,11 +2597,11 @@
                 
                 // 白いメタリック素材（スペースシャトルのような色）
                 const whiteMaterial = new THREE.MeshStandardMaterial({
-                    color: 0xf5f5f5,
-                    metalness: 0.95,
-                    roughness: 0.05,
-                    emissive: 0xffffff,
-                    emissiveIntensity: 0.02
+                    color: 0xffffff,        // 純白に変更
+                    metalness: 0.9,         // 金属感を少し下げて明るく
+                    roughness: 0.1,         // 粗さを少し上げて光沢を調整
+                    emissive: 0xffffff,     // 発光色も純白
+                    emissiveIntensity: 0.15 // 発光強度を7.5倍に強化
                 });
                 
                 // Main body - ステルス戦闘機風の三角形胴体
@@ -10767,10 +10767,13 @@
                 video.currentTime = 0;
                 video.play().catch(e => console.error('Video play failed:', e));
                 
+                // thisの参照を保持（アロー関数内でthisが失われるのを防ぐ）
+                const game = this;
+                
                 // 動画終了時の処理
                 video.onended = () => {
                     console.log('[playEndingMovie] Movie ended, starting Wave 6 transition...');
-                    this.isMoviePlaying = false;
+                    game.isMoviePlaying = false;
                     container.classList.remove('visible');
                     
                     setTimeout(() => {
@@ -10779,15 +10782,16 @@
                         
                         // Wave 6を開始
                         console.log('[playEndingMovie] Setting game state to PLAYING...');
-                        this.state = GameState.PLAYING;
-                        this.gameCleared = false;
+                        game.state = GameState.PLAYING;
+                        game.gameCleared = false;
                         console.log('[playEndingMovie] gameCleared set to false');
                         
-                        if (this.waveManager) {
+                        console.log('[playEndingMovie] Checking waveManager...', game.waveManager);
+                        if (game.waveManager) {
                             console.log('[playEndingMovie] WaveManager found, unpausing and starting Wave 6...');
-                            this.waveManager.paused = false;
+                            game.waveManager.paused = false;
                             console.log('[playEndingMovie] Calling waveManager.startWave(6)...');
-                            this.waveManager.startWave(6);
+                            game.waveManager.startWave(6);
                             console.log('[playEndingMovie] waveManager.startWave(6) called successfully');
                         } else {
                             console.error('[playEndingMovie] ERROR: waveManager is null or undefined!');
@@ -10796,7 +10800,7 @@
                         // 500ms後にCongratulationsを表示
                         setTimeout(() => {
                             console.log('[playEndingMovie] Showing game clear announcement...');
-                            this.showGameClearAnnouncement();
+                            game.showGameClearAnnouncement();
                         }, 500);
                     }, 2000);
                 };

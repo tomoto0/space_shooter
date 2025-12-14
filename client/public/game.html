@@ -10770,10 +10770,7 @@
                     this.audioManager.stopBGM();
                 }
                 
-                // Wave 6背景を事前ロード
-                if (this.waveManager) {
-                    this.waveManager.setEarthSpaceBackground();
-                }
+                // Wave 6背景を事前ロードしない（アナウンス終了後に設定）
                 
                 text.textContent = 'CONGRATULATIONS!';
                 sub.textContent = 'YOU SAVED THE GALAXY!';
@@ -10787,19 +10784,24 @@
                     this.audioManager.playWaveStart();
                 }
                 
-                // アナウンス終了後、Wave 6へ自動遷移してゲームを開始
+                // 5秒後にWave 6へ遷移
                 setTimeout(() => {
                     announcement.classList.remove('visible');
                     text.style.color = '';
                     text.style.textShadow = '';
                     
-                    // ゲーム状態をPLAYINGに戻す
-                    this.state = GameState.PLAYING;
+                    // Wave 6背景を設定
+                    if (this.waveManager) {
+                        this.waveManager.setEarthSpaceBackground();
+                    }
                     
-                    // WaveManagerの一時停止を解除してWave 6を開始
+                    // ゲーム状態を初期化
+                    this.state = GameState.PLAYING;
+                    this.gameCleared = false;
+                    
+                    // Wave 6を開始
                     if (this.waveManager) {
                         this.waveManager.paused = false;
-                        // 組み込みのstartWaveを直接呼び出してWave 6を開始
                         this.waveManager.startWave(6);
                     }
                 }, 5000);

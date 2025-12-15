@@ -10517,6 +10517,10 @@
                 } else if (waveNumber >= 6 && this.scene) {
                     console.log('[startWave] Setting Earth space background for Wave 6+');
                     this.setEarthSpaceBackground();
+                    // 背景切り替え完了を待つ（GPU負荷を軽減）
+                    console.log('[startWave] Waiting for background transition to complete...');
+                    // 次のフレームでレンダリングを完了させる
+                    this.renderer.render(this.scene, this.camera);
                 } else {
                     console.log(`[startWave] No special background for wave ${waveNumber}`);
                 }
@@ -11362,7 +11366,7 @@
                 document.getElementById('enemy-kills').textContent = this.enemiesDestroyed;
             }
             
-            // Wave 6以降の地球背景を設定
+            // Wave 6以降の地球背景を設定（使い回し版）
             setEarthSpaceBackground() {
                 console.log('[setEarthSpaceBackground] Starting Earth background setup...');
                 
@@ -11372,28 +11376,25 @@
                     console.log('[setEarthSpaceBackground] Fog color changed to deep space black');
                 }
                 
-                // 異次元の裂け目を完全に削除
+                // 異次元の裂け目を非表示に（削除しない）
                 if (this.dimensionalRift) {
-                    console.log('[setEarthSpaceBackground] Removing dimensional rift...');
-                    try {
-                        this.scene.remove(this.dimensionalRift);
-                        this.dimensionalRift = null;
-                        console.log('[setEarthSpaceBackground] Dimensional rift removed successfully');
-                    } catch (e) {
-                        console.error('[setEarthSpaceBackground] Error removing dimensional rift:', e);
-                    }
+                    console.log('[setEarthSpaceBackground] Hiding dimensional rift...');
+                    this.dimensionalRift.visible = false;
                 }
                 
-                // 既存の地球グループを削除
-                if (this.earthGroup) {
-                    console.log('[setEarthSpaceBackground] Removing existing Earth group...');
-                    this.scene.remove(this.earthGroup);
-                    this.earthGroup = null;
+                // 地球背景が既に存在する場合は再利用
+                if (this.earthGroup && this.earthBackgroundReady) {
+                    console.log('[setEarthSpaceBackground] Reusing existing Earth background...');
+                    this.earthGroup.visible = true;
+                    if (this.stars) this.stars.visible = true;
+                    console.log('[setEarthSpaceBackground] Earth space background activated (reused)!');
+                    return;
                 }
                 
-                // 3D空間で地球と宇宙を作成
-                console.log('[setEarthSpaceBackground] Creating 3D Earth and space...');
+                // 初回のみ3D空間で地球と宇宙を作成
+                console.log('[setEarthSpaceBackground] Creating 3D Earth and space for the first time...');
                 this.create3DEarthSpace();
+                this.earthBackgroundReady = true;
                 
                 console.log('[setEarthSpaceBackground] Earth space background activated!');
             }
@@ -12354,7 +12355,9 @@
                 }
 
                 this.renderer.setSize(window.innerWidth, window.innerHeight);
-                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                // GPU負荷を軽減するためにPixelRatioを1.5に制限
+                this.renderer.setPixelRatio(Math.min(1.5, window.devicePixelRatio));
+                console.log('[initRenderer] PixelRatio set to:', Math.min(1.5, window.devicePixelRatio));
                 this.renderer.outputEncoding = THREE.sRGBEncoding;
                 this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
                 this.renderer.toneMappingExposure = 1.2;

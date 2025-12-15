@@ -185,3 +185,8 @@
 - [x] 敵・隗石のdisposeを強化（全敵クラス、Mine、BossAlienを含む）
 - [x] VFXManagerにクリーンアップメソッドを追加（MuzzleFlash、KillMarkerも強化）
 - [x] Wave切り替え時にクリーンアップを呼び出す（startWaveの最初に実行）
+
+## Fix Boss Bullet Residue Bug
+- [x] ボス撃破後にオレンジ色の弾幕（敵弾）が次のステージに残るバグを修正
+- [x] ボス撃破時に全敵弾を消去するロジックを追加
+- [x] Wave切り替え時に敵弾配列をクリアするロジックを追加

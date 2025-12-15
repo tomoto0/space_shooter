@@ -10755,6 +10755,17 @@
                     this.vfxManager.cleanup();
                 }
                 
+                // Wave切り替え時に全ての弾丸（敵弾含む）をクリーンアップ
+                if (this.projectiles && this.projectiles.length > 0) {
+                    console.log(`[startWave] Cleaning up ${this.projectiles.length} projectiles before wave transition...`);
+                    this.projectiles.forEach(p => {
+                        if (p && p.destroy) {
+                            p.destroy();
+                        }
+                    });
+                    this.projectiles = [];
+                }
+                
                 this.currentWave = waveNumber;
                 this.waveActive = true;
                 this.waveDuration = 0;
@@ -11366,6 +11377,17 @@
                                 }, i * 200);
                             }
                         }
+                        
+                        // ボス撃破時に全ての敵弾を消去
+                        console.log('[WaveManager] Boss defeated! Clearing all enemy bullets...');
+                        const enemyBullets = this.projectiles.filter(p => !p.isPlayerBullet);
+                        console.log(`[WaveManager] Destroying ${enemyBullets.length} enemy bullets`);
+                        enemyBullets.forEach(bullet => {
+                            if (bullet && bullet.destroy) {
+                                bullet.destroy();
+                            }
+                        });
+                        this.projectiles = this.projectiles.filter(p => p.isPlayerBullet && p.alive);
                         
                         // Wave 5のボスを倒したらゲームクリア
                         if (this.boss.isFinalBoss || this.currentWave === 5 || this.boss.waveNumber === 5) {

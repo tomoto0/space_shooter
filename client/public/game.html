@@ -10517,10 +10517,7 @@
                 } else if (waveNumber >= 6 && this.scene) {
                     console.log('[startWave] Setting Earth space background for Wave 6+');
                     this.setEarthSpaceBackground();
-                    // 背景切り替え完了を待つ（GPU負荷を軽減）
-                    console.log('[startWave] Waiting for background transition to complete...');
-                    // 次のフレームでレンダリングを完了させる
-                    this.renderer.render(this.scene, this.camera);
+                    console.log('[startWave] Earth background setup complete');
                 } else {
                     console.log(`[startWave] No special background for wave ${waveNumber}`);
                 }
@@ -11459,28 +11456,58 @@
                 this.scene.add(stars);
                 this.stars = stars;
                 
-                // 3. 地球を水平の帯状として作成（画面下約5分の1を埋める）
-                const earthWidth = 400;
-                const earthHeight = 80;
-                const earthGeometry = new THREE.PlaneGeometry(earthWidth, earthHeight, 128, 32);
+                // 3. 地球を画面横全体に広げて画面下約5分の1を埋める地平線として表現
+                const earthWidth = 600;  // 画面横全体を覆う幅
+                const earthHeight = 100; // 画面下約5分の1の高さ
+                const earthGeometry = new THREE.PlaneGeometry(earthWidth, earthHeight, 256, 64);
                 
-                // 地球のテクスチャを作成（青い海、緑の大地、白い雲）
+                // 地球のテクスチャを作成（青い海、緑の大地、茶色の山脈、白い雲）
                 const earthCanvas = document.createElement('canvas');
-                earthCanvas.width = 2048;
-                earthCanvas.height = 512;
+                earthCanvas.width = 4096;  // 高解像度
+                earthCanvas.height = 1024;
                 const ctx = earthCanvas.getContext('2d');
                 
-                // 海の青（深い青のグラデーション）
+                // 海の青（美しい青い地球のグラデーション）
                 const gradient = ctx.createLinearGradient(0, 0, 0, earthCanvas.height);
-                gradient.addColorStop(0, '#0a2f5f');
-                gradient.addColorStop(0.5, '#1a5f9f');
-                gradient.addColorStop(1, '#0a3f7f');
+                gradient.addColorStop(0, '#0a4080');   // 上部: 深い青
+                gradient.addColorStop(0.3, '#1a6faf'); // 中間: 明るい青
+                gradient.addColorStop(0.6, '#2080c0'); // 中間: シアン
+                gradient.addColorStop(1, '#0a5090');   // 下部: 深い青
                 ctx.fillStyle = gradient;
                 ctx.fillRect(0, 0, earthCanvas.width, earthCanvas.height);
                 
-                // 大陸を描画（緑の大地）
-                ctx.fillStyle = '#2d6b3d';
-                for (let i = 0; i < 60; i++) {
+                // 大陸を描画（緑の大地）- より大きく、より多く
+                const landColors = ['#2d6b3d', '#3d7b4d', '#4d8b5d', '#1d5b2d'];
+                for (let i = 0; i < 100; i++) {
+                    ctx.fillStyle = landColors[Math.floor(Math.random() * landColors.length)];
+                    const x = Math.random() * earthCanvas.width;
+                    const y = Math.random() * earthCanvas.height;
+                    const w = Math.random() * 400 + 200;
+                    const h = Math.random() * 250 + 150;
+                    
+                    ctx.beginPath();
+                    ctx.ellipse(x, y, w, h, Math.random() * Math.PI, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                // 山脈や砂漠（茶色）- よりリアルな表現
+                const mountainColors = ['#8b7355', '#9b8365', '#7b6345', '#6b5335'];
+                for (let i = 0; i < 50; i++) {
+                    ctx.fillStyle = mountainColors[Math.floor(Math.random() * mountainColors.length)];
+                    const x = Math.random() * earthCanvas.width;
+                    const y = Math.random() * earthCanvas.height;
+                    const w = Math.random() * 200 + 100;
+                    const h = Math.random() * 150 + 80;
+                    
+                    ctx.beginPath();
+                    ctx.ellipse(x, y, w, h, Math.random() * Math.PI, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                // 白い雲を追加（よりリアルな雲）
+                for (let i = 0; i < 150; i++) {
+                    const opacity = 0.3 + Math.random() * 0.4;
+                    ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
                     const x = Math.random() * earthCanvas.width;
                     const y = Math.random() * earthCanvas.height;
                     const w = Math.random() * 250 + 120;
@@ -11491,47 +11518,22 @@
                     ctx.fill();
                 }
                 
-                // 山脈や砂漠（茶色）
-                ctx.fillStyle = '#8b7355';
-                for (let i = 0; i < 25; i++) {
-                    const x = Math.random() * earthCanvas.width;
-                    const y = Math.random() * earthCanvas.height;
-                    const w = Math.random() * 120 + 60;
-                    const h = Math.random() * 80 + 50;
-                    
-                    ctx.beginPath();
-                    ctx.ellipse(x, y, w, h, Math.random() * Math.PI, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-                
-                // 白い雲を追加
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-                for (let i = 0; i < 80; i++) {
-                    const x = Math.random() * earthCanvas.width;
-                    const y = Math.random() * earthCanvas.height;
-                    const w = Math.random() * 150 + 80;
-                    const h = Math.random() * 100 + 60;
-                    
-                    ctx.beginPath();
-                    ctx.ellipse(x, y, w, h, Math.random() * Math.PI, 0, Math.PI * 2);
-                    ctx.fill();
-                }
-                
                 const earthTexture = new THREE.CanvasTexture(earthCanvas);
                 earthTexture.wrapS = THREE.RepeatWrapping;
-                earthTexture.repeat.x = 2;
+                earthTexture.wrapT = THREE.ClampToEdgeWrapping;
+                earthTexture.repeat.x = 3;  // 横に繰り返して広げる
                 
                 const earthMaterial = new THREE.MeshPhongMaterial({
                     map: earthTexture,
-                    shininess: 15,
-                    specular: 0x333333,
+                    shininess: 20,
+                    specular: 0x444444,
                     side: THREE.DoubleSide
                 });
                 
                 const earth = new THREE.Mesh(earthGeometry, earthMaterial);
-                // 地球を画面下部に水平に配置
-                earth.position.set(0, -35, -150);
-                earth.rotation.x = Math.PI * 0.15;
+                // 地球を画面下部に水平に配置（画面下約5分の1を埋める）
+                earth.position.set(0, -42, -120);
+                earth.rotation.x = Math.PI * 0.1;  // 少し傾けて地平線のように
                 this.earthGroup.add(earth);
                 this.earth = earth;
                 

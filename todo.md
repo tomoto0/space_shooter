@@ -164,3 +164,8 @@
 - [x] Earth背景を事前に作成して使い回すロジックを実装（disposeしない、visibleで制御）
 - [x] 背景切り替え完了待機ロジックを導入（次のフレームでレンダリングを完了）
 - [x] PixelRatio制限を追加してGPU負荷を軽減（Math.min(1.5, window.devicePixelRatio)）
+
+## Fix Wave 6 Background Error and Earth Design
+- [x] renderer.renderエラーを修正（不要なコードを削除）
+- [x] 地球を画面横全体に広げて画面下約5分の1を埋める地平線として表現（幅600、高さ100）
+- [x] 青い海、緑の大地、茶色の山脈、白い雲を美しく表現（4096x1024の高解像度テクスチャ）

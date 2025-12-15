@@ -14035,6 +14035,16 @@
                                 console.log('[playEndingMovie] Player health reset to:', game.player.health);
                             }
                             
+                            // オーディオボリュームを復元（エンディングムービー中に0にしたのを元に戻す）
+                            if (game.audioManager) {
+                                console.log('[playEndingMovie] Restoring audio volume...');
+                                game.audioManager.setMasterVolume(game.savedMasterVolume || 0.5);
+                                if (game.audioManager.sfxGain) {
+                                    game.audioManager.sfxGain.gain.value = (game.savedSfxVolume || 0.7) * (game.savedMasterVolume || 0.5);
+                                }
+                                console.log('[playEndingMovie] Audio volume restored');
+                            }
+                            
                             console.log('[playEndingMovie] Calling waveManager.startWave(6)...');
                             game.waveManager.startWave(6);
                             console.log('[playEndingMovie] waveManager.startWave(6) called successfully');

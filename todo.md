@@ -216,3 +216,8 @@
 - [x] EnemyAceのHPを1000から1500に増加
 - [x] Wave 6以降のBGMをダウンロード（Blazing Stars by Eric Matyas - soundimage.org）
 - [x] BGM再生ロジックを修正してWave 6以降で新しいBGMを再生
+
+## Fix Wave 6+ Audio Issue
+- [x] Wave 6以降で音が全く出ない問題を調査
+- [x] BGMファイルのパスと存在を確認
+- [x] BGM再生ロジックを確認・修正（エンディングムービー後にボリューム復元が欠落していた）

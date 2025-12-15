@@ -3964,11 +3964,11 @@
                 this.type = 'asteroid';
                 this.highSpeed = highSpeed;
                 
-                // Size configurations
+                // Size configurations - スピードを1.5倍に引き上げ
                 const sizeConfig = {
-                    small: { radius: 1.5, health: 15, score: 50, speed: 15 },
-                    medium: { radius: 3, health: 40, score: 100, speed: 10 },
-                    large: { radius: 5, health: 80, score: 200, speed: 5 }
+                    small: { radius: 1.5, health: 15, score: 50, speed: 22.5 },   // 15 * 1.5 = 22.5
+                    medium: { radius: 3, health: 40, score: 100, speed: 15 },     // 10 * 1.5 = 15
+                    large: { radius: 5, health: 80, score: 200, speed: 7.5 }      // 5 * 1.5 = 7.5
                 };
                 
                 const config = sizeConfig[size];
@@ -7024,6 +7024,7 @@
                 // 主眼からビーム弾
                 const eyePos = this.position.clone();
                 eyePos.z += 14;
+                const dmgMult = this.damageMultiplier || 1;
                 
                 if (this.player) {
                     const dir = new THREE.Vector3().subVectors(this.player.position, eyePos).normalize();
@@ -7035,7 +7036,7 @@
                         spreadDir.normalize();
                         
                         const proj = new Projectile(this.scene, eyePos.clone(), spreadDir, false);
-                        proj.damage = 15;
+                        proj.damage = Math.round(15 * dmgMult);
                         proj.speed = 45;
                         projectiles.push(proj);
                     }
@@ -7050,15 +7051,16 @@
                     if (this.player) {
                         const dir = new THREE.Vector3().subVectors(this.player.position, eyeWorldPos).normalize();
                         const proj = new Projectile(this.scene, eyeWorldPos, dir, false);
-                        proj.damage = 10;
+                        proj.damage = Math.round(10 * dmgMult);
                         proj.speed = 50;
                         projectiles.push(proj);
                     }
                 }
             }
             
-            // 特殊攻撃：触手薙ぎ払い
+            // 特殊攻撃：触手薪ぎ払い
             tentacleSwipe(projectiles) {
+                const dmgMult = this.damageMultiplier || 1;
                 // 全触手から放射状に弾を発射
                 this.tentacles.forEach((tentacle, i) => {
                     const angle = tentacle.userData.angle;
@@ -7075,7 +7077,7 @@
                         ).normalize();
                         
                         const proj = new Projectile(this.scene, tipPos.clone(), dir, false);
-                        proj.damage = 12;
+                        proj.damage = Math.round(12 * dmgMult);
                         proj.speed = 35;
                         projectiles.push(proj);
                     }
@@ -7472,6 +7474,7 @@
             }
             
             attack(projectiles) {
+                const dmgMult = this.damageMultiplier || 1;
                 // 両頭から炎弾
                 this.heads.forEach((head, idx) => {
                     const headWorldPos = new THREE.Vector3();
@@ -7490,7 +7493,7 @@
                             spreadDir.normalize();
                             
                             const proj = new Projectile(this.scene, headWorldPos.clone(), spreadDir, false);
-                            proj.damage = 12;
+                            proj.damage = Math.round(12 * dmgMult);
                             proj.speed = 50;
                             projectiles.push(proj);
                         }
@@ -7500,6 +7503,7 @@
             
             // 特殊攻撃：毒液噴射（尾から）
             poisonBreath(projectiles) {
+                const dmgMult = this.damageMultiplier || 1;
                 const tailPos = this.position.clone();
                 tailPos.z -= this.bodySegments.length * 2.5 + 10;
                 
@@ -7513,7 +7517,7 @@
                     ).normalize();
                     
                     const proj = new Projectile(this.scene, tailPos.clone(), dir, false);
-                    proj.damage = 15;
+                    proj.damage = Math.round(15 * dmgMult);
                     proj.speed = 35;
                     projectiles.push(proj);
                 }
@@ -7897,6 +7901,7 @@
             }
             
             attack(projectiles) {
+                const dmgMult = this.damageMultiplier || 1;
                 // 目からビーム
                 this.eyes.forEach((eye, i) => {
                     const eyeWorldPos = new THREE.Vector3();
@@ -7911,7 +7916,7 @@
                             spreadDir.normalize();
                             
                             const proj = new Projectile(this.scene, eyeWorldPos, spreadDir, false);
-                            proj.damage = 12;
+                            proj.damage = Math.round(12 * dmgMult);
                             proj.speed = 45;
                             projectiles.push(proj);
                         }
@@ -7919,8 +7924,9 @@
                 });
             }
             
-            // 特殊攻撃：触手薙ぎ払い
+            // 特殊攻撃：触手薪ぎ払い
             tentacleSweep(projectiles) {
+                const dmgMult = this.damageMultiplier || 1;
                 // 全触手の先端から放射状に弾を発射
                 this.tentacles.forEach((tentacle, i) => {
                     const tipSeg = tentacle.children[tentacle.children.length - 1];
@@ -7937,7 +7943,7 @@
                         ).normalize();
                         
                         const proj = new Projectile(this.scene, tipWorldPos, dir, false);
-                        proj.damage = 10;
+                        proj.damage = Math.round(10 * dmgMult);
                         proj.speed = 40;
                         projectiles.push(proj);
                     }
@@ -8349,6 +8355,7 @@
             }
             
             attack(projectiles) {
+                const dmgMult = this.damageMultiplier || 1;
                 const pattern = Math.floor(Math.random() * 4);
                 
                 if (pattern === 0) {
@@ -8362,7 +8369,7 @@
                         ).normalize();
                         
                         const proj = new Projectile(this.scene, this.position.clone(), dir, false);
-                        proj.damage = 12;
+                        proj.damage = Math.round(12 * dmgMult);
                         proj.speed = 55;
                         projectiles.push(proj);
                     }
@@ -8377,7 +8384,7 @@
                                     .normalize();
                                 
                                 const proj = new Projectile(this.scene, this.position.clone(), dir, false);
-                                proj.damage = 12;
+                                proj.damage = Math.round(12 * dmgMult);
                                 proj.speed = 60;
                                 projectiles.push(proj);
                             }, i * 150);
@@ -8397,7 +8404,7 @@
                         ).normalize();
                         
                         const proj = new Projectile(this.scene, stingerPos.clone(), dir, false);
-                        proj.damage = 15;
+                        proj.damage = Math.round(15 * dmgMult);
                         proj.speed = 45;
                         projectiles.push(proj);
                     }
@@ -8412,15 +8419,16 @@
                         ).normalize();
                         
                         const proj = new Projectile(this.scene, this.position.clone(), dir, false);
-                        proj.damage = 8;
+                        proj.damage = Math.round(8 * dmgMult);
                         proj.speed = 40;
                         projectiles.push(proj);
                     }
                 }
             }
             
-            // 特殊攻撃：鎌の薙ぎ払い
+            // 特殊攻撃：鎌の薪ぎ払い
             scytheAttack(projectiles) {
+                const dmgMult = this.damageMultiplier || 1;
                 // 両顎から弧を描くように弾を発射
                 this.jaws.forEach((jaw, ji) => {
                     const jawWorldPos = new THREE.Vector3();
@@ -8435,7 +8443,7 @@
                         ).normalize();
                         
                         const proj = new Projectile(this.scene, jawWorldPos.clone(), dir, false);
-                        proj.damage = 18;
+                        proj.damage = Math.round(18 * dmgMult);
                         proj.speed = 50;
                         projectiles.push(proj);
                     }
@@ -9113,6 +9121,7 @@
             }
             
             attack(projectiles) {
+                const dmgMult = this.damageMultiplier || 1;
                 const patterns = this.rageMode ? 6 : this.phase + 2;
                 const pattern = Math.floor(Math.random() * patterns);
                 
@@ -9130,7 +9139,7 @@
                             ).normalize();
                             
                             const proj = new Projectile(this.scene, eyePos.clone(), dir, false);
-                            proj.damage = 10;
+                            proj.damage = Math.round(10 * dmgMult);
                             proj.speed = 55;
                             projectiles.push(proj);
                         }
@@ -9148,7 +9157,7 @@
                             ).normalize();
                             
                             const proj = new Projectile(this.scene, this.position.clone(), dir, false);
-                            proj.damage = 12;
+                            proj.damage = Math.round(12 * dmgMult);
                             proj.speed = 60;
                             projectiles.push(proj);
                         }
@@ -9171,7 +9180,7 @@
                                 setTimeout(() => {
                                     if (!this.alive) return;
                                     const proj = new Projectile(this.scene, tentacleEnd.clone(), dir.clone(), false);
-                                    proj.damage = 15;
+                                    proj.damage = Math.round(15 * dmgMult);
                                     proj.speed = 70;
                                     projectiles.push(proj);
                                 }, j * 100);
@@ -9195,7 +9204,7 @@
                                 1
                             ).normalize();
                             const proj = new Projectile(this.scene, startPos, dir, false);
-                            proj.damage = 10;
+                            proj.damage = Math.round(10 * dmgMult);
                             proj.speed = 50;
                             projectiles.push(proj);
                         }
@@ -9212,7 +9221,7 @@
                                 .normalize();
                             
                             const proj = new Projectile(this.scene, hornWorldPos.clone(), dir, false);
-                            proj.damage = 18;
+                            proj.damage = Math.round(18 * dmgMult);
                             proj.speed = 80;
                             projectiles.push(proj);
                         }
@@ -9230,7 +9239,7 @@
                             ).normalize();
                             
                             const proj = new Projectile(this.scene, this.position.clone(), dir, false);
-                            proj.damage = 8;
+                            proj.damage = Math.round(8 * dmgMult);
                             proj.speed = 45 + layer * 5;
                             projectiles.push(proj);
                         }
@@ -9238,8 +9247,9 @@
                 }
             }
             
-            // 特殊攻撃：虚空触手の薙ぎ払い
+            // 特殊攻撃：虚空触手の薪ぎ払い
             voidTentacleSlash(projectiles) {
+                const dmgMult = this.damageMultiplier || 1;
                 // 全触手から弧を描くように弾を発射
                 this.voidTentacles.forEach((t, ti) => {
                     const tentacleEnd = this.position.clone();
@@ -9256,7 +9266,7 @@
                         ).normalize();
                         
                         const proj = new Projectile(this.scene, tentacleEnd.clone(), dir, false);
-                        proj.damage = 20;
+                        proj.damage = Math.round(20 * dmgMult);
                         proj.speed = 55;
                         projectiles.push(proj);
                     }
@@ -9265,6 +9275,7 @@
             
             // 特殊攻撃：次元核ビーム
             dimensionCoreBeam(projectiles) {
+                const dmgMult = this.damageMultiplier || 1;
                 // 次元核から収束するビーム
                 if (this.player) {
                     const targetDir = new THREE.Vector3()
@@ -9284,7 +9295,7 @@
                                 const dir = targetDir.clone().add(spread).normalize();
                                 
                                 const proj = new Projectile(this.scene, this.position.clone(), dir, false);
-                                proj.damage = 25;
+                                proj.damage = Math.round(25 * dmgMult);
                                 proj.speed = 90;
                                 projectiles.push(proj);
                             }, ci * 50 + i * 30);
@@ -10754,6 +10765,12 @@
                 // 難易度をボスに適用
                 if (this.boss) {
                     this.applyDifficultyToEnemy(this.boss);
+                    
+                    // Wave 6以降のボスは弾幕威力を1.5倍に引き上げ
+                    if (waveNumber >= 6) {
+                        this.boss.damageMultiplier = 1.5;
+                        console.log(`[spawnBoss] Wave ${waveNumber} boss damage multiplier set to 1.5x`);
+                    }
                 }
                 
                 // Wave 6以降はボスのHPを増加
@@ -11363,9 +11380,9 @@
                 document.getElementById('enemy-kills').textContent = this.enemiesDestroyed;
             }
             
-            // Wave 6以降の地球背景を設定（使い回し版）
+            // Wave 6以降の宇宙背景を設定（星空のみ）
             setEarthSpaceBackground() {
-                console.log('[setEarthSpaceBackground] Starting Earth background setup...');
+                console.log('[setEarthSpaceBackground] Starting space background setup (stars only)...');
                 
                 // フォグを深い宇宙の黒に変更
                 if (this.scene.fog) {
@@ -11379,21 +11396,20 @@
                     this.dimensionalRift.visible = false;
                 }
                 
-                // 地球背景が既に存在する場合は再利用
-                if (this.earthGroup && this.earthBackgroundReady) {
-                    console.log('[setEarthSpaceBackground] Reusing existing Earth background...');
-                    this.earthGroup.visible = true;
+                // 星空背景が既に存在する場合は再利用
+                if (this.spaceBackgroundReady) {
+                    console.log('[setEarthSpaceBackground] Reusing existing space background...');
                     if (this.stars) this.stars.visible = true;
-                    console.log('[setEarthSpaceBackground] Earth space background activated (reused)!');
+                    console.log('[setEarthSpaceBackground] Space background activated (reused)!');
                     return;
                 }
                 
-                // 初回のみ3D空間で地球と宇宙を作成
-                console.log('[setEarthSpaceBackground] Creating 3D Earth and space for the first time...');
-                this.create3DEarthSpace();
-                this.earthBackgroundReady = true;
+                // 初回のみ星空を作成（地球は作成しない）
+                console.log('[setEarthSpaceBackground] Creating space background (stars only)...');
+                this.createSpaceBackground();
+                this.spaceBackgroundReady = true;
                 
-                console.log('[setEarthSpaceBackground] Earth space background activated!');
+                console.log('[setEarthSpaceBackground] Space background activated!');
             }
             
             // 3D空間で地球と宇宙を作成
@@ -11550,6 +11566,66 @@
                 
                 this.scene.add(this.earthGroup);
                 console.log('[create3DEarthSpace] Earth and space scene created successfully');
+            }
+            
+            // 星空のみを作成（地球なし）
+            createSpaceBackground() {
+                console.log('[createSpaceBackground] Creating space background (stars only)...');
+                
+                // 1. 宇宙空間の背景（深い黒）
+                const spaceGeometry = new THREE.SphereGeometry(500, 32, 32);
+                const spaceMaterial = new THREE.MeshBasicMaterial({
+                    color: 0x000008,
+                    side: THREE.BackSide
+                });
+                const spaceSphere = new THREE.Mesh(spaceGeometry, spaceMaterial);
+                this.scene.add(spaceSphere);
+                
+                // 2. 星をまばらに配置（瞬く星）
+                const starGeometry = new THREE.BufferGeometry();
+                const starCount = 1500;
+                const starPositions = new Float32Array(starCount * 3);
+                const starColors = new Float32Array(starCount * 3);
+                const starSizes = new Float32Array(starCount);
+                
+                for (let i = 0; i < starCount; i++) {
+                    const i3 = i * 3;
+                    // 星を球面上に配置
+                    const theta = Math.random() * Math.PI * 2;
+                    const phi = Math.acos(2 * Math.random() - 1);
+                    const radius = 400 + Math.random() * 80;
+                    
+                    starPositions[i3] = radius * Math.sin(phi) * Math.cos(theta);
+                    starPositions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+                    starPositions[i3 + 2] = radius * Math.cos(phi);
+                    
+                    // 白っぽい星の色
+                    const brightness = 0.8 + Math.random() * 0.2;
+                    starColors[i3] = brightness;
+                    starColors[i3 + 1] = brightness;
+                    starColors[i3 + 2] = brightness;
+                    
+                    // 星のサイズ
+                    starSizes[i] = Math.random() * 2.5 + 0.5;
+                }
+                
+                starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+                starGeometry.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
+                starGeometry.setAttribute('size', new THREE.BufferAttribute(starSizes, 1));
+                
+                const starMaterial = new THREE.PointsMaterial({
+                    size: 2.0,
+                    vertexColors: true,
+                    transparent: true,
+                    opacity: 0.9,
+                    sizeAttenuation: true
+                });
+                
+                const stars = new THREE.Points(starGeometry, starMaterial);
+                this.scene.add(stars);
+                this.stars = stars;
+                
+                console.log('[createSpaceBackground] Space background created successfully');
             }
             
             // Wave 5以降の異次元空間背景を設定

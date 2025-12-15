@@ -190,3 +190,8 @@
 - [x] ボス撃破後にオレンジ色の弾幕（敵弾）が次のステージに残るバグを修正
 - [x] ボス撃破時に全敵弾を消去するロジックを追加
 - [x] Wave切り替え時に敵弾配列をクリアするロジックを追加
+
+## Fix Remaining Boss Bullet Residue and Null Errors
+- [x] ボス撃破後にまだ２７個の弾丸が残る問題を調査（エンディングムービー再生中に新たに生成される弾丸）
+- [x] playEndingMovie内でも敵弾を消去するロジックを追加
+- [x] Cannot read properties of null (reading 'children')エラーを修正（4454行目、4297行目）

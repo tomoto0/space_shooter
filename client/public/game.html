@@ -4088,13 +4088,15 @@
             takeDamage(amount) {
                 this.health -= amount;
                 
-                // Flash effect
-                if (this.mesh.children[0]) {
+                // Flash effect - meshがnullでないことを確認
+                if (this.mesh && this.mesh.children && this.mesh.children[0]) {
                     const rock = this.mesh.children[0];
                     rock.material.emissive.setHex(0xff6600);
                     rock.material.emissiveIntensity = 0.5;
                     setTimeout(() => {
-                        rock.material.emissiveIntensity = 0;
+                        if (rock && rock.material) {
+                            rock.material.emissiveIntensity = 0;
+                        }
                     }, 100);
                 }
                 
@@ -4278,12 +4280,13 @@
             takeDamage(amount) {
                 this.health -= amount;
                 
-                // Flash effect
-                if (this.mesh.children[0]) {
+                // Flash effect - meshがnullでないことを確認
+                if (this.mesh && this.mesh.children && this.mesh.children[0]) {
                     this.mesh.children[0].material.emissiveIntensity = 1;
+                    const meshRef = this.mesh;
                     setTimeout(() => {
-                        if (this.mesh.children[0]) {
-                            this.mesh.children[0].material.emissiveIntensity = 0.3;
+                        if (meshRef && meshRef.children && meshRef.children[0]) {
+                            meshRef.children[0].material.emissiveIntensity = 0.3;
                         }
                     }, 100);
                 }
@@ -4436,11 +4439,13 @@
             takeDamage(amount) {
                 this.health -= amount;
                 
-                if (this.mesh.children[0]) {
+                // Flash effect - meshがnullでないことを確認
+                if (this.mesh && this.mesh.children && this.mesh.children[0]) {
                     this.mesh.children[0].material.emissiveIntensity = 0.8;
+                    const meshRef = this.mesh;
                     setTimeout(() => {
-                        if (this.mesh.children[0]) {
-                            this.mesh.children[0].material.emissiveIntensity = 0.2;
+                        if (meshRef && meshRef.children && meshRef.children[0]) {
+                            meshRef.children[0].material.emissiveIntensity = 0.2;
                         }
                     }, 100);
                 }
@@ -4635,10 +4640,14 @@
 
             takeDamage(amount) {
                 this.health -= amount;
-                if (this.mesh.children[0]) {
+                // Flash effect - meshがnullでないことを確認
+                if (this.mesh && this.mesh.children && this.mesh.children[0]) {
                     this.mesh.children[0].material.emissiveIntensity = 1;
+                    const meshRef = this.mesh;
                     setTimeout(() => {
-                        if (this.mesh.children[0]) this.mesh.children[0].material.emissiveIntensity = 0.4;
+                        if (meshRef && meshRef.children && meshRef.children[0]) {
+                            meshRef.children[0].material.emissiveIntensity = 0.4;
+                        }
                     }, 100);
                 }
                 if (this.health <= 0) { this.destroy(); return true; }
@@ -13372,6 +13381,19 @@
                 // ムービー再生中フラグを設定
                 if (this.waveManager) {
                     this.waveManager.isMoviePlaying = true;
+                    
+                    // エンディングムービー開始時に全ての敵弾を消去
+                    console.log('[playEndingMovie] Clearing all enemy bullets at movie start...');
+                    if (this.waveManager.projectiles) {
+                        const enemyBullets = this.waveManager.projectiles.filter(p => !p.isPlayerBullet);
+                        console.log(`[playEndingMovie] Destroying ${enemyBullets.length} enemy bullets`);
+                        enemyBullets.forEach(bullet => {
+                            if (bullet && bullet.destroy) {
+                                bullet.destroy();
+                            }
+                        });
+                        this.waveManager.projectiles = this.waveManager.projectiles.filter(p => p.isPlayerBullet && p.alive);
+                    }
                 }
                 
                 // ゲーム状態を保存してからGAME_OVERに変更（pause画面を表示しない）
@@ -13432,6 +13454,18 @@
                         if (game.waveManager) {
                             console.log('[playEndingMovie] WaveManager found, unpausing and starting Wave 6...');
                             game.waveManager.paused = false;
+                            
+                            // Wave 6開始前に全ての敵弾を再度消去（ムービー中に生成された可能性がある）
+                            console.log('[playEndingMovie] Clearing all projectiles before Wave 6...');
+                            if (game.waveManager.projectiles) {
+                                console.log(`[playEndingMovie] Destroying ${game.waveManager.projectiles.length} projectiles`);
+                                game.waveManager.projectiles.forEach(p => {
+                                    if (p && p.destroy) {
+                                        p.destroy();
+                                    }
+                                });
+                                game.waveManager.projectiles = [];
+                            }
                             
                             // プレイヤーのhealthを回復して状態をリセット
                             if (game.player) {

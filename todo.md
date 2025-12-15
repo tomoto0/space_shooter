@@ -195,3 +195,9 @@
 - [x] ボス撃破後にまだ２７個の弾丸が残る問題を調査（エンディングムービー再生中に新たに生成される弾丸）
 - [x] playEndingMovie内でも敵弾を消去するロジックを追加
 - [x] Cannot read properties of null (reading 'children')エラーを修正（4454行目、4297行目）
+
+## Fix Boss Bullet Trail Burn-in Issue
+- [x] ボスの弾幕パーティクルが背景に焼き付いて残る問題を調査
+- [x] Projectileクラスのトレイル（軌跡）エフェクトのクリーンアップを強化
+- [x] ボス撃破時とWave切り替え時にシーンから全トレイルオブジェクトを削除
+- [x] 弾丸destroy時にトレイルメッシュをシーンから確実に削除

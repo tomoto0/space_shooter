@@ -10775,6 +10775,24 @@
                     this.projectiles = [];
                 }
                 
+                // シーンから残留しているトレイルオブジェクト（Line）を完全に削除
+                if (this.scene) {
+                    console.log('[startWave] Cleaning up residual trail objects from scene...');
+                    const objectsToRemove = [];
+                    this.scene.children.forEach(child => {
+                        // Lineオブジェクト（トレイル）を検出
+                        if (child.isLine) {
+                            objectsToRemove.push(child);
+                        }
+                    });
+                    console.log(`[startWave] Found ${objectsToRemove.length} residual trail objects to remove`);
+                    objectsToRemove.forEach(obj => {
+                        this.scene.remove(obj);
+                        if (obj.geometry) obj.geometry.dispose();
+                        if (obj.material) obj.material.dispose();
+                    });
+                }
+                
                 this.currentWave = waveNumber;
                 this.waveActive = true;
                 this.waveDuration = 0;
@@ -11397,6 +11415,24 @@
                             }
                         });
                         this.projectiles = this.projectiles.filter(p => p.isPlayerBullet && p.alive);
+                        
+                        // シーンから残留しているトレイルオブジェクト（Line）を完全に削除
+                        if (this.scene) {
+                            console.log('[WaveManager] Cleaning up residual trail objects from scene after boss defeat...');
+                            const objectsToRemove = [];
+                            this.scene.children.forEach(child => {
+                                // Lineオブジェクト（トレイル）を検出
+                                if (child.isLine) {
+                                    objectsToRemove.push(child);
+                                }
+                            });
+                            console.log(`[WaveManager] Found ${objectsToRemove.length} residual trail objects to remove`);
+                            objectsToRemove.forEach(obj => {
+                                this.scene.remove(obj);
+                                if (obj.geometry) obj.geometry.dispose();
+                                if (obj.material) obj.material.dispose();
+                            });
+                        }
                         
                         // Wave 5のボスを倒したらゲームクリア
                         if (this.boss.isFinalBoss || this.currentWave === 5 || this.boss.waveNumber === 5) {
@@ -13394,6 +13430,24 @@
                         });
                         this.waveManager.projectiles = this.waveManager.projectiles.filter(p => p.isPlayerBullet && p.alive);
                     }
+                    
+                    // シーンから残留しているトレイルオブジェクト（Line）を完全に削除
+                    if (this.waveManager.scene) {
+                        console.log('[playEndingMovie] Cleaning up residual trail objects from scene at movie start...');
+                        const objectsToRemove = [];
+                        this.waveManager.scene.children.forEach(child => {
+                            // Lineオブジェクト（トレイル）を検出
+                            if (child.isLine) {
+                                objectsToRemove.push(child);
+                            }
+                        });
+                        console.log(`[playEndingMovie] Found ${objectsToRemove.length} residual trail objects to remove`);
+                        objectsToRemove.forEach(obj => {
+                            this.waveManager.scene.remove(obj);
+                            if (obj.geometry) obj.geometry.dispose();
+                            if (obj.material) obj.material.dispose();
+                        });
+                    }
                 }
                 
                 // ゲーム状態を保存してからGAME_OVERに変更（pause画面を表示しない）
@@ -13465,6 +13519,24 @@
                                     }
                                 });
                                 game.waveManager.projectiles = [];
+                            }
+                            
+                            // シーンから残留しているトレイルオブジェクト（Line）を完全に削除
+                            if (game.waveManager.scene) {
+                                console.log('[playEndingMovie] Cleaning up residual trail objects from scene...');
+                                const objectsToRemove = [];
+                                game.waveManager.scene.children.forEach(child => {
+                                    // Lineオブジェクト（トレイル）を検出
+                                    if (child.isLine) {
+                                        objectsToRemove.push(child);
+                                    }
+                                });
+                                console.log(`[playEndingMovie] Found ${objectsToRemove.length} residual trail objects to remove`);
+                                objectsToRemove.forEach(obj => {
+                                    game.waveManager.scene.remove(obj);
+                                    if (obj.geometry) obj.geometry.dispose();
+                                    if (obj.material) obj.material.dispose();
+                                });
                             }
                             
                             // プレイヤーのhealthを回復して状態をリセット

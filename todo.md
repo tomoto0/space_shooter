@@ -227,3 +227,13 @@
 - [x] プレイヤー機の前方空間で動くように制限
 - [x] 移動速度を上げて素早く近づいたり遠ざかったりするように調整
 - [x] 上下左右にランダムに動き回りミサイルを回避する動作を追加
+
+## EnemyAce Adjustments and Wave 7-10 BGM
+- [x] EnemyAceの出現場所を最奥の空間からに変更
+- [x] EnemyAceの動きに「遠方への回避行動」パターンを追加
+- [x] EnemyAceのHPを1500から2000に増加
+- [x] Wave 7用のBGMをダウンロードして設定（Light Years）
+- [x] Wave 8用のBGMをダウンロードして設定（Trouble On Mercury）
+- [x] Wave 9用のBGMをダウンロードして設定（Cold Moon）
+- [x] Wave 10用のBGMをダウンロードして設定（Steamtech Mayhem）
+- [x] EnemyAce撃破時に大きな爆発エフェクトを追加

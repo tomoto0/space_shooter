@@ -5517,7 +5517,7 @@
                 this.waveNumber = waveNumber;
                 
                 // 中ボス級の高HP
-                this.health = 1500;
+                this.health = 2000;
                 this.maxHealth = this.health;
                 this.score = 2000 + waveNumber * 200;
                 this.speed = 40 + waveNumber * 2;
@@ -5539,7 +5539,7 @@
                 this.movementPattern = 'approach';
                 this.patternTimer = 0;
                 this.patternDuration = 2;
-                this.patterns = ['approach', 'strafe', 'circle', 'zigzag', 'evasive', 'retreat'];
+                this.patterns = ['approach', 'strafe', 'circle', 'zigzag', 'evasive', 'retreat', 'farEvasion'];
                 
                 // 基本速度を上げる
                 this.baseSpeed = 55 + waveNumber * 3;
@@ -5727,6 +5727,11 @@
                     case 'retreat':
                         this.retreatTarget = 60 + Math.random() * 20;
                         break;
+                    case 'farEvasion':
+                        // 遠方への回避行動
+                        this.farEvasionPhase = Math.random() * Math.PI * 2;
+                        this.farEvasionTarget = 70 + Math.random() * 20; // 目標距離
+                        break;
                 }
             }
 
@@ -5893,6 +5898,28 @@
                             }
                             this.speed = this.baseSpeed * 1.1;
                             break;
+                            
+                        case 'farEvasion':
+                            // 遠方への回避行動（最奥まで逃げてから攻撃）
+                            this.farEvasionPhase += deltaTime * 3;
+                            if (distToPlayer < this.farEvasionTarget) {
+                                // 遠くに逃げる
+                                targetDir.set(
+                                    Math.sin(this.farEvasionPhase) * 20,
+                                    Math.cos(this.farEvasionPhase * 0.8) * 10,
+                                    -1 // 前方（遠方）に逃げる
+                                ).normalize();
+                                this.speed = this.baseSpeed * 1.8; // 高速で逃げる
+                            } else {
+                                // 十分遠くに逃げたら、遠方から攻撃しながら横移動
+                                targetDir.set(
+                                    Math.sin(this.farEvasionPhase * 1.5) * 1.5,
+                                    Math.cos(this.farEvasionPhase * 1.2) * 0.8,
+                                    Math.sin(this.farEvasionPhase * 0.3) * 0.2
+                                );
+                                this.speed = this.baseSpeed * 1.2;
+                            }
+                            break;
                     }
                 }
                 
@@ -5973,6 +6000,9 @@
             destroy() {
                 this.alive = false;
                 
+                // 大爆発エフェクトを生成（中ボス級なので大きな爆発）
+                this.createMassiveExplosion();
+                
                 // メッシュのリソース解放
                 if (this.mesh) {
                     this.mesh.traverse(child => {
@@ -5988,6 +6018,119 @@
                     this.scene.remove(this.mesh);
                     this.mesh = null;
                 }
+            }
+            
+            createMassiveExplosion() {
+                const pos = this.position.clone();
+                const scene = this.scene;
+                
+                // 複数の爆発パーティクルを生成
+                const explosionColors = [0xff6600, 0xff3300, 0xffaa00, 0xff0000, 0xffff00];
+                const particleCount = 80;
+                const particles = [];
+                
+                for (let i = 0; i < particleCount; i++) {
+                    const size = 0.5 + Math.random() * 2;
+                    const geometry = new THREE.SphereGeometry(size, 8, 8);
+                    const material = new THREE.MeshBasicMaterial({
+                        color: explosionColors[Math.floor(Math.random() * explosionColors.length)],
+                        transparent: true,
+                        opacity: 1
+                    });
+                    const particle = new THREE.Mesh(geometry, material);
+                    particle.position.copy(pos);
+                    
+                    // ランダムな方向に飛び散る
+                    const velocity = new THREE.Vector3(
+                        (Math.random() - 0.5) * 80,
+                        (Math.random() - 0.5) * 80,
+                        (Math.random() - 0.5) * 80
+                    );
+                    
+                    particle.userData = {
+                        velocity: velocity,
+                        life: 1.5 + Math.random() * 1,
+                        maxLife: 1.5 + Math.random() * 1
+                    };
+                    
+                    scene.add(particle);
+                    particles.push(particle);
+                }
+                
+                // 中心の大きな光球
+                const coreGeometry = new THREE.SphereGeometry(8, 16, 16);
+                const coreMaterial = new THREE.MeshBasicMaterial({
+                    color: 0xffffff,
+                    transparent: true,
+                    opacity: 1
+                });
+                const core = new THREE.Mesh(coreGeometry, coreMaterial);
+                core.position.copy(pos);
+                scene.add(core);
+                
+                // ショックウェーブリング
+                const ringGeometry = new THREE.RingGeometry(0.1, 2, 32);
+                const ringMaterial = new THREE.MeshBasicMaterial({
+                    color: 0xff6600,
+                    transparent: true,
+                    opacity: 0.8,
+                    side: THREE.DoubleSide
+                });
+                const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+                ring.position.copy(pos);
+                ring.rotation.x = Math.PI / 2;
+                scene.add(ring);
+                
+                // アニメーション
+                let elapsed = 0;
+                const animate = () => {
+                    elapsed += 0.016;
+                    
+                    // パーティクルの更新
+                    for (let i = particles.length - 1; i >= 0; i--) {
+                        const p = particles[i];
+                        p.position.add(p.userData.velocity.clone().multiplyScalar(0.016));
+                        p.userData.velocity.multiplyScalar(0.96); // 減速
+                        p.userData.life -= 0.016;
+                        p.material.opacity = Math.max(0, p.userData.life / p.userData.maxLife);
+                        p.scale.setScalar(1 + (1 - p.userData.life / p.userData.maxLife) * 0.5);
+                        
+                        if (p.userData.life <= 0) {
+                            scene.remove(p);
+                            p.geometry.dispose();
+                            p.material.dispose();
+                            particles.splice(i, 1);
+                        }
+                    }
+                    
+                    // 中心の光球
+                    if (core.parent) {
+                        core.scale.setScalar(1 + elapsed * 3);
+                        core.material.opacity = Math.max(0, 1 - elapsed * 0.8);
+                        if (core.material.opacity <= 0) {
+                            scene.remove(core);
+                            core.geometry.dispose();
+                            core.material.dispose();
+                        }
+                    }
+                    
+                    // ショックウェーブリング
+                    if (ring.parent) {
+                        ring.scale.setScalar(1 + elapsed * 25);
+                        ring.material.opacity = Math.max(0, 0.8 - elapsed * 0.5);
+                        if (ring.material.opacity <= 0) {
+                            scene.remove(ring);
+                            ring.geometry.dispose();
+                            ring.material.dispose();
+                        }
+                    }
+                    
+                    if (particles.length > 0 || (core.parent || ring.parent)) {
+                        requestAnimationFrame(animate);
+                    }
+                };
+                
+                animate();
             }
 
             getCollisionRadius() {
@@ -11064,7 +11207,11 @@
                     3: 'audio/bgm_wave3.mp3',
                     4: 'audio/bgm_wave4.mp3',
                     5: 'audio/bgm_wave5.mp3',
-                    6: 'audio/bgm_wave6.mp3'  // Wave 6以降用の荘厳な宇宙系BGM
+                    6: 'audio/bgm_wave6.mp3',   // Blazing Stars - 荘厳な宇宙系BGM
+                    7: 'audio/bgm_wave7.mp3',   // Light Years - 宇宙旅行
+                    8: 'audio/bgm_wave8.mp3',   // Trouble On Mercury - 緊張感
+                    9: 'audio/bgm_wave9.mp3',   // Cold Moon - 寂寥とした宇宙
+                    10: 'audio/bgm_wave10.mp3'  // Steamtech Mayhem - テクノバトル
                 };
                 
                 this.currentBGM = null;
@@ -11085,10 +11232,11 @@
                     this.initBGM();
                 }
                 
-                // Wave 6以降は全てbgm_wave6.mp3を使用
+                // Wave番号に応じたトラックを選択（Wave 10以降はWave 6-10をループ）
                 let trackWave = wave;
-                if (wave >= 6) {
-                    trackWave = 6;
+                if (wave > 10) {
+                    // Wave 11以降はWave 6-10のBGMをループ
+                    trackWave = 6 + ((wave - 6) % 5);
                 }
                 const trackUrl = this.bgmTracks[trackWave] || this.bgmTracks[1];
                 
@@ -11423,10 +11571,16 @@
                 
                 let cumulative = 0;
                 
-                // Ace (Wave 6+) - 中ボス級敵機
+                // Ace (Wave 6+) - 中ボス級敵機（最奥の空間から出現）
                 cumulative += aceChance;
                 if (roll < cumulative && waveNumber >= 6) {
-                    const enemy = new EnemyAce(this.scene, pos, this.player, waveNumber);
+                    // EnemyAceは最奥の空間から出現
+                    const acePos = new THREE.Vector3(
+                        (Math.random() - 0.5) * 50, // 左右
+                        (Math.random() - 0.5) * 25, // 上下
+                        -180 - Math.random() * 30   // 最奥の空間（通常の敵よりもっと遠く）
+                    );
+                    const enemy = new EnemyAce(this.scene, acePos, this.player, waveNumber);
                     this.applyDifficultyToEnemy(enemy);
                     this.enemies.push(enemy);
                     this.totalSpawned++;

@@ -178,3 +178,10 @@
 ## Fix Orange Particle Residue on Wave 5/6 Background Change
 - [x] オレンジ色の点々の原因を調査（異次元の裂け目のパーティクルが原因）
 - [x] 背景切り替え時のパーティクル削除ロジックを修正（異次元の裂け目を完全に削除、星の色を白に戻す）
+
+## GPU Resource Release - Fix WebGL Context Lost
+- [x] Explosionクラスのdisposeを強化（ジオメトリとマテリアルを明示的にdispose、パーティクルのメッシュを完全に解放）
+- [x] Bulletクラスのトレイルdisposeを強化（destroy()でトレイル配列をクリア）
+- [x] 敵・隗石のdisposeを強化（全敵クラス、Mine、BossAlienを含む）
+- [x] VFXManagerにクリーンアップメソッドを追加（MuzzleFlash、KillMarkerも強化）
+- [x] Wave切り替え時にクリーンアップを呼び出す（startWaveの最初に実行）

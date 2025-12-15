@@ -3545,16 +3545,26 @@
 
             destroy() {
                 this.alive = false;
+                
+                // メッシュのリソース解放
                 if (this.mesh) {
                     this.scene.remove(this.mesh);
-                    this.mesh.geometry.dispose();
-                    this.mesh.material.dispose();
+                    if (this.mesh.geometry) this.mesh.geometry.dispose();
+                    if (this.mesh.material) this.mesh.material.dispose();
+                    this.mesh = null;
                 }
+                
+                // トレイルのリソース解放
                 if (this.trail) {
                     this.scene.remove(this.trail);
-                    this.trail.geometry.dispose();
-                    this.trailMaterial.dispose();
+                    if (this.trail.geometry) this.trail.geometry.dispose();
+                    if (this.trailMaterial) this.trailMaterial.dispose();
+                    this.trail = null;
+                    this.trailMaterial = null;
                 }
+                
+                // トレイル位置配列をクリア
+                this.trailPositions = [];
             }
 
             getCollisionRadius() {
@@ -4097,8 +4107,21 @@
 
             destroy() {
                 this.alive = false;
+                
+                // メッシュのリソース解放
                 if (this.mesh) {
+                    this.mesh.traverse(child => {
+                        if (child.geometry) child.geometry.dispose();
+                        if (child.material) {
+                            if (Array.isArray(child.material)) {
+                                child.material.forEach(m => m.dispose());
+                            } else {
+                                child.material.dispose();
+                            }
+                        }
+                    });
                     this.scene.remove(this.mesh);
+                    this.mesh = null;
                 }
             }
 
@@ -4274,8 +4297,21 @@
 
             destroy() {
                 this.alive = false;
+                
+                // メッシュのリソース解放
                 if (this.mesh) {
+                    this.mesh.traverse(child => {
+                        if (child.geometry) child.geometry.dispose();
+                        if (child.material) {
+                            if (Array.isArray(child.material)) {
+                                child.material.forEach(m => m.dispose());
+                            } else {
+                                child.material.dispose();
+                            }
+                        }
+                    });
                     this.scene.remove(this.mesh);
+                    this.mesh = null;
                 }
             }
 
@@ -4418,8 +4454,21 @@
 
             destroy() {
                 this.alive = false;
+                
+                // メッシュのリソース解放
                 if (this.mesh) {
+                    this.mesh.traverse(child => {
+                        if (child.geometry) child.geometry.dispose();
+                        if (child.material) {
+                            if (Array.isArray(child.material)) {
+                                child.material.forEach(m => m.dispose());
+                            } else {
+                                child.material.dispose();
+                            }
+                        }
+                    });
                     this.scene.remove(this.mesh);
+                    this.mesh = null;
                 }
             }
 
@@ -4598,7 +4647,22 @@
 
             destroy() {
                 this.alive = false;
-                if (this.mesh) this.scene.remove(this.mesh);
+                
+                // メッシュのリソース解放
+                if (this.mesh) {
+                    this.mesh.traverse(child => {
+                        if (child.geometry) child.geometry.dispose();
+                        if (child.material) {
+                            if (Array.isArray(child.material)) {
+                                child.material.forEach(m => m.dispose());
+                            } else {
+                                child.material.dispose();
+                            }
+                        }
+                    });
+                    this.scene.remove(this.mesh);
+                    this.mesh = null;
+                }
             }
 
             getCollisionRadius() { return this.radius; }
@@ -4765,7 +4829,22 @@
 
             destroy() {
                 this.alive = false;
-                if (this.mesh) this.scene.remove(this.mesh);
+                
+                // メッシュのリソース解放
+                if (this.mesh) {
+                    this.mesh.traverse(child => {
+                        if (child.geometry) child.geometry.dispose();
+                        if (child.material) {
+                            if (Array.isArray(child.material)) {
+                                child.material.forEach(m => m.dispose());
+                            } else {
+                                child.material.dispose();
+                            }
+                        }
+                    });
+                    this.scene.remove(this.mesh);
+                    this.mesh = null;
+                }
             }
 
             getCollisionRadius() { return this.radius; }
@@ -4924,7 +5003,30 @@
 
             destroy() {
                 this.alive = false;
-                if (this.mesh) this.scene.remove(this.mesh);
+                
+                // レーザーラインのリソース解放
+                if (this.laserLine) {
+                    if (this.laserLine.geometry) this.laserLine.geometry.dispose();
+                    if (this.laserLine.material) this.laserLine.material.dispose();
+                    this.scene.remove(this.laserLine);
+                    this.laserLine = null;
+                }
+                
+                // メッシュのリソース解放
+                if (this.mesh) {
+                    this.mesh.traverse(child => {
+                        if (child.geometry) child.geometry.dispose();
+                        if (child.material) {
+                            if (Array.isArray(child.material)) {
+                                child.material.forEach(m => m.dispose());
+                            } else {
+                                child.material.dispose();
+                            }
+                        }
+                    });
+                    this.scene.remove(this.mesh);
+                    this.mesh = null;
+                }
             }
 
             getCollisionRadius() { return this.radius; }
@@ -5058,7 +5160,22 @@
 
             destroy() {
                 this.alive = false;
-                if (this.mesh) this.scene.remove(this.mesh);
+                
+                // メッシュのリソース解放
+                if (this.mesh) {
+                    this.mesh.traverse(child => {
+                        if (child.geometry) child.geometry.dispose();
+                        if (child.material) {
+                            if (Array.isArray(child.material)) {
+                                child.material.forEach(m => m.dispose());
+                            } else {
+                                child.material.dispose();
+                            }
+                        }
+                    });
+                    this.scene.remove(this.mesh);
+                    this.mesh = null;
+                }
             }
 
             getCollisionRadius() { return this.radius; }
@@ -5235,7 +5352,22 @@
 
             destroy() {
                 this.alive = false;
-                if (this.mesh) this.scene.remove(this.mesh);
+                
+                // メッシュのリソース解放
+                if (this.mesh) {
+                    this.mesh.traverse(child => {
+                        if (child.geometry) child.geometry.dispose();
+                        if (child.material) {
+                            if (Array.isArray(child.material)) {
+                                child.material.forEach(m => m.dispose());
+                            } else {
+                                child.material.dispose();
+                            }
+                        }
+                    });
+                    this.scene.remove(this.mesh);
+                    this.mesh = null;
+                }
             }
 
             getCollisionRadius() { return this.radius; }
@@ -5336,8 +5468,21 @@
 
             destroy() {
                 this.alive = false;
+                
+                // メッシュのリソース解放
                 if (this.mesh) {
+                    this.mesh.traverse(child => {
+                        if (child.geometry) child.geometry.dispose();
+                        if (child.material) {
+                            if (Array.isArray(child.material)) {
+                                child.material.forEach(m => m.dispose());
+                            } else {
+                                child.material.dispose();
+                            }
+                        }
+                    });
                     this.scene.remove(this.mesh);
+                    this.mesh = null;
                 }
             }
 
@@ -5398,8 +5543,21 @@
 
             destroy() {
                 this.alive = false;
+                
+                // メッシュのリソース解放
                 if (this.mesh) {
+                    this.mesh.traverse(child => {
+                        if (child.geometry) child.geometry.dispose();
+                        if (child.material) {
+                            if (Array.isArray(child.material)) {
+                                child.material.forEach(m => m.dispose());
+                            } else {
+                                child.material.dispose();
+                            }
+                        }
+                    });
                     this.scene.remove(this.mesh);
+                    this.mesh = null;
                 }
             }
 
@@ -9492,15 +9650,40 @@
             destroy() {
                 this.alive = false;
                 
+                // Flashのリソース解放
                 if (this.flash) {
+                    if (this.flash.geometry) this.flash.geometry.dispose();
+                    if (this.flash.material) this.flash.material.dispose();
                     this.scene.remove(this.flash);
+                    this.flash = null;
                 }
+                
+                // パーティクルメッシュのリソース解放
                 if (this.meshes) {
+                    this.meshes.traverse(child => {
+                        if (child.geometry) child.geometry.dispose();
+                        if (child.material) {
+                            if (Array.isArray(child.material)) {
+                                child.material.forEach(m => m.dispose());
+                            } else {
+                                child.material.dispose();
+                            }
+                        }
+                    });
                     this.scene.remove(this.meshes);
+                    this.meshes = null;
                 }
+                
+                // Shockwaveのリソース解放
                 if (this.shockwave) {
+                    if (this.shockwave.geometry) this.shockwave.geometry.dispose();
+                    if (this.shockwave.material) this.shockwave.material.dispose();
                     this.scene.remove(this.shockwave);
+                    this.shockwave = null;
                 }
+                
+                // パーティクル配列をクリア
+                this.particles = [];
             }
         }
 
@@ -9642,6 +9825,41 @@
             getTimeScale() {
                 return this.slowMotion;
             }
+            
+            // Wave切り替え時に全エフェクトを強制クリーンアップ
+            cleanup() {
+                console.log('[VFXManager] Cleaning up all effects...');
+                
+                // 爆発エフェクトを全て破棄
+                this.explosions.forEach(exp => {
+                    if (exp && exp.destroy) {
+                        exp.destroy();
+                    }
+                });
+                this.explosions = [];
+                
+                // マズルフラッシュを全て破棄
+                this.muzzleFlashes.forEach(flash => {
+                    if (flash && flash.destroy) {
+                        flash.destroy();
+                    }
+                });
+                this.muzzleFlashes = [];
+                
+                // キルマーカーを全て破棄
+                this.killMarkers.forEach(marker => {
+                    if (marker && marker.destroy) {
+                        marker.destroy();
+                    }
+                });
+                this.killMarkers = [];
+                
+                // スローモーションをリセット
+                this.slowMotion = 1.0;
+                this.slowMotionTarget = 1.0;
+                
+                console.log('[VFXManager] Cleanup complete');
+            }
         }
 
         // ============================================
@@ -9729,8 +9947,21 @@
 
             destroy() {
                 this.alive = false;
+                
+                // メッシュのリソース解放
                 if (this.meshes) {
+                    this.meshes.traverse(child => {
+                        if (child.geometry) child.geometry.dispose();
+                        if (child.material) {
+                            if (Array.isArray(child.material)) {
+                                child.material.forEach(m => m.dispose());
+                            } else {
+                                child.material.dispose();
+                            }
+                        }
+                    });
                     this.scene.remove(this.meshes);
+                    this.meshes = null;
                 }
             }
         }
@@ -9822,8 +10053,21 @@
 
             destroy() {
                 this.alive = false;
+                
+                // メッシュのリソース解放
                 if (this.group) {
+                    this.group.traverse(child => {
+                        if (child.geometry) child.geometry.dispose();
+                        if (child.material) {
+                            if (Array.isArray(child.material)) {
+                                child.material.forEach(m => m.dispose());
+                            } else {
+                                child.material.dispose();
+                            }
+                        }
+                    });
                     this.scene.remove(this.group);
+                    this.group = null;
                 }
             }
         }
@@ -10504,6 +10748,13 @@
 
             startWave(waveNumber) {
                 console.log(`[startWave] Called with waveNumber: ${waveNumber}`);
+                
+                // Wave切り替え時にVFXをクリーンアップ（GPUリソース解放）
+                if (this.vfxManager) {
+                    console.log('[startWave] Cleaning up VFX before wave transition...');
+                    this.vfxManager.cleanup();
+                }
+                
                 this.currentWave = waveNumber;
                 this.waveActive = true;
                 this.waveDuration = 0;

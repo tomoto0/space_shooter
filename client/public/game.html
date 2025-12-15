@@ -5517,7 +5517,7 @@
                 this.waveNumber = waveNumber;
                 
                 // 中ボス級の高HP
-                this.health = 1000;
+                this.health = 1500;
                 this.maxHealth = this.health;
                 this.score = 2000 + waveNumber * 200;
                 this.speed = 40 + waveNumber * 2;
@@ -10981,7 +10981,8 @@
                     2: 'audio/bgm_wave2.mp3',
                     3: 'audio/bgm_wave3.mp3',
                     4: 'audio/bgm_wave4.mp3',
-                    5: 'audio/bgm_wave5.mp3'
+                    5: 'audio/bgm_wave5.mp3',
+                    6: 'audio/bgm_wave6.mp3'  // Wave 6以降用の荘厳な宇宙系BGM
                 };
                 
                 this.currentBGM = null;
@@ -11002,7 +11003,12 @@
                     this.initBGM();
                 }
                 
-                const trackUrl = this.bgmTracks[wave] || this.bgmTracks[1];
+                // Wave 6以降は全てbgm_wave6.mp3を使用
+                let trackWave = wave;
+                if (wave >= 6) {
+                    trackWave = 6;
+                }
+                const trackUrl = this.bgmTracks[trackWave] || this.bgmTracks[1];
                 
                 console.log('Playing BGM for wave:', wave, trackUrl);
                 
@@ -11312,7 +11318,14 @@
                     tankChance = 0.10;
                     sniperChance = 0.10;
                     carrierChance = 0.10;
-                    aceChance = 0.05; // 中ボス級敵機（5%の確率）
+                    // EnemyAceの出現確率: Wave 6で2%, Wave 7で3%, Wave 8以降で4%
+                    if (waveNumber === 6) {
+                        aceChance = 0.02;
+                    } else if (waveNumber === 7) {
+                        aceChance = 0.03;
+                    } else {
+                        aceChance = 0.04;
+                    }
                 } else {
                     // Wave 1-5: 既存の確率
                     asteroidChance = Math.max(0.2, 0.5 - waveNumber * 0.03);

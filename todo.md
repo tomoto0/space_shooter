@@ -210,3 +210,9 @@
 - [x] EnemyAceクラスを実装（HP1000、レーザー連射、3D空間を自由に動き回る）
 - [x] 複数の動作パターンを実装（ランダム選択）
 - [x] Wave 6以降のスポーンロジックにEnemyAceを追加
+
+## Adjust EnemyAce and Add Wave 6+ BGM
+- [x] EnemyAceの出現確率を調整（Wave 6: 2%, Wave 7: 3%, Wave 8+: 4%）
+- [x] EnemyAceのHPを1000から1500に増加
+- [x] Wave 6以降のBGMをダウンロード（Blazing Stars by Eric Matyas - soundimage.org）
+- [x] BGM再生ロジックを修正してWave 6以降で新しいBGMを再生

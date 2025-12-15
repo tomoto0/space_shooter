@@ -201,3 +201,12 @@
 - [x] Projectileクラスのトレイル（軌跡）エフェクトのクリーンアップを強化
 - [x] ボス撃破時とWave切り替え時にシーンから全トレイルオブジェクトを削除
 - [x] 弾丸destroy時にトレイルメッシュをシーンから確実に削除
+
+## Bullet Mesh Cleanup Enhancement
+- [x] 弾丸のメッシュエフェクトにも同様の削除ロジックを適用
+- [x] ボス撃破時・Wave切り替え時に弾丸メッシュも確実に削除
+
+## Add EnemyAce (Mid-Boss Enemy) for Wave 6+
+- [x] EnemyAceクラスを実装（HP1000、レーザー連射、3D空間を自由に動き回る）
+- [x] 複数の動作パターンを実装（ランダム選択）
+- [x] Wave 6以降のスポーンロジックにEnemyAceを追加

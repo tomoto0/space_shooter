@@ -6139,6 +6139,707 @@
         }
 
         // ============================================
+        // Enemy Ace2 Class (中ボス級敵機2 - Wave 7以降)
+        // HP2000、遠方レーザー射撃特化、白い宇宙船デザイン
+        // 行動範囲: 遠方から中距離中心
+        // ============================================
+        class EnemyAce2 {
+            constructor(scene, position, playerRef, waveNumber = 7) {
+                this.scene = scene;
+                this.player = playerRef;
+                this.alive = true;
+                this.type = 'ace2';
+                this.waveNumber = waveNumber;
+                
+                // 中ボス級の高HP
+                this.health = 2000;
+                this.maxHealth = this.health;
+                this.score = 2500 + waveNumber * 250;
+                this.speed = 35 + waveNumber * 2;
+                this.radius = 5;
+                
+                this.position = position.clone();
+                this.velocity = new THREE.Vector3();
+                this.targetPosition = new THREE.Vector3();
+                
+                // 攻撃タイマー（遠方レーザー特化）
+                this.fireTimer = 0;
+                this.fireCooldown = 0.8; // 遅い連射だが強力
+                this.chargeTimer = 0;
+                this.isCharging = false;
+                this.chargeTime = 1.2; // チャージ時間
+                this.burstCount = 0;
+                this.burstMax = 3; // 3連射
+                this.burstCooldown = 0;
+                this.burstCooldownMax = 2.5;
+                
+                // 動作パターン（遠方から中距離中心）
+                this.movementPattern = 'snipe';
+                this.patternTimer = 0;
+                this.patternDuration = 3;
+                this.patterns = ['snipe', 'orbit', 'drift', 'reposition', 'hover'];
+                
+                // 基本速度（EnemyAceより遅い）
+                this.baseSpeed = 40 + waveNumber * 2;
+                
+                // エンジングロー用
+                this.engineGlows = [];
+                this.time = 0;
+                
+                // チャージエフェクト用
+                this.chargeEffects = [];
+                
+                this.createMesh();
+                this.createEngineEffects();
+                this.selectNewPattern();
+            }
+
+            createMesh() {
+                this.mesh = new THREE.Group();
+                
+                // Main body - 白い宇宙船デザイン（流線形）
+                const bodyGeometry = new THREE.ConeGeometry(1.0, 5, 8);
+                const bodyMaterial = new THREE.MeshStandardMaterial({
+                    color: 0xffffff, // 白
+                    metalness: 0.95,
+                    roughness: 0.1,
+                    emissive: 0xaaccff,
+                    emissiveIntensity: 0.2
+                });
+                const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+                body.rotation.x = Math.PI / 2;
+                body.position.z = 0.5;
+                this.mesh.add(body);
+                this.bodyMesh = body;
+
+                // 中央胴体（幅広の楽円形）
+                const midBodyGeometry = new THREE.SphereGeometry(1.2, 16, 16);
+                const midBodyMaterial = new THREE.MeshStandardMaterial({
+                    color: 0xf0f0ff,
+                    metalness: 0.9,
+                    roughness: 0.15,
+                    emissive: 0x8899ff,
+                    emissiveIntensity: 0.15
+                });
+                const midBody = new THREE.Mesh(midBodyGeometry, midBodyMaterial);
+                midBody.scale.set(1.5, 0.6, 1.2);
+                midBody.position.set(0, 0, 0.8);
+                this.mesh.add(midBody);
+
+                // Cockpit - 青白いコックピット
+                const cockpitGeometry = new THREE.SphereGeometry(0.6, 16, 16);
+                const cockpitMaterial = new THREE.MeshStandardMaterial({
+                    color: 0x88ccff,
+                    metalness: 0.1,
+                    roughness: 0.1,
+                    emissive: 0x4488ff,
+                    emissiveIntensity: 0.6,
+                    transparent: true,
+                    opacity: 0.85
+                });
+                const cockpit = new THREE.Mesh(cockpitGeometry, cockpitMaterial);
+                cockpit.scale.set(1, 0.5, 1.3);
+                cockpit.position.set(0, 0.4, -0.3);
+                this.mesh.add(cockpit);
+
+                // Wings - 大きな三角形の翼
+                const wingShape = new THREE.Shape();
+                wingShape.moveTo(0, 0);
+                wingShape.lineTo(5, 0);
+                wingShape.lineTo(3, 2.5);
+                wingShape.lineTo(0, 1.5);
+                wingShape.closePath();
+                
+                const wingExtrudeSettings = {
+                    steps: 1,
+                    depth: 0.15,
+                    bevelEnabled: true,
+                    bevelThickness: 0.05,
+                    bevelSize: 0.05,
+                    bevelSegments: 2
+                };
+                
+                const wingGeometry = new THREE.ExtrudeGeometry(wingShape, wingExtrudeSettings);
+                const wingMaterial = new THREE.MeshStandardMaterial({
+                    color: 0xe8e8f0,
+                    metalness: 0.85,
+                    roughness: 0.2,
+                    emissive: 0x6677aa,
+                    emissiveIntensity: 0.1
+                });
+                
+                const leftWing = new THREE.Mesh(wingGeometry, wingMaterial);
+                leftWing.position.set(-0.5, 0, 0.5);
+                leftWing.rotation.set(0, Math.PI, 0);
+                leftWing.rotation.z = 0.05;
+                this.mesh.add(leftWing);
+
+                const rightWing = new THREE.Mesh(wingGeometry, wingMaterial.clone());
+                rightWing.position.set(0.5, 0, 0.5);
+                rightWing.rotation.z = -0.05;
+                this.mesh.add(rightWing);
+
+                // Wing tips with blue lights
+                const wingTipGeometry = new THREE.SphereGeometry(0.2, 8, 8);
+                const wingTipMaterial = new THREE.MeshBasicMaterial({
+                    color: 0x00aaff,
+                    transparent: true,
+                    opacity: 0.9
+                });
+
+                const leftTip = new THREE.Mesh(wingTipGeometry, wingTipMaterial);
+                leftTip.position.set(-4.5, 0, 0.5);
+                this.mesh.add(leftTip);
+                this.leftWingTip = leftTip;
+
+                const rightTip = new THREE.Mesh(wingTipGeometry, wingTipMaterial.clone());
+                rightTip.position.set(4.5, 0, 0.5);
+                this.mesh.add(rightTip);
+                this.rightWingTip = rightTip;
+
+                // Engine housings - 大型エンジン
+                const engineGeometry = new THREE.CylinderGeometry(0.4, 0.5, 1.5, 8);
+                const engineMaterial = new THREE.MeshStandardMaterial({
+                    color: 0xccccdd,
+                    metalness: 0.9,
+                    roughness: 0.2
+                });
+
+                const engines = [
+                    { x: -1.5, y: -0.1, z: 2 },
+                    { x: 1.5, y: -0.1, z: 2 },
+                    { x: 0, y: -0.2, z: 2.3 }
+                ];
+
+                engines.forEach(pos => {
+                    const engine = new THREE.Mesh(engineGeometry, engineMaterial);
+                    engine.rotation.x = Math.PI / 2;
+                    engine.position.set(pos.x, pos.y, pos.z);
+                    this.mesh.add(engine);
+                });
+
+                // メインレーザー砲（中央の大型砲）
+                const cannonGeometry = new THREE.CylinderGeometry(0.15, 0.2, 3, 8);
+                const cannonMaterial = new THREE.MeshStandardMaterial({
+                    color: 0xddddee,
+                    metalness: 0.95,
+                    roughness: 0.1,
+                    emissive: 0x4466aa,
+                    emissiveIntensity: 0.3
+                });
+
+                const mainCannon = new THREE.Mesh(cannonGeometry, cannonMaterial);
+                mainCannon.rotation.x = Math.PI / 2;
+                mainCannon.position.set(0, -0.3, -1.5);
+                this.mesh.add(mainCannon);
+                this.mainCannon = mainCannon;
+
+                // サブレーザー砲（左右）
+                const subCannonGeometry = new THREE.CylinderGeometry(0.08, 0.1, 2, 6);
+                const subCannonMaterial = new THREE.MeshStandardMaterial({
+                    color: 0xccccdd,
+                    metalness: 0.9,
+                    roughness: 0.15
+                });
+
+                const leftCannon = new THREE.Mesh(subCannonGeometry, subCannonMaterial);
+                leftCannon.rotation.x = Math.PI / 2;
+                leftCannon.position.set(-2, -0.2, -0.5);
+                this.mesh.add(leftCannon);
+                this.leftCannon = leftCannon;
+
+                const rightCannon = new THREE.Mesh(subCannonGeometry, subCannonMaterial.clone());
+                rightCannon.rotation.x = Math.PI / 2;
+                rightCannon.position.set(2, -0.2, -0.5);
+                this.mesh.add(rightCannon);
+                this.rightCannon = rightCannon;
+
+                // アンテナ/センサーアレイ
+                const antennaGeometry = new THREE.ConeGeometry(0.1, 0.8, 4);
+                const antennaMaterial = new THREE.MeshStandardMaterial({
+                    color: 0xffffff,
+                    metalness: 0.8,
+                    roughness: 0.3
+                });
+
+                const antenna = new THREE.Mesh(antennaGeometry, antennaMaterial);
+                antenna.position.set(0, 0.8, 0);
+                this.mesh.add(antenna);
+
+                // スケールを大きく
+                this.mesh.scale.set(2.2, 2.2, 2.2);
+                this.mesh.position.copy(this.position);
+                this.scene.add(this.mesh);
+            }
+
+            createEngineEffects() {
+                // Engine glow - 青白い光
+                const glowPositions = [
+                    { x: -1.5, y: -0.1, z: 2.8 },
+                    { x: 1.5, y: -0.1, z: 2.8 },
+                    { x: 0, y: -0.2, z: 3.1 }
+                ];
+
+                glowPositions.forEach(pos => {
+                    const glowGeometry = new THREE.SphereGeometry(0.5, 8, 8);
+                    const glowMaterial = new THREE.MeshBasicMaterial({
+                        color: 0x4488ff,
+                        transparent: true,
+                        opacity: 0.7
+                    });
+                    const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+                    glow.position.set(pos.x, pos.y, pos.z);
+                    this.mesh.add(glow);
+                    this.engineGlows.push(glow);
+                });
+            }
+
+            selectNewPattern() {
+                const oldPattern = this.movementPattern;
+                do {
+                    this.movementPattern = this.patterns[Math.floor(Math.random() * this.patterns.length)];
+                } while (this.movementPattern === oldPattern && this.patterns.length > 1);
+                
+                this.patternTimer = 0;
+                this.patternDuration = 3 + Math.random() * 4;
+                
+                // パターンに応じた初期設定
+                switch (this.movementPattern) {
+                    case 'snipe':
+                        // 狙撃ポジション（遠方で静止して射撃）
+                        this.snipeTarget = 65 + Math.random() * 20; // 目標距離
+                        break;
+                    case 'orbit':
+                        // 遠方で大きな円を描く
+                        this.orbitAngle = Math.random() * Math.PI * 2;
+                        this.orbitRadius = 50 + Math.random() * 20;
+                        this.orbitDirection = Math.random() > 0.5 ? 1 : -1;
+                        this.orbitHeight = (Math.random() - 0.5) * 20;
+                        break;
+                    case 'drift':
+                        // ゆっくり横移動しながら射撃
+                        this.driftDirection = Math.random() > 0.5 ? 1 : -1;
+                        this.driftSpeed = 0.5 + Math.random() * 0.5;
+                        break;
+                    case 'reposition':
+                        // 新しい狙撃位置へ移動
+                        this.repositionTarget = new THREE.Vector3(
+                            (Math.random() - 0.5) * 60,
+                            (Math.random() - 0.5) * 30,
+                            -60 - Math.random() * 30
+                        );
+                        break;
+                    case 'hover':
+                        // その場で微動しながら射撃
+                        this.hoverCenter = this.position.clone();
+                        this.hoverPhase = Math.random() * Math.PI * 2;
+                        break;
+                }
+            }
+
+            update(deltaTime, projectiles) {
+                if (!this.alive) return;
+                
+                this.time += deltaTime;
+                this.patternTimer += deltaTime;
+                
+                // パターン切り替え
+                if (this.patternTimer >= this.patternDuration) {
+                    this.selectNewPattern();
+                }
+                
+                // 動作パターンに応じた移動
+                this.updateMovement(deltaTime);
+                
+                // 攻撃処理
+                this.updateAttack(deltaTime, projectiles);
+                
+                // メッシュ更新
+                this.mesh.position.copy(this.position);
+                
+                // プレイヤーの方向を向く
+                if (this.player) {
+                    const lookDir = new THREE.Vector3().subVectors(this.player.position, this.position);
+                    if (lookDir.length() > 0.1) {
+                        const targetRotation = Math.atan2(lookDir.x, lookDir.z);
+                        this.mesh.rotation.y = targetRotation + Math.PI;
+                    }
+                }
+                
+                // エンジングローアニメーション
+                this.engineGlows.forEach((glow, i) => {
+                    const flicker = 0.6 + 0.4 * Math.sin(this.time * 15 + i);
+                    glow.material.opacity = 0.7 * flicker;
+                    glow.scale.setScalar(0.8 + 0.2 * flicker);
+                });
+                
+                // ウィングチップの点滅
+                if (this.leftWingTip && this.rightWingTip) {
+                    const blink = Math.sin(this.time * 3) > 0 ? 0.9 : 0.3;
+                    this.leftWingTip.material.opacity = blink;
+                    this.rightWingTip.material.opacity = blink;
+                }
+                
+                // チャージ中のエフェクト
+                if (this.isCharging && this.mainCannon) {
+                    const chargeProgress = this.chargeTimer / this.chargeTime;
+                    this.mainCannon.material.emissiveIntensity = 0.3 + chargeProgress * 1.5;
+                }
+            }
+
+            updateMovement(deltaTime) {
+                const targetDir = new THREE.Vector3();
+                const playerPos = this.player.position;
+                const distToPlayer = this.position.distanceTo(playerPos);
+                
+                // 遠方から中距離の範囲を維持（Z軸で-45から-90の範囲）
+                const minDistance = 45;
+                const maxDistance = 90;
+                
+                // 近すぎる場合は強制的に後退
+                if (distToPlayer < minDistance) {
+                    targetDir.subVectors(this.position, playerPos).normalize();
+                    targetDir.z = Math.min(targetDir.z, -0.5);
+                    this.speed = this.baseSpeed * 1.5;
+                } else {
+                    // 通常の動作パターン
+                    switch (this.movementPattern) {
+                        case 'snipe':
+                            // 狙撃ポジション（遠方で静止して射撃）
+                            if (distToPlayer < this.snipeTarget - 5) {
+                                // 遠くに移動
+                                targetDir.set(
+                                    (this.position.x - playerPos.x) * 0.3,
+                                    (this.position.y - playerPos.y) * 0.2,
+                                    -1
+                                ).normalize();
+                            } else if (distToPlayer > this.snipeTarget + 10) {
+                                // 近づく
+                                targetDir.subVectors(playerPos, this.position);
+                                targetDir.z = Math.min(targetDir.z, -0.3);
+                                targetDir.normalize();
+                            } else {
+                                // 適正距離では微動のみ
+                                targetDir.set(
+                                    Math.sin(this.time * 0.8) * 0.3,
+                                    Math.cos(this.time * 0.6) * 0.2,
+                                    Math.sin(this.time * 0.4) * 0.1
+                                );
+                            }
+                            this.speed = this.baseSpeed * 0.8;
+                            break;
+                            
+                        case 'orbit':
+                            // 遠方で大きな円を描く
+                            this.orbitAngle += this.orbitDirection * deltaTime * 0.8;
+                            const orbitCenter = new THREE.Vector3(
+                                playerPos.x,
+                                playerPos.y + this.orbitHeight,
+                                playerPos.z - 65
+                            );
+                            const orbitTarget = new THREE.Vector3(
+                                orbitCenter.x + Math.sin(this.orbitAngle) * this.orbitRadius,
+                                orbitCenter.y + Math.cos(this.orbitAngle * 0.5) * 10,
+                                orbitCenter.z + Math.cos(this.orbitAngle) * (this.orbitRadius * 0.3)
+                            );
+                            targetDir.subVectors(orbitTarget, this.position).normalize();
+                            this.speed = this.baseSpeed * 1.1;
+                            break;
+                            
+                        case 'drift':
+                            // ゆっくり横移動しながら射撃
+                            targetDir.set(
+                                this.driftDirection * this.driftSpeed,
+                                Math.sin(this.time * 0.5) * 0.2,
+                                Math.sin(this.time * 0.3) * 0.1
+                            );
+                            // 境界で方向転換
+                            if (Math.abs(this.position.x) > 45) {
+                                this.driftDirection *= -1;
+                            }
+                            this.speed = this.baseSpeed * 0.6;
+                            break;
+                            
+                        case 'reposition':
+                            // 新しい狙撃位置へ移動
+                            targetDir.subVectors(this.repositionTarget, this.position);
+                            if (targetDir.length() < 5) {
+                                // 目標に到達したらパターン変更
+                                this.selectNewPattern();
+                            }
+                            targetDir.normalize();
+                            this.speed = this.baseSpeed * 1.3;
+                            break;
+                            
+                        case 'hover':
+                            // その場で微動しながら射撃
+                            this.hoverPhase += deltaTime * 2;
+                            const hoverOffset = new THREE.Vector3(
+                                Math.sin(this.hoverPhase) * 5,
+                                Math.cos(this.hoverPhase * 0.7) * 3,
+                                Math.sin(this.hoverPhase * 0.5) * 2
+                            );
+                            const hoverTarget = this.hoverCenter.clone().add(hoverOffset);
+                            targetDir.subVectors(hoverTarget, this.position).normalize();
+                            this.speed = this.baseSpeed * 0.5;
+                            break;
+                    }
+                }
+                
+                // 移動適用
+                this.velocity.lerp(targetDir.multiplyScalar(this.speed), deltaTime * 3);
+                this.position.add(this.velocity.clone().multiplyScalar(deltaTime));
+                
+                // 境界制限（遠方から中距離に制限）
+                this.position.x = Math.max(-55, Math.min(55, this.position.x));
+                this.position.y = Math.max(-30, Math.min(30, this.position.y));
+                // Z軸は遠方から中距離に制限
+                const minZ = playerPos.z - maxDistance;
+                const maxZ = playerPos.z - minDistance;
+                this.position.z = Math.max(minZ, Math.min(maxZ, this.position.z));
+            }
+
+            updateAttack(deltaTime, projectiles) {
+                // バーストクールダウン中
+                if (this.burstCooldown > 0) {
+                    this.burstCooldown -= deltaTime;
+                    if (this.burstCooldown <= 0) {
+                        this.burstCount = 0;
+                        this.isCharging = false;
+                    }
+                    return;
+                }
+                
+                // チャージ中
+                if (this.isCharging) {
+                    this.chargeTimer += deltaTime;
+                    if (this.chargeTimer >= this.chargeTime) {
+                        // チャージ完了、発射
+                        this.fireChargedLaser(projectiles);
+                        this.chargeTimer = 0;
+                        this.isCharging = false;
+                        this.burstCount++;
+                        
+                        if (this.burstCount >= this.burstMax) {
+                            this.burstCooldown = this.burstCooldownMax;
+                        }
+                    }
+                    return;
+                }
+                
+                this.fireTimer += deltaTime;
+                
+                if (this.fireTimer >= this.fireCooldown && this.burstCount < this.burstMax) {
+                    this.fireTimer = 0;
+                    this.isCharging = true;
+                    this.chargeTimer = 0;
+                }
+            }
+            
+            fireChargedLaser(projectiles) {
+                // 強力なチャージレーザーを発射
+                const dir = new THREE.Vector3().subVectors(this.player.position, this.position).normalize();
+                
+                // メインレーザー（中央から）
+                const mainPos = this.position.clone().add(new THREE.Vector3(0, -0.6, -3));
+                const mainProj = new Projectile(this.scene, mainPos, dir, false);
+                mainProj.damage = 25; // 高ダメージ
+                mainProj.speed = 180; // 高速
+                projectiles.push(mainProj);
+                
+                // サブレーザー（左右から）
+                const leftPos = this.position.clone().add(new THREE.Vector3(-4.4, -0.4, -1));
+                const rightPos = this.position.clone().add(new THREE.Vector3(4.4, -0.4, -1));
+                
+                // 少し拡散する方向
+                const spreadAngle = 0.05;
+                const leftDir = dir.clone();
+                leftDir.x -= spreadAngle;
+                leftDir.normalize();
+                
+                const rightDir = dir.clone();
+                rightDir.x += spreadAngle;
+                rightDir.normalize();
+                
+                const leftProj = new Projectile(this.scene, leftPos, leftDir, false);
+                leftProj.damage = 15;
+                leftProj.speed = 160;
+                projectiles.push(leftProj);
+                
+                const rightProj = new Projectile(this.scene, rightPos, rightDir, false);
+                rightProj.damage = 15;
+                rightProj.speed = 160;
+                projectiles.push(rightProj);
+                
+                // メインキャノンの発光をリセット
+                if (this.mainCannon) {
+                    this.mainCannon.material.emissiveIntensity = 0.3;
+                }
+            }
+
+            takeDamage(amount) {
+                this.health -= amount;
+                
+                // Flash effect - meshがnullでないことを確認
+                if (this.mesh && this.bodyMesh) {
+                    this.bodyMesh.material.emissiveIntensity = 1;
+                    const meshRef = this.bodyMesh;
+                    setTimeout(() => {
+                        if (meshRef && meshRef.material) {
+                            meshRef.material.emissiveIntensity = 0.2;
+                        }
+                    }, 100);
+                }
+                
+                if (this.health <= 0) {
+                    this.destroy();
+                    return true;
+                }
+                return false;
+            }
+
+            destroy() {
+                this.alive = false;
+                
+                // 大爆発エフェクトを生成（EnemyAceと同じ）
+                this.createMassiveExplosion();
+                
+                // メッシュのリソース解放
+                if (this.mesh) {
+                    this.mesh.traverse(child => {
+                        if (child.geometry) child.geometry.dispose();
+                        if (child.material) {
+                            if (Array.isArray(child.material)) {
+                                child.material.forEach(m => m.dispose());
+                            } else {
+                                child.material.dispose();
+                            }
+                        }
+                    });
+                    this.scene.remove(this.mesh);
+                    this.mesh = null;
+                }
+            }
+            
+            createMassiveExplosion() {
+                const pos = this.position.clone();
+                const scene = this.scene;
+                
+                // 複数の爆発パーティクルを生成（青白い爆発）
+                const explosionColors = [0x4488ff, 0x88aaff, 0xaaccff, 0xffffff, 0x6699ff];
+                const particleCount = 80;
+                const particles = [];
+                
+                for (let i = 0; i < particleCount; i++) {
+                    const size = 0.5 + Math.random() * 2;
+                    const geometry = new THREE.SphereGeometry(size, 8, 8);
+                    const material = new THREE.MeshBasicMaterial({
+                        color: explosionColors[Math.floor(Math.random() * explosionColors.length)],
+                        transparent: true,
+                        opacity: 1
+                    });
+                    const particle = new THREE.Mesh(geometry, material);
+                    particle.position.copy(pos);
+                    
+                    // ランダムな方向に飛び散る
+                    const velocity = new THREE.Vector3(
+                        (Math.random() - 0.5) * 80,
+                        (Math.random() - 0.5) * 80,
+                        (Math.random() - 0.5) * 80
+                    );
+                    
+                    particle.userData = {
+                        velocity: velocity,
+                        life: 1.5 + Math.random() * 1,
+                        maxLife: 1.5 + Math.random() * 1
+                    };
+                    
+                    scene.add(particle);
+                    particles.push(particle);
+                }
+                
+                // 中心の大きな光球
+                const coreGeometry = new THREE.SphereGeometry(8, 16, 16);
+                const coreMaterial = new THREE.MeshBasicMaterial({
+                    color: 0xffffff,
+                    transparent: true,
+                    opacity: 1
+                });
+                const core = new THREE.Mesh(coreGeometry, coreMaterial);
+                core.position.copy(pos);
+                scene.add(core);
+                
+                // ショックウェーブリング
+                const ringGeometry = new THREE.RingGeometry(0.1, 2, 32);
+                const ringMaterial = new THREE.MeshBasicMaterial({
+                    color: 0x4488ff,
+                    transparent: true,
+                    opacity: 0.8,
+                    side: THREE.DoubleSide
+                });
+                const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+                ring.position.copy(pos);
+                ring.rotation.x = Math.PI / 2;
+                scene.add(ring);
+                
+                // アニメーション
+                let elapsed = 0;
+                const animate = () => {
+                    elapsed += 0.016;
+                    
+                    // パーティクルの更新
+                    for (let i = particles.length - 1; i >= 0; i--) {
+                        const p = particles[i];
+                        p.position.add(p.userData.velocity.clone().multiplyScalar(0.016));
+                        p.userData.velocity.multiplyScalar(0.96); // 減速
+                        p.userData.life -= 0.016;
+                        p.material.opacity = Math.max(0, p.userData.life / p.userData.maxLife);
+                        p.scale.setScalar(1 + (1 - p.userData.life / p.userData.maxLife) * 0.5);
+                        
+                        if (p.userData.life <= 0) {
+                            scene.remove(p);
+                            p.geometry.dispose();
+                            p.material.dispose();
+                            particles.splice(i, 1);
+                        }
+                    }
+                    
+                    // 中心の光球
+                    if (core.parent) {
+                        core.scale.setScalar(1 + elapsed * 3);
+                        core.material.opacity = Math.max(0, 1 - elapsed * 0.8);
+                        if (core.material.opacity <= 0) {
+                            scene.remove(core);
+                            core.geometry.dispose();
+                            core.material.dispose();
+                        }
+                    }
+                    
+                    // ショックウェーブリング
+                    if (ring.parent) {
+                        ring.scale.setScalar(1 + elapsed * 25);
+                        ring.material.opacity = Math.max(0, 0.8 - elapsed * 0.5);
+                        if (ring.material.opacity <= 0) {
+                            scene.remove(ring);
+                            ring.geometry.dispose();
+                            ring.material.dispose();
+                        }
+                    }
+                    
+                    if (particles.length > 0 || (core.parent || ring.parent)) {
+                        requestAnimationFrame(animate);
+                    }
+                };
+                
+                animate();
+            }
+
+            getCollisionRadius() {
+                return this.radius;
+            }
+        }
+
+        // ============================================
         // Boss Base Class (共通機能)
         // ============================================
         class BossAlien {
@@ -11536,10 +12237,10 @@
                 // Wave 5+: + Carrier
                 
                 // Wave 6以降は全種類の敵が均等に出現
-                let asteroidChance, fighterChance, interceptorChance, swarmChance, bomberChance, tankChance, sniperChance, carrierChance, aceChance;
+                let asteroidChance, fighterChance, interceptorChance, swarmChance, bomberChance, tankChance, sniperChance, carrierChance, aceChance, ace2Chance;
                 
                 if (waveNumber >= 6) {
-                    // Wave 6以降: 全種類が均等に出現 + EnemyAce（中ボス）
+                    // Wave 6以降: 全種類が均等に出現 + EnemyAce（中ボス）+ EnemyAce2（Wave 7以降）
                     asteroidChance = 0.25;
                     fighterChance = 0.10;
                     interceptorChance = 0.10;
@@ -11548,13 +12249,16 @@
                     tankChance = 0.10;
                     sniperChance = 0.10;
                     carrierChance = 0.10;
-                    // EnemyAceの出現確率: Wave 6で2%, Wave 7で3%, Wave 8以降で4%
+                    // EnemyAceの出現確率: Wave 6で2%, Wave 7で1.5%, Wave 8以降で2%
                     if (waveNumber === 6) {
                         aceChance = 0.02;
+                        ace2Chance = 0; // Wave 6では出現しない
                     } else if (waveNumber === 7) {
-                        aceChance = 0.03;
+                        aceChance = 0.015; // 1.5%
+                        ace2Chance = 0.01; // 1%
                     } else {
-                        aceChance = 0.04;
+                        aceChance = 0.02; // 2%
+                        ace2Chance = 0.01; // 1%
                     }
                 } else {
                     // Wave 1-5: 既存の確率
@@ -11567,9 +12271,26 @@
                     sniperChance = waveNumber >= 4 ? 0.05 + (waveNumber - 4) * 0.02 : 0;
                     carrierChance = waveNumber >= 5 ? 0.03 + (waveNumber - 5) * 0.015 : 0;
                     aceChance = 0; // Wave 1-5では出現しない
+                    ace2Chance = 0; // Wave 1-6では出現しない
                 }
                 
                 let cumulative = 0;
+                
+                // Ace2 (Wave 7+) - 中ボス級敵機2（遠方レーザー特化、白い宇宙船）
+                cumulative += ace2Chance;
+                if (roll < cumulative && waveNumber >= 7) {
+                    // EnemyAce2は遠方から出現
+                    const ace2Pos = new THREE.Vector3(
+                        (Math.random() - 0.5) * 50, // 左右
+                        (Math.random() - 0.5) * 25, // 上下
+                        -200 - Math.random() * 40   // さらに遠方から出現
+                    );
+                    const enemy = new EnemyAce2(this.scene, ace2Pos, this.player, waveNumber);
+                    this.applyDifficultyToEnemy(enemy);
+                    this.enemies.push(enemy);
+                    this.totalSpawned++;
+                    return;
+                }
                 
                 // Ace (Wave 6+) - 中ボス級敵機（最奥の空間から出現）
                 cumulative += aceChance;

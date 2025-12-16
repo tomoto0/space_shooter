@@ -237,3 +237,11 @@
 - [x] Wave 9用のBGMをダウンロードして設定（Cold Moon）
 - [x] Wave 10用のBGMをダウンロードして設定（Steamtech Mayhem）
 - [x] EnemyAce撃破時に大きな爆発エフェクトを追加
+
+## EnemyAce2の追加とEnemyAce出現確率調整
+- [x] EnemyAce2クラスを作成（白い宇宙船デザイン、HP 2000）
+- [x] EnemyAce2の遠方レーザー射撃特化の攻撃パターンを実装
+- [x] EnemyAce2のEnemyAceとは異なる動作パターンを実装
+- [x] EnemyAce2のスポーンロジックを追加（Wave 7以降、1%の確率）
+- [x] EnemyAceの出現確率を調整（Wave 7: 1.5%、Wave 8以降: 2%）
+- [x] EnemyAce2撃破時の大爆発エフェクト（EnemyAceと同じ）

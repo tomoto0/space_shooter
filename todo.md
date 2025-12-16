@@ -254,3 +254,14 @@
 - [x] EnemyAce3のスポーンロジックを追加（Wave 7以降、0.5%の確率）
 - [x] EnemyAceの出現確率を再調整（Wave 7: 1%、Wave 8以降: 1.5%）
 - [x] EnemyAce3撃破時の大爆発エフェクト
+
+## EnemyAce2/Ace3の強化
+- [x] EnemyAce3のHPを4000に変更
+- [x] EnemyAce3に遠方へのテレポート動作を追加
+- [x] EnemyAce3に高出力の大型チャージレーザーを追加
+- [x] EnemyAce3の通常オレンジ弾丸を断続的に発射するように変更
+- [x] EnemyAce2のHPを4000に変更
+- [x] EnemyAce2をより遠方で行動するように調整
+- [x] EnemyAce2のスピードを上げる
+- [x] EnemyAce2に高出力の大型チャージレーザーを追加
+- [x] EnemyAce2の通常オレンジ弾丸を断続的に発射するように変更

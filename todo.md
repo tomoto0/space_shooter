@@ -245,3 +245,12 @@
 - [x] EnemyAce2のスポーンロジックを追加（Wave 7以降、1%の確率）
 - [x] EnemyAceの出現確率を調整（Wave 7: 1.5%、Wave 8以降: 2%）
 - [x] EnemyAce2撃破時の大爆発エフェクト（EnemyAceと同じ）
+
+## EnemyAce3の追加とEnemyAce出現確率再調整
+- [x] EnemyAce3クラスを作成（赤いステルス戦闘機デザイン、HP 3000）
+- [x] EnemyAce3の複雑な動作パターンを実装（EnemyAce/Ace2とは全く異なる）
+- [x] EnemyAce3の断続的なレーザー射撃を実装
+- [x] EnemyAce3の「撃破しない限りフィールドに残り続ける」特性を実装
+- [x] EnemyAce3のスポーンロジックを追加（Wave 7以降、0.5%の確率）
+- [x] EnemyAceの出現確率を再調整（Wave 7: 1%、Wave 8以降: 1.5%）
+- [x] EnemyAce3撃破時の大爆発エフェクト

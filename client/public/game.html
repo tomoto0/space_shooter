@@ -6179,7 +6179,7 @@
                 this.burstCount = 0;
                 this.burstMax = 3; // 3連射
                 this.burstCooldown = 0;
-                this.burstCooldownMax = 3.5; // レーザーのクールダウン
+                this.burstCooldownMax = 5.5; // レーザーのクールダウン（頻度を下げた）
                 this.laserBeam = null;
                 
                 // 動作パターン（より遠方で行動）
@@ -7002,7 +7002,7 @@
                 this.chargeDuration = 1.5; // チャージ時間
                 this.isCharging = false;
                 this.chargeCooldown = 0;
-                this.chargeCooldownMax = 4.0; // レーザーのクールダウン
+                this.chargeCooldownMax = 6.0; // レーザーのクールダウン（頻度を下げた）
                 this.laserBeam = null;
                 
                 // テレポート用
@@ -12190,81 +12190,176 @@
                 this.group = new THREE.Group();
                 
                 // 母艦本体（巨大な暗黒の戦艦）
-                // メインハル（横長の巨大な船体）
-                const hullGeometry = new THREE.BoxGeometry(180, 25, 80);
+                // メインハル（横長の巨大な船体）- より大きく
+                const hullGeometry = new THREE.BoxGeometry(220, 30, 100);
                 const hullMaterial = new THREE.MeshStandardMaterial({
-                    color: 0x1a1a2e,
-                    emissive: 0x0a0a15,
-                    emissiveIntensity: 0.3,
-                    metalness: 0.9,
-                    roughness: 0.3
+                    color: 0x0d0d1a,
+                    emissive: 0x050510,
+                    emissiveIntensity: 0.4,
+                    metalness: 0.95,
+                    roughness: 0.2
                 });
                 const hull = new THREE.Mesh(hullGeometry, hullMaterial);
                 this.group.add(hull);
                 
-                // 船体の装甲プレート
-                for (let i = 0; i < 12; i++) {
-                    const plateGeo = new THREE.BoxGeometry(12, 3, 70);
+                // 船体の中央隆起部（キール）
+                const keelGeo = new THREE.BoxGeometry(200, 10, 40);
+                const keelMat = new THREE.MeshStandardMaterial({
+                    color: 0x151525,
+                    emissive: 0x080815,
+                    metalness: 0.9,
+                    roughness: 0.25
+                });
+                const keel = new THREE.Mesh(keelGeo, keelMat);
+                keel.position.y = 20;
+                this.group.add(keel);
+                
+                // 船首の尖った部分
+                const bowGeo = new THREE.ConeGeometry(25, 60, 4);
+                const bowMat = new THREE.MeshStandardMaterial({
+                    color: 0x0d0d1a,
+                    emissive: 0x050510,
+                    metalness: 0.95,
+                    roughness: 0.2
+                });
+                const bow = new THREE.Mesh(bowGeo, bowMat);
+                bow.rotation.x = Math.PI / 2;
+                bow.rotation.z = Math.PI / 4;
+                bow.position.set(0, 5, -80);
+                this.group.add(bow);
+                
+                // 船体の装甲プレート（より詳細）
+                for (let i = 0; i < 16; i++) {
+                    const plateGeo = new THREE.BoxGeometry(10, 4, 85);
                     const plateMat = new THREE.MeshStandardMaterial({
-                        color: 0x252540,
-                        emissive: 0x101020,
+                        color: 0x1a1a35,
+                        emissive: 0x0a0a18,
                         metalness: 0.95,
-                        roughness: 0.2
+                        roughness: 0.15
                     });
                     const plate = new THREE.Mesh(plateGeo, plateMat);
-                    plate.position.set(-82 + i * 15, 14, 0);
+                    plate.position.set(-100 + i * 13, 17, 0);
                     this.group.add(plate);
                 }
                 
-                // ブリッジ（司令塔）
-                const bridgeGeo = new THREE.BoxGeometry(30, 20, 25);
-                const bridgeMat = new THREE.MeshStandardMaterial({
-                    color: 0x2a2a45,
-                    emissive: 0x151530,
-                    metalness: 0.85,
-                    roughness: 0.25
-                });
-                const bridge = new THREE.Mesh(bridgeGeo, bridgeMat);
-                bridge.position.set(0, 22, -15);
-                this.group.add(bridge);
-                
-                // ブリッジの窓（赤く光る）
-                for (let i = 0; i < 5; i++) {
-                    const windowGeo = new THREE.BoxGeometry(4, 3, 1);
-                    const windowMat = new THREE.MeshBasicMaterial({
-                        color: 0xff2200,
-                        transparent: true,
-                        opacity: 0.9
-                    });
-                    const windowMesh = new THREE.Mesh(windowGeo, windowMat);
-                    windowMesh.position.set(-10 + i * 5, 25, -2);
-                    this.group.add(windowMesh);
-                }
-                
-                // エンジンナセル（左右）
-                for (let side = -1; side <= 1; side += 2) {
-                    const nacelleGeo = new THREE.CylinderGeometry(8, 10, 50, 8);
-                    const nacelleMat = new THREE.MeshStandardMaterial({
-                        color: 0x1a1a30,
-                        emissive: 0x0a0a18,
+                // 装甲プレートのリベット（ディテール）
+                for (let i = 0; i < 40; i++) {
+                    const rivetGeo = new THREE.CylinderGeometry(0.3, 0.3, 2, 6);
+                    const rivetMat = new THREE.MeshStandardMaterial({
+                        color: 0x252545,
                         metalness: 0.9,
                         roughness: 0.3
                     });
+                    const rivet = new THREE.Mesh(rivetGeo, rivetMat);
+                    rivet.rotation.x = Math.PI / 2;
+                    rivet.position.set(
+                        (Math.random() - 0.5) * 200,
+                        16,
+                        (Math.random() - 0.5) * 80
+                    );
+                    this.group.add(rivet);
+                }
+                
+                // ブリッジ（司令塔）- より大きく詳細に
+                const bridgeGeo = new THREE.BoxGeometry(45, 30, 35);
+                const bridgeMat = new THREE.MeshStandardMaterial({
+                    color: 0x1a1a35,
+                    emissive: 0x0a0a1a,
+                    metalness: 0.9,
+                    roughness: 0.2
+                });
+                const bridge = new THREE.Mesh(bridgeGeo, bridgeMat);
+                bridge.position.set(0, 30, -20);
+                this.group.add(bridge);
+                
+                // ブリッジの上部構造
+                const bridgeTopGeo = new THREE.BoxGeometry(30, 12, 25);
+                const bridgeTop = new THREE.Mesh(bridgeTopGeo, bridgeMat);
+                bridgeTop.position.set(0, 51, -20);
+                this.group.add(bridgeTop);
+                
+                // ブリッジのアンテナアレイ
+                for (let i = 0; i < 6; i++) {
+                    const antennaGeo = new THREE.CylinderGeometry(0.3, 0.5, 15 + Math.random() * 10, 6);
+                    const antennaMat = new THREE.MeshStandardMaterial({
+                        color: 0x303050,
+                        metalness: 0.8,
+                        roughness: 0.4
+                    });
+                    const antenna = new THREE.Mesh(antennaGeo, antennaMat);
+                    antenna.position.set(-12 + i * 5, 65, -20);
+                    this.group.add(antenna);
+                }
+                
+                // ブリッジの窓（赤く光る）- より多く
+                for (let row = 0; row < 2; row++) {
+                    for (let i = 0; i < 8; i++) {
+                        const windowGeo = new THREE.BoxGeometry(3, 4, 1);
+                        const windowMat = new THREE.MeshBasicMaterial({
+                            color: 0xff1100,
+                            transparent: true,
+                            opacity: 0.95
+                        });
+                        const windowMesh = new THREE.Mesh(windowGeo, windowMat);
+                        windowMesh.position.set(-14 + i * 4, 35 + row * 8, -2);
+                        this.group.add(windowMesh);
+                        this.bridgeWindows = this.bridgeWindows || [];
+                        this.bridgeWindows.push(windowMesh);
+                    }
+                }
+                
+                // エンジンナセル（左右）- より大きく詳細に
+                this.engineGlows = [];
+                for (let side = -1; side <= 1; side += 2) {
+                    // メインナセル
+                    const nacelleGeo = new THREE.CylinderGeometry(12, 15, 70, 12);
+                    const nacelleMat = new THREE.MeshStandardMaterial({
+                        color: 0x0d0d20,
+                        emissive: 0x050510,
+                        metalness: 0.95,
+                        roughness: 0.2
+                    });
                     const nacelle = new THREE.Mesh(nacelleGeo, nacelleMat);
                     nacelle.rotation.x = Math.PI / 2;
-                    nacelle.position.set(side * 70, -5, 15);
+                    nacelle.position.set(side * 90, -5, 20);
                     this.group.add(nacelle);
                     
-                    // エンジン光
-                    const engineGlowGeo = new THREE.CircleGeometry(7, 16);
+                    // ナセルのリングディテール
+                    for (let r = 0; r < 3; r++) {
+                        const ringGeo = new THREE.TorusGeometry(13, 1.5, 8, 24);
+                        const ringMat = new THREE.MeshStandardMaterial({
+                            color: 0x1a1a35,
+                            metalness: 0.9,
+                            roughness: 0.3
+                        });
+                        const ring = new THREE.Mesh(ringGeo, ringMat);
+                        ring.position.set(side * 90, -5, -10 + r * 25);
+                        this.group.add(ring);
+                    }
+                    
+                    // エンジン光（複数層）
+                    const engineGlowGeo = new THREE.CircleGeometry(10, 24);
                     const engineGlowMat = new THREE.MeshBasicMaterial({
-                        color: 0x4400ff,
+                        color: 0x6600ff,
                         transparent: true,
-                        opacity: 0.9
+                        opacity: 0.95
                     });
                     const engineGlow = new THREE.Mesh(engineGlowGeo, engineGlowMat);
-                    engineGlow.position.set(side * 70, -5, 41);
+                    engineGlow.position.set(side * 90, -5, 56);
                     this.group.add(engineGlow);
+                    this.engineGlows.push(engineGlow);
+                    
+                    // エンジンの内側グロー
+                    const innerGlowGeo = new THREE.CircleGeometry(6, 16);
+                    const innerGlowMat = new THREE.MeshBasicMaterial({
+                        color: 0xaa44ff,
+                        transparent: true,
+                        opacity: 0.8
+                    });
+                    const innerGlow = new THREE.Mesh(innerGlowGeo, innerGlowMat);
+                    innerGlow.position.set(side * 90, -5, 57);
+                    this.group.add(innerGlow);
+                    this.engineGlows.push(innerGlow);
                 }
                 
                 // 中央エンジン
@@ -12314,78 +12409,130 @@
                     this.group.add(underDetail);
                 }
                 
-                // 4つの砲塔を作成
+                // 4つの砲塔を作成（より大きく詳細に）
                 const turretPositions = [
-                    new THREE.Vector3(-55, 18, -20),  // 左前
-                    new THREE.Vector3(55, 18, -20),   // 右前
-                    new THREE.Vector3(-55, 18, 20),   // 左後
-                    new THREE.Vector3(55, 18, 20)     // 右後
+                    new THREE.Vector3(-70, 22, -30),  // 左前
+                    new THREE.Vector3(70, 22, -30),   // 右前
+                    new THREE.Vector3(-70, 22, 30),   // 左後
+                    new THREE.Vector3(70, 22, 30)     // 右後
                 ];
+                
+                const turretColors = [0xff0044, 0x44ff00, 0x0088ff, 0xffaa00]; // 各砲塔のアクセント色
                 
                 turretPositions.forEach((pos, index) => {
                     const turretGroup = new THREE.Group();
+                    const accentColor = turretColors[index];
                     
-                    // 砲塔ベース
-                    const baseGeo = new THREE.CylinderGeometry(8, 10, 6, 8);
+                    // 砲塔ベース（より大きく）
+                    const baseGeo = new THREE.CylinderGeometry(12, 15, 8, 12);
                     const baseMat = new THREE.MeshStandardMaterial({
-                        color: 0x2a2a45,
-                        emissive: 0x151530,
-                        metalness: 0.9,
-                        roughness: 0.25
+                        color: 0x1a1a35,
+                        emissive: 0x0a0a1a,
+                        metalness: 0.95,
+                        roughness: 0.2
                     });
                     const base = new THREE.Mesh(baseGeo, baseMat);
                     turretGroup.add(base);
                     
-                    // 砲塔ドーム
-                    const domeGeo = new THREE.SphereGeometry(7, 16, 12, 0, Math.PI * 2, 0, Math.PI / 2);
-                    const domeMat = new THREE.MeshStandardMaterial({
-                        color: 0x353560,
-                        emissive: 0x1a1a35,
-                        metalness: 0.85,
+                    // ベースのリングディテール
+                    const baseRingGeo = new THREE.TorusGeometry(13, 1, 8, 24);
+                    const baseRingMat = new THREE.MeshStandardMaterial({
+                        color: 0x252545,
+                        metalness: 0.9,
                         roughness: 0.3
                     });
+                    const baseRing = new THREE.Mesh(baseRingGeo, baseRingMat);
+                    baseRing.rotation.x = Math.PI / 2;
+                    baseRing.position.y = 4;
+                    turretGroup.add(baseRing);
+                    
+                    // 砲塔ドーム（より大きく）
+                    const domeGeo = new THREE.SphereGeometry(10, 24, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+                    const domeMat = new THREE.MeshStandardMaterial({
+                        color: 0x252550,
+                        emissive: 0x101030,
+                        metalness: 0.9,
+                        roughness: 0.25
+                    });
                     const dome = new THREE.Mesh(domeGeo, domeMat);
-                    dome.position.y = 3;
+                    dome.position.y = 4;
                     turretGroup.add(dome);
                     
-                    // レーザー砲身
-                    const barrelGeo = new THREE.CylinderGeometry(2, 2.5, 20, 8);
-                    const barrelMat = new THREE.MeshStandardMaterial({
-                        color: 0x404070,
-                        emissive: 0x202040,
-                        metalness: 0.95,
-                        roughness: 0.2
-                    });
-                    const barrel = new THREE.Mesh(barrelGeo, barrelMat);
-                    barrel.rotation.x = Math.PI / 2;
-                    barrel.position.set(0, 5, -12);
-                    turretGroup.add(barrel);
-                    
-                    // 砲口の発光部
-                    const muzzleGeo = new THREE.CircleGeometry(2, 16);
-                    const muzzleMat = new THREE.MeshBasicMaterial({
-                        color: 0xff0044,
+                    // ドームのアクセントライン
+                    const accentLineGeo = new THREE.TorusGeometry(10, 0.5, 8, 32, Math.PI);
+                    const accentLineMat = new THREE.MeshBasicMaterial({
+                        color: accentColor,
                         transparent: true,
                         opacity: 0.8
                     });
+                    const accentLine = new THREE.Mesh(accentLineGeo, accentLineMat);
+                    accentLine.rotation.x = Math.PI / 2;
+                    accentLine.position.y = 8;
+                    turretGroup.add(accentLine);
+                    turretGroup.userData.accentLine = accentLine;
+                    
+                    // ツインレーザー砲身（左右）
+                    for (let b = -1; b <= 1; b += 2) {
+                        const barrelGeo = new THREE.CylinderGeometry(2.5, 3, 28, 12);
+                        const barrelMat = new THREE.MeshStandardMaterial({
+                            color: 0x303060,
+                            emissive: 0x151530,
+                            metalness: 0.95,
+                            roughness: 0.15
+                        });
+                        const barrel = new THREE.Mesh(barrelGeo, barrelMat);
+                        barrel.rotation.x = Math.PI / 2;
+                        barrel.position.set(b * 4, 8, -16);
+                        turretGroup.add(barrel);
+                        
+                        // 砲身のリング
+                        for (let r = 0; r < 2; r++) {
+                            const barrelRingGeo = new THREE.TorusGeometry(3, 0.5, 8, 16);
+                            const barrelRing = new THREE.Mesh(barrelRingGeo, baseMat);
+                            barrelRing.position.set(b * 4, 8, -8 - r * 10);
+                            turretGroup.add(barrelRing);
+                        }
+                    }
+                    turretGroup.userData.barrel = dome; // フラッシュ用
+                    
+                    // 砲口の発光部（中央）
+                    const muzzleGeo = new THREE.CircleGeometry(4, 24);
+                    const muzzleMat = new THREE.MeshBasicMaterial({
+                        color: accentColor,
+                        transparent: true,
+                        opacity: 0.9
+                    });
                     const muzzle = new THREE.Mesh(muzzleGeo, muzzleMat);
-                    muzzle.position.set(0, 5, -22);
+                    muzzle.position.set(0, 8, -30);
                     turretGroup.add(muzzle);
                     turretGroup.userData.muzzle = muzzle;
-                    turretGroup.userData.barrel = barrel;
                     
-                    // チャージエフェクト用のリング
-                    const chargeRingGeo = new THREE.RingGeometry(3, 5, 32);
-                    const chargeRingMat = new THREE.MeshBasicMaterial({
-                        color: 0xff0066,
-                        transparent: true,
-                        opacity: 0,
-                        side: THREE.DoubleSide
-                    });
-                    const chargeRing = new THREE.Mesh(chargeRingGeo, chargeRingMat);
-                    chargeRing.position.set(0, 5, -23);
-                    turretGroup.add(chargeRing);
-                    turretGroup.userData.chargeRing = chargeRing;
+                    // チャージエフェクト用の複数リング
+                    const chargeRings = [];
+                    for (let r = 0; r < 3; r++) {
+                        const chargeRingGeo = new THREE.RingGeometry(5 + r * 2, 7 + r * 2, 32);
+                        const chargeRingMat = new THREE.MeshBasicMaterial({
+                            color: accentColor,
+                            transparent: true,
+                            opacity: 0,
+                            side: THREE.DoubleSide
+                        });
+                        const chargeRing = new THREE.Mesh(chargeRingGeo, chargeRingMat);
+                        chargeRing.position.set(0, 8, -31 - r);
+                        turretGroup.add(chargeRing);
+                        chargeRings.push(chargeRing);
+                    }
+                    turretGroup.userData.chargeRing = chargeRings[0];
+                    turretGroup.userData.chargeRings = chargeRings;
+                    turretGroup.userData.accentColor = accentColor;
+                    
+                    // 砲塔のサイドパネル
+                    for (let s = -1; s <= 1; s += 2) {
+                        const panelGeo = new THREE.BoxGeometry(2, 6, 8);
+                        const panel = new THREE.Mesh(panelGeo, baseMat);
+                        panel.position.set(s * 11, 6, 0);
+                        turretGroup.add(panel);
+                    }
                     
                     turretGroup.position.copy(pos);
                     turretGroup.userData.index = index;
@@ -14009,7 +14156,8 @@
                     7: 'audio/bgm_wave7.mp3',   // Light Years - 宇宙旅行
                     8: 'audio/bgm_wave8.mp3',   // Trouble On Mercury - 緊張感
                     9: 'audio/bgm_wave9.mp3',   // Cold Moon - 寂寥とした宇宙
-                    10: 'audio/bgm_wave10.mp3'  // Steamtech Mayhem - テクノバトル
+                    10: 'audio/bgm_wave10.mp3',  // Steamtech Mayhem - テクノバトル
+                    11: 'wave11_boss.mp3'  // Battle Theme A - 最終ボス戦用エピックバトル
                 };
                 
                 this.currentBGM = null;
@@ -14279,7 +14427,7 @@
                     this.asteroidBeltTimer = 0;
                     this.asteroidBeltDuration = 40; // 40秒
                     this.asteroidBeltSpawnTimer = 0;
-                    this.asteroidBeltSpawnInterval = 0.15; // 大量の階石
+                    this.asteroidBeltSpawnInterval = 0.06; // 非常に大量の階石（更に短い間隔）
                 } else if (waveNumber >= 6 && this.scene) {
                     console.log('[startWave] Setting Earth space background for Wave 6+');
                     this.setEarthSpaceBackground();
@@ -14766,15 +14914,24 @@
                     if (this.asteroidBeltSpawnTimer >= this.asteroidBeltSpawnInterval) {
                         this.asteroidBeltSpawnTimer = 0;
                         
-                        // 複数同時スポーン
-                        for (let i = 0; i < 3; i++) {
+                        // 非常に多くの階石を同時スポーン（5-8個）
+                        const spawnCount = 5 + Math.floor(Math.random() * 4);
+                        for (let i = 0; i < spawnCount; i++) {
                             const pos = new THREE.Vector3(
-                                (Math.random() - 0.5) * 120,
-                                (Math.random() - 0.5) * 60,
-                                this.player ? this.player.position.z - 150 - Math.random() * 50 : -200
+                                (Math.random() - 0.5) * 160, // より広い範囲
+                                (Math.random() - 0.5) * 80,  // より広い範囲
+                                this.player ? this.player.position.z - 150 - Math.random() * 80 : -200
                             );
-                            const sizes = ['small', 'medium', 'large'];
-                            const size = sizes[Math.floor(Math.random() * sizes.length)];
+                            // 大小様々な階石（小型が多め）
+                            const sizeRoll = Math.random();
+                            let size;
+                            if (sizeRoll < 0.5) {
+                                size = 'small';
+                            } else if (sizeRoll < 0.85) {
+                                size = 'medium';
+                            } else {
+                                size = 'large';
+                            }
                             const asteroid = new Asteroid(this.scene, pos, size, this.currentWave);
                             // 速度1.2倍
                             asteroid.velocity.multiplyScalar(1.2);

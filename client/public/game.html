@@ -57,6 +57,107 @@
             object-fit: cover;
         }
         
+        /* Power Breakthrough Selection Screen */
+        #power-breakthrough-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 2500;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        #power-breakthrough-screen.visible {
+            display: flex;
+            opacity: 1;
+        }
+        
+        .breakthrough-content {
+            text-align: center;
+            padding: 3rem;
+            background: linear-gradient(135deg, rgba(20, 20, 40, 0.9) 0%, rgba(40, 20, 60, 0.9) 100%);
+            border: 2px solid #ff4444;
+            border-radius: 20px;
+            box-shadow: 0 0 50px rgba(255, 68, 68, 0.3), inset 0 0 30px rgba(255, 68, 68, 0.1);
+            max-width: 600px;
+        }
+        
+        .breakthrough-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #ff4444;
+            text-shadow: 0 0 20px #ff4444, 0 0 40px #ff4444;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.3rem;
+        }
+        
+        .breakthrough-description {
+            font-size: 1.3rem;
+            color: #ffffff;
+            margin-bottom: 1rem;
+        }
+        
+        .breakthrough-info {
+            font-size: 1.1rem;
+            color: #aaaaaa;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        
+        .breakthrough-info .red-text {
+            color: #ff4444;
+            font-weight: bold;
+            text-shadow: 0 0 10px #ff4444;
+        }
+        
+        .breakthrough-buttons {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+        }
+        
+        .breakthrough-btn {
+            padding: 1rem 3rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.2rem;
+        }
+        
+        .breakthrough-btn.yes-btn {
+            background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+            color: white;
+            box-shadow: 0 0 20px rgba(255, 68, 68, 0.5);
+        }
+        
+        .breakthrough-btn.yes-btn:hover {
+            background: linear-gradient(135deg, #ff6666 0%, #ff0000 100%);
+            box-shadow: 0 0 30px rgba(255, 68, 68, 0.8);
+            transform: scale(1.05);
+        }
+        
+        .breakthrough-btn.no-btn {
+            background: linear-gradient(135deg, #444444 0%, #222222 100%);
+            color: #aaaaaa;
+            box-shadow: 0 0 10px rgba(100, 100, 100, 0.3);
+        }
+        
+        .breakthrough-btn.no-btn:hover {
+            background: linear-gradient(135deg, #555555 0%, #333333 100%);
+            color: white;
+            transform: scale(1.05);
+        }
+        
         /* Opening Movie */
         #opening-movie-container {
             position: fixed;
@@ -1435,6 +1536,19 @@
         </video>
     </div>
     
+    <!-- Power Breakthrough Selection Screen -->
+    <div id="power-breakthrough-screen">
+        <div class="breakthrough-content">
+            <h2 class="breakthrough-title">POWER BREAKTHROUGH</h2>
+            <p class="breakthrough-description">Unlock the ability to exceed normal power limits?</p>
+            <p class="breakthrough-info">After reaching max power level, additional power-ups will turn your bullets <span class="red-text">RED</span> with <span class="red-text">2x DAMAGE</span>!</p>
+            <div class="breakthrough-buttons">
+                <button class="breakthrough-btn yes-btn" id="btn-breakthrough-yes">YES</button>
+                <button class="breakthrough-btn no-btn" id="btn-breakthrough-no">NO</button>
+            </div>
+        </div>
+    </div>
+    
     <!-- Opening Movie Container -->
     <div id="opening-movie-container">
         <video id="opening-video" playsinline>
@@ -2582,6 +2696,10 @@
                 this.powerLevel = 0;
                 this.maxPowerLevel = 3;
                 
+                // Power限界突破システム（Wave 6以降）
+                this.powerBreakthroughUnlocked = false;  // 限界突破がunlockされたか
+                this.extraPowerLevel = 0;  // 限界突破後の追加パワーレベル（0-3で赤くなる）
+                
                 // Weapons
                 this.primaryWeapon = 'laser';
                 this.secondaryWeapon = 'missile';
@@ -3293,9 +3411,44 @@
                 // 基本のスラスト強度
                 const thrustIntensity = 0.6 + Math.abs(movement.z) * 0.6;
                 
-                // 左右移動時の青白い発光エフェクト（シンプルな発光のみ）
+                // 左右移動量と上下移動量
                 const lateralThrust = Math.abs(movement.x);
+                const verticalThrust = Math.abs(movement.y);
                 
+                // 噴射口の発光エフェクト（ノズルの丸い口部分が白く発光）
+                if (this.engineNozzles) {
+                    this.engineNozzles.forEach((nozzle, index) => {
+                        // デフォルトの発光強度
+                        let emissiveIntensity = 0.5;
+                        let emissiveColor = new THREE.Color(0x0a0a15);
+                        
+                        // 上下移動中は三つの噴射口が発光
+                        if (verticalThrust > 0.05) {
+                            emissiveIntensity = 2.0 + verticalThrust * 3.0;
+                            emissiveColor = new THREE.Color(0xffffff);
+                        }
+                        // 左移動中は右の噴射口（index 2）が白く発光
+                        else if (movement.x < -0.05) {
+                            if (index === 2) {
+                                emissiveIntensity = 2.0 + lateralThrust * 3.0;
+                                emissiveColor = new THREE.Color(0xffffff);
+                            }
+                        }
+                        // 右移動中は左の噴射口（index 0）が白く発光
+                        else if (movement.x > 0.05) {
+                            if (index === 0) {
+                                emissiveIntensity = 2.0 + lateralThrust * 3.0;
+                                emissiveColor = new THREE.Color(0xffffff);
+                            }
+                        }
+                        
+                        // ノズルの発光を更新
+                        nozzle.material.emissive = emissiveColor;
+                        nozzle.material.emissiveIntensity = emissiveIntensity;
+                    });
+                }
+                
+                // エンジングロー（元のロジック）
                 this.engineGlows.forEach((glow, index) => {
                     // 左右移動時に丸い噴射口が青白く光る
                     if (lateralThrust > 0.05) {
@@ -3311,6 +3464,10 @@
                         // 青白い発光（シンプル）
                         glow.material.uniforms.color.value.setRGB(0.7, 0.9, 1.0);
                         glow.material.uniforms.intensity.value = glowIntensity;
+                    } else if (verticalThrust > 0.05) {
+                        // 上下移動時は全てのエンジンが光る
+                        glow.material.uniforms.color.value.setRGB(0.9, 0.95, 1.0);
+                        glow.material.uniforms.intensity.value = thrustIntensity + verticalThrust * 2.0;
                     } else {
                         // 通常時は元の色（青白）
                         glow.material.uniforms.color.value.setRGB(0.67, 0.87, 1.0);
@@ -3570,6 +3727,31 @@
             getCollisionRadius() {
                 // プレイヤー弾は当たり判定を広く
                 return this.isPlayerBullet ? 2.5 : 0.5;
+            }
+            
+            // 限界突破モードを設定（赤い弾丸でダメージ2倍）
+            setBreakthroughMode(extraLevel, color) {
+                this.isBreakthroughBullet = true;
+                this.damage = 60;  // ダメージ2倍（30 * 2 = 60）
+                
+                // 弾丸の色を赤く変更
+                if (this.mesh && this.mesh.material) {
+                    this.mesh.material.color.setHex(color);
+                }
+                
+                // グローの色も変更
+                if (this.mesh && this.mesh.children.length > 0) {
+                    this.mesh.children.forEach(child => {
+                        if (child.material) {
+                            child.material.color.setHex(color);
+                        }
+                    });
+                }
+                
+                // トレイルの色も変更
+                if (this.trailMaterial) {
+                    this.trailMaterial.color.setHex(color);
+                }
             }
         }
 
@@ -6144,9 +6326,10 @@
         // 行動範囲: 遠方から中距離中心
         // ============================================
         class EnemyAce2 {
-            constructor(scene, position, playerRef, waveNumber = 7) {
+            constructor(scene, position, playerRef, waveNumber = 7, audioManager = null) {
                 this.scene = scene;
                 this.player = playerRef;
+                this.audioManager = audioManager;
                 this.alive = true;
                 this.type = 'ace2';
                 this.waveNumber = waveNumber;
@@ -6179,7 +6362,7 @@
                 this.burstCount = 0;
                 this.burstMax = 3; // 3連射
                 this.burstCooldown = 0;
-                this.burstCooldownMax = 5.5; // レーザーのクールダウン（頻度を下げた）
+                this.burstCooldownMax = 10.0; // レーザーのクールダウン（10秒に調整）
                 this.laserBeam = null;
                 
                 // 動作パターン（より遠方で行動）
@@ -6712,6 +6895,11 @@
                 const dir = new THREE.Vector3().subVectors(this.player.position, this.position).normalize();
                 const firePos = this.position.clone().add(new THREE.Vector3(0, -0.6, -4));
                 
+                // 高出力レーザー発射音を再生
+                if (this.audioManager) {
+                    this.audioManager.playHighPowerLaser();
+                }
+                
                 // 大型レーザービームを作成
                 this.createLaserBeam(firePos, dir);
                 
@@ -6967,9 +7155,10 @@
         // 撃破しない限りフィールドからいなくならない
         // ============================================
         class EnemyAce3 {
-            constructor(scene, position, playerRef, waveNumber = 7) {
+            constructor(scene, position, playerRef, waveNumber = 7, audioManager = null) {
                 this.scene = scene;
                 this.player = playerRef;
+                this.audioManager = audioManager;
                 this.alive = true;
                 this.type = 'ace3';
                 this.waveNumber = waveNumber;
@@ -7002,7 +7191,7 @@
                 this.chargeDuration = 1.5; // チャージ時間
                 this.isCharging = false;
                 this.chargeCooldown = 0;
-                this.chargeCooldownMax = 6.0; // レーザーのクールダウン（頻度を下げた）
+                this.chargeCooldownMax = 10.0; // レーザーのクールダウン（10秒に調整）
                 this.laserBeam = null;
                 
                 // テレポート用
@@ -7772,6 +7961,11 @@
                 // 高出力の大型レーザーを発射
                 const dir = new THREE.Vector3().subVectors(this.player.position, this.position).normalize();
                 const firePos = this.position.clone().add(new THREE.Vector3(0, 0, -4));
+                
+                // 高出力レーザー発射音を再生
+                if (this.audioManager) {
+                    this.audioManager.playHighPowerLaser();
+                }
                 
                 // 大型レーザービームを作成
                 this.createLaserBeam(firePos, dir);
@@ -12884,12 +13078,13 @@
                 spawnPos.z += 30;
                 
                 let ace;
+                const audioMgr = this.waveManager ? this.waveManager.audioManager : null;
                 if (aceType < 0.5) {
                     ace = new EnemyAce(this.scene, spawnPos, this.player, 11);
                 } else if (aceType < 0.8) {
-                    ace = new EnemyAce2(this.scene, spawnPos, this.player, 11);
+                    ace = new EnemyAce2(this.scene, spawnPos, this.player, 11, audioMgr);
                 } else {
-                    ace = new EnemyAce3(this.scene, spawnPos, this.player, 11);
+                    ace = new EnemyAce3(this.scene, spawnPos, this.player, 11, audioMgr);
                 }
                 
                 if (ace && this.waveManager.enemies) {
@@ -13917,8 +14112,110 @@
                 noise.start();
             }
 
+            // High-power laser fire sound (EnemyAce2/Ace3の高出力レーザー発射音)
+            playHighPowerLaser() {
+                if (!this.initialized || !this.enabled) return;
+                this.resume();
+                
+                // 重厚なレーザー発射音
+                const osc = this.audioContext.createOscillator();
+                const osc2 = this.audioContext.createOscillator();
+                const osc3 = this.audioContext.createOscillator();
+                const gain = this.audioContext.createGain();
+                
+                osc.connect(gain);
+                osc2.connect(gain);
+                osc3.connect(gain);
+                gain.connect(this.sfxGain);
+                
+                // 低音の「ビーム」音
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(80, this.audioContext.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(40, this.audioContext.currentTime + 0.5);
+                
+                // 中音の「ジリジリ」音
+                osc2.type = 'square';
+                osc2.frequency.setValueAtTime(200, this.audioContext.currentTime);
+                osc2.frequency.exponentialRampToValueAtTime(100, this.audioContext.currentTime + 0.4);
+                
+                // 高音の「ビューン」音
+                osc3.type = 'sine';
+                osc3.frequency.setValueAtTime(1200, this.audioContext.currentTime);
+                osc3.frequency.exponentialRampToValueAtTime(400, this.audioContext.currentTime + 0.3);
+                
+                gain.gain.setValueAtTime(0.5, this.audioContext.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.5);
+                
+                osc.start();
+                osc2.start();
+                osc3.start();
+                osc.stop(this.audioContext.currentTime + 0.5);
+                osc2.stop(this.audioContext.currentTime + 0.4);
+                osc3.stop(this.audioContext.currentTime + 0.3);
+            }
+            
+            // EnemyAce/Ace2/Ace3 destruction sound (中ボス級敵機の破壊音)
+            playAceDestroyed() {
+                if (!this.initialized || !this.enabled) return;
+                this.resume();
+                
+                // 大爆発音：低音の重厚な爆発 + 金属的な破壊音
+                const duration = 0.8;
+                
+                // 低音の爆発部分
+                const bufferSize = this.audioContext.sampleRate * duration;
+                const buffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
+                const data = buffer.getChannelData(0);
+                
+                for (let i = 0; i < bufferSize; i++) {
+                    const t = i / bufferSize;
+                    data[i] = (Math.random() * 2 - 1) * Math.pow(1 - t, 1.2) * 0.8;
+                }
+                
+                const noise = this.audioContext.createBufferSource();
+                noise.buffer = buffer;
+                
+                const filter = this.audioContext.createBiquadFilter();
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(600, this.audioContext.currentTime);
+                filter.frequency.exponentialRampToValueAtTime(80, this.audioContext.currentTime + duration);
+                
+                const noiseGain = this.audioContext.createGain();
+                noiseGain.gain.setValueAtTime(0.6, this.audioContext.currentTime);
+                noiseGain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
+                
+                noise.connect(filter);
+                filter.connect(noiseGain);
+                noiseGain.connect(this.sfxGain);
+                noise.start();
+                
+                // 金属的な破壊音
+                const osc = this.audioContext.createOscillator();
+                const osc2 = this.audioContext.createOscillator();
+                const oscGain = this.audioContext.createGain();
+                
+                osc.connect(oscGain);
+                osc2.connect(oscGain);
+                oscGain.connect(this.sfxGain);
+                
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(400, this.audioContext.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(80, this.audioContext.currentTime + 0.4);
+                
+                osc2.type = 'square';
+                osc2.frequency.setValueAtTime(600, this.audioContext.currentTime);
+                osc2.frequency.exponentialRampToValueAtTime(100, this.audioContext.currentTime + 0.3);
+                
+                oscGain.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+                oscGain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.5);
+                
+                osc.start();
+                osc2.start();
+                osc.stop(this.audioContext.currentTime + 0.5);
+                osc2.stop(this.audioContext.currentTime + 0.4);
+            }
+
             // Player damage sound
-            playDamage() {
                 if (!this.initialized || !this.enabled) return;
                 this.resume();
                 
@@ -14305,9 +14602,10 @@
         // Wave Manager
         // ============================================
         class WaveManager {
-            constructor(scene, playerRef) {
+            constructor(scene, playerRef, audioManager = null) {
                 this.scene = scene;
                 this.player = playerRef;
+                this.audioManager = audioManager;
                 
                 this.currentWave = 0;
                 this.enemiesRemaining = 0;
@@ -14545,7 +14843,7 @@
                         (Math.random() - 0.5) * 30, // 上下
                         -150 - Math.random() * 50   // 遠方から出現
                     );
-                    const enemy = new EnemyAce3(this.scene, ace3Pos, this.player, waveNumber);
+                    const enemy = new EnemyAce3(this.scene, ace3Pos, this.player, waveNumber, this.audioManager);
                     this.applyDifficultyToEnemy(enemy);
                     this.enemies.push(enemy);
                     this.totalSpawned++;
@@ -14561,7 +14859,7 @@
                         (Math.random() - 0.5) * 25, // 上下
                         -200 - Math.random() * 40   // さらに遠方から出現
                     );
-                    const enemy = new EnemyAce2(this.scene, ace2Pos, this.player, waveNumber);
+                    const enemy = new EnemyAce2(this.scene, ace2Pos, this.player, waveNumber, this.audioManager);
                     this.applyDifficultyToEnemy(enemy);
                     this.enemies.push(enemy);
                     this.totalSpawned++;
@@ -15378,7 +15676,12 @@
                                 
                                 // Play enemy destroyed sound
                                 if (this.audioManager) {
-                                    this.audioManager.playEnemyDestroyed();
+                                    // EnemyAce/Ace2/Ace3の場合は専用の破壊音を再生
+                                    if (enemy.type === 'ace' || enemy.type === 'ace2' || enemy.type === 'ace3') {
+                                        this.audioManager.playAceDestroyed();
+                                    } else {
+                                        this.audioManager.playEnemyDestroyed();
+                                    }
                                 }
                                 
                                 // Enemy explosion + kill marker
@@ -16094,6 +16397,18 @@
                 const direction = this.player.getForwardDirection();
                 const powerLevel = this.player.powerLevel;
                 
+                // 限界突破の赤い弾丸かどうか
+                const isBreakthroughActive = this.player.powerBreakthroughUnlocked && this.player.extraPowerLevel > 0;
+                const extraLevel = this.player.extraPowerLevel || 0;
+                
+                // 赤い弾丸の色（extraLevelに応じて赤くなる）
+                // extraLevel 1: オレンジ赤, 2: 赤, 3: 深紅
+                const getBreakthroughColor = () => {
+                    if (extraLevel === 1) return 0xff6644; // オレンジ赤
+                    if (extraLevel === 2) return 0xff3333; // 赤
+                    return 0xff0000; // 深紅
+                };
+                
                 // パワーレベルに応じた射撃パターン
                 // Level 0: 左右2発（デフォルト）
                 // Level 1: 左右2発 + 中央1発 = 3発
@@ -16103,11 +16418,16 @@
                 // 基本の左右2発
                 positions.forEach((pos, index) => {
                     const projectile = new Projectile(this.scene, pos, direction, true);
+                    // 限界突破時は赤い弾丸でダメージ2倍
+                    if (isBreakthroughActive) {
+                        projectile.setBreakthroughMode(extraLevel, getBreakthroughColor());
+                    }
                     this.projectiles.push(projectile);
                     
                     // Muzzle flash
                     if (this.vfxManager) {
-                        this.vfxManager.createMuzzleFlash(pos.clone(), direction.clone(), 0x00ffff);
+                        const flashColor = isBreakthroughActive ? getBreakthroughColor() : 0x00ffff;
+                        this.vfxManager.createMuzzleFlash(pos.clone(), direction.clone(), flashColor);
                     }
                 });
                 
@@ -16116,10 +16436,14 @@
                     const centerPos = this.player.position.clone();
                     centerPos.z -= 2;
                     const projectile = new Projectile(this.scene, centerPos, direction, true);
+                    if (isBreakthroughActive) {
+                        projectile.setBreakthroughMode(extraLevel, getBreakthroughColor());
+                    }
                     this.projectiles.push(projectile);
                     
                     if (this.vfxManager) {
-                        this.vfxManager.createMuzzleFlash(centerPos.clone(), direction.clone(), 0x00ffff);
+                        const flashColor = isBreakthroughActive ? getBreakthroughColor() : 0x00ffff;
+                        this.vfxManager.createMuzzleFlash(centerPos.clone(), direction.clone(), flashColor);
                     }
                 }
                 
@@ -16140,17 +16464,24 @@
                     leftPos.x -= 1;
                     leftPos.z -= 2;
                     const leftProj = new Projectile(this.scene, leftPos, leftDir, true);
+                    if (isBreakthroughActive) {
+                        leftProj.setBreakthroughMode(extraLevel, getBreakthroughColor());
+                    }
                     this.projectiles.push(leftProj);
                     
                     const rightPos = this.player.position.clone();
                     rightPos.x += 1;
                     rightPos.z -= 2;
                     const rightProj = new Projectile(this.scene, rightPos, rightDir, true);
+                    if (isBreakthroughActive) {
+                        rightProj.setBreakthroughMode(extraLevel, getBreakthroughColor());
+                    }
                     this.projectiles.push(rightProj);
                     
                     if (this.vfxManager) {
-                        this.vfxManager.createMuzzleFlash(leftPos.clone(), leftDir.clone(), 0x00ff88);
-                        this.vfxManager.createMuzzleFlash(rightPos.clone(), rightDir.clone(), 0x00ff88);
+                        const flashColor = isBreakthroughActive ? getBreakthroughColor() : 0x00ff88;
+                        this.vfxManager.createMuzzleFlash(leftPos.clone(), leftDir.clone(), flashColor);
+                        this.vfxManager.createMuzzleFlash(rightPos.clone(), rightDir.clone(), flashColor);
                     }
                 }
                 
@@ -16171,12 +16502,18 @@
                     leftWidePos.x -= 2;
                     leftWidePos.z -= 2;
                     const leftWideProj = new Projectile(this.scene, leftWidePos, leftWideDir, true);
+                    if (isBreakthroughActive) {
+                        leftWideProj.setBreakthroughMode(extraLevel, getBreakthroughColor());
+                    }
                     this.projectiles.push(leftWideProj);
                     
                     const rightWidePos = this.player.position.clone();
                     rightWidePos.x += 2;
                     rightWidePos.z -= 2;
                     const rightWideProj = new Projectile(this.scene, rightWidePos, rightWideDir, true);
+                    if (isBreakthroughActive) {
+                        rightWideProj.setBreakthroughMode(extraLevel, getBreakthroughColor());
+                    }
                     this.projectiles.push(rightWideProj);
                     
                     // 追加の中央弾（少し上）
@@ -16184,12 +16521,17 @@
                     topCenterPos.y += 0.5;
                     topCenterPos.z -= 2;
                     const topCenterProj = new Projectile(this.scene, topCenterPos, direction, true);
+                    if (isBreakthroughActive) {
+                        topCenterProj.setBreakthroughMode(extraLevel, getBreakthroughColor());
+                    }
                     this.projectiles.push(topCenterProj);
                     
                     if (this.vfxManager) {
-                        this.vfxManager.createMuzzleFlash(leftWidePos.clone(), leftWideDir.clone(), 0xffff00);
-                        this.vfxManager.createMuzzleFlash(rightWidePos.clone(), rightWideDir.clone(), 0xffff00);
-                        this.vfxManager.createMuzzleFlash(topCenterPos.clone(), direction.clone(), 0x00ffff);
+                        const flashColor = isBreakthroughActive ? getBreakthroughColor() : 0xffff00;
+                        this.vfxManager.createMuzzleFlash(leftWidePos.clone(), leftWideDir.clone(), flashColor);
+                        this.vfxManager.createMuzzleFlash(rightWidePos.clone(), rightWideDir.clone(), flashColor);
+                        const centerFlash = isBreakthroughActive ? getBreakthroughColor() : 0x00ffff;
+                        this.vfxManager.createMuzzleFlash(topCenterPos.clone(), direction.clone(), centerFlash);
                     }
                 }
                 
@@ -16248,6 +16590,31 @@
                             if (this.audioManager) {
                                 this.audioManager.playPowerUp();
                             }
+                        } else if (this.player.powerBreakthroughUnlocked) {
+                            // 限界突破がunlockされている場合、extraPowerLevelを上げる
+                            if (this.player.extraPowerLevel < 3) {
+                                this.player.extraPowerLevel++;
+                                
+                                // 赤いパワーアップ通知
+                                this.showBreakthroughPowerUpNotification(this.player.extraPowerLevel);
+                                
+                                // 赤いエフェクト
+                                if (this.vfxManager) {
+                                    this.vfxManager.createExplosion(this.player.position.clone(), 'large', 0xff4444);
+                                }
+                                
+                                if (this.audioManager) {
+                                    this.audioManager.playPowerUp();
+                                }
+                            } else {
+                                // 限界突破も最大の場合はスコアボーナス
+                                this.score += 1000;
+                                this.showBreakthroughPowerUpNotification('MAX');
+                                
+                                if (this.audioManager) {
+                                    this.audioManager.playPowerUp();
+                                }
+                            }
                         } else {
                             // 既に最大レベルの場合はスコアボーナス
                             this.score += 500;
@@ -16262,6 +16629,28 @@
                         this.updatePowerLevelUI();
                     }
                 });
+            }
+            
+            // 限界突破パワーアップ通知を表示
+            showBreakthroughPowerUpNotification(level) {
+                const notification = document.createElement('div');
+                notification.textContent = level === 'MAX' ? 'BREAKTHROUGH MAX!' : `BREAKTHROUGH LV.${level}`;
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 35%;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    font-size: 2.5rem;
+                    font-weight: bold;
+                    color: #ff4444;
+                    text-shadow: 0 0 20px #ff4444, 0 0 40px #ff4444, 0 0 60px #ff0000;
+                    z-index: 1000;
+                    animation: powerUpNotify 1.5s ease-out forwards;
+                    pointer-events: none;
+                `;
+                
+                document.body.appendChild(notification);
+                setTimeout(() => notification.remove(), 1500);
             }
             
             // HP回復アイテムとプレイヤーの衝突チェック
@@ -16637,10 +17026,9 @@
                 this.vfxManager = new VFXManager(this.scene, this.camera);
                 
                 this.updateLoadingProgress(88, 'Initializing wave manager...');
-                this.waveManager = new WaveManager(this.scene, this.player);
+                this.waveManager = new WaveManager(this.scene, this.player, this.audioManager);
                 this.waveManager.gameRef = this;  // Gameクラスへの参照を設定
                 this.waveManager.vfxManager = this.vfxManager;
-                this.waveManager.audioManager = this.audioManager;
                 this.vfxManager.audioManager = this.audioManager;
                 
                 this.updateLoadingProgress(90, 'Initializing post-processing...');
@@ -17440,6 +17828,12 @@
                         console.log('[playEndingMovie] Fade out complete, hiding container...');
                         container.style.display = 'none';
                         
+                        // Wave 5ボス撃破後の場合は限界突破選択画面を表示
+                        if (game.waveManager && game.waveManager.currentWave === 5) {
+                            game.showPowerBreakthroughScreen();
+                            return;
+                        }
+                        
                         // Wave 6を開始
                         console.log('[playEndingMovie] Setting game state to PLAYING...');
                         game.state = GameState.PLAYING;
@@ -17531,6 +17925,87 @@
                         }, 500);
                     }, 2000);
                 };
+            }
+
+            showPowerBreakthroughScreen() {
+                console.log('[showPowerBreakthroughScreen] Showing power breakthrough selection...');
+                const screen = document.getElementById('power-breakthrough-screen');
+                screen.style.display = 'flex';
+                requestAnimationFrame(() => {
+                    screen.classList.add('visible');
+                });
+                
+                // ボタンのイベントリスナーを設定
+                const yesBtn = document.getElementById('btn-breakthrough-yes');
+                const noBtn = document.getElementById('btn-breakthrough-no');
+                const game = this;
+                
+                yesBtn.onclick = () => {
+                    console.log('[PowerBreakthrough] YES selected - unlocking power breakthrough');
+                    if (game.player) {
+                        game.player.powerBreakthroughUnlocked = true;
+                    }
+                    game.hidePowerBreakthroughScreen();
+                    game.continueToWave6();
+                };
+                
+                noBtn.onclick = () => {
+                    console.log('[PowerBreakthrough] NO selected - keeping normal power');
+                    game.hidePowerBreakthroughScreen();
+                    game.continueToWave6();
+                };
+            }
+            
+            hidePowerBreakthroughScreen() {
+                const screen = document.getElementById('power-breakthrough-screen');
+                screen.classList.remove('visible');
+                setTimeout(() => {
+                    screen.style.display = 'none';
+                }, 500);
+            }
+            
+            continueToWave6() {
+                console.log('[continueToWave6] Starting Wave 6 transition...');
+                const game = this;
+                
+                // Wave 6を開始
+                game.state = GameState.PLAYING;
+                if (game.waveManager) {
+                    game.waveManager.gameCleared = false;
+                    game.waveManager.paused = false;
+                    
+                    // Wave 6開始前に全ての敵弾を消去
+                    if (game.waveManager.projectiles) {
+                        game.waveManager.projectiles.forEach(p => {
+                            if (p && p.destroy) p.destroy();
+                        });
+                        game.waveManager.projectiles = [];
+                    }
+                    
+                    // プレイヤーのhealthを回復
+                    if (game.player) {
+                        game.player.health = game.player.maxHealth;
+                        game.player.invulnerable = false;
+                        game.player.invulnerableTimer = 0;
+                    }
+                    
+                    // オーディオボリュームを復元
+                    if (game.audioManager) {
+                        game.audioManager.setMasterVolume(game.savedMasterVolume || 0.5);
+                        if (game.audioManager.sfxGain) {
+                            game.audioManager.sfxGain.gain.value = (game.savedSfxVolume || 0.7) * (game.savedMasterVolume || 0.5);
+                        }
+                    }
+                    
+                    game.waveManager.startWave(6);
+                    
+                    // Congratulationsを表示
+                    setTimeout(() => {
+                        if (game.waveManager) {
+                            game.waveManager.showGameClearAnnouncement();
+                        }
+                    }, 500);
+                }
             }
 
             updatePlayer(deltaTime, elapsedTime) {

@@ -16398,16 +16398,17 @@
                 const powerLevel = this.player.powerLevel;
                 
                 // 限界突破の赤い弾丸かどうか
-                const isBreakthroughActive = this.player.powerBreakthroughUnlocked && this.player.extraPowerLevel > 0;
+                const isBreakthroughUnlocked = this.player.powerBreakthroughUnlocked;
                 const extraLevel = this.player.extraPowerLevel || 0;
                 
-                // 赤い弾丸の色（extraLevelに応じて赤くなる）
-                // extraLevel 1: オレンジ赤, 2: 赤, 3: 深紅
-                const getBreakthroughColor = () => {
-                    if (extraLevel === 1) return 0xff6644; // オレンジ赤
-                    if (extraLevel === 2) return 0xff3333; // 赤
-                    return 0xff0000; // 深紅
-                };
+                // 赤い弾丸の色（深紅）
+                const breakthroughColor = 0xff0000;
+                
+                // 弾道ごとに順番に赤くなる
+                // extraLevel 1: 中央の弾道が赤くなる
+                // extraLevel 2: 左右の斜め弾道が赤くなる
+                // extraLevel 3: 広角の弾道と追加中央弾が赤くなる
+                // extraLevel 4+: 基本の左右2発も赤くなる
                 
                 // パワーレベルに応じた射撃パターン
                 // Level 0: 左右2発（デフォルト）
@@ -16415,40 +16416,42 @@
                 // Level 2: 左右2発 + 中央1発 + 斜め2発 = 5発
                 // Level 3: 左右2発 + 中央2発 + 斜め4発 = 8発（広角扇状）
                 
-                // 基本の左右2発
+                // 基本の左右2発（extraLevel 4以上で赤くなる）
+                const isBasicRed = isBreakthroughUnlocked && extraLevel >= 4;
                 positions.forEach((pos, index) => {
                     const projectile = new Projectile(this.scene, pos, direction, true);
-                    // 限界突破時は赤い弾丸でダメージ2倍
-                    if (isBreakthroughActive) {
-                        projectile.setBreakthroughMode(extraLevel, getBreakthroughColor());
+                    if (isBasicRed) {
+                        projectile.setBreakthroughMode(extraLevel, breakthroughColor);
                     }
                     this.projectiles.push(projectile);
                     
                     // Muzzle flash
                     if (this.vfxManager) {
-                        const flashColor = isBreakthroughActive ? getBreakthroughColor() : 0x00ffff;
+                        const flashColor = isBasicRed ? breakthroughColor : 0x00ffff;
                         this.vfxManager.createMuzzleFlash(pos.clone(), direction.clone(), flashColor);
                     }
                 });
                 
-                // Level 1+: 中央の弾
+                // Level 1+: 中央の弾（extraLevel 1以上で赤くなる）
                 if (powerLevel >= 1) {
+                    const isCenterRed = isBreakthroughUnlocked && extraLevel >= 1;
                     const centerPos = this.player.position.clone();
                     centerPos.z -= 2;
                     const projectile = new Projectile(this.scene, centerPos, direction, true);
-                    if (isBreakthroughActive) {
-                        projectile.setBreakthroughMode(extraLevel, getBreakthroughColor());
+                    if (isCenterRed) {
+                        projectile.setBreakthroughMode(extraLevel, breakthroughColor);
                     }
                     this.projectiles.push(projectile);
                     
                     if (this.vfxManager) {
-                        const flashColor = isBreakthroughActive ? getBreakthroughColor() : 0x00ffff;
+                        const flashColor = isCenterRed ? breakthroughColor : 0x00ffff;
                         this.vfxManager.createMuzzleFlash(centerPos.clone(), direction.clone(), flashColor);
                     }
                 }
                 
-                // Level 2+: 斜め方向の弾（左右に15度）
+                // Level 2+: 斜め方向の弾（左右に15度）（extraLevel 2以上で赤くなる）
                 if (powerLevel >= 2) {
+                    const isDiagonalRed = isBreakthroughUnlocked && extraLevel >= 2;
                     const spreadAngle = 0.26; // 約15度
                     const leftDir = direction.clone();
                     leftDir.x = Math.sin(-spreadAngle);
@@ -16464,8 +16467,8 @@
                     leftPos.x -= 1;
                     leftPos.z -= 2;
                     const leftProj = new Projectile(this.scene, leftPos, leftDir, true);
-                    if (isBreakthroughActive) {
-                        leftProj.setBreakthroughMode(extraLevel, getBreakthroughColor());
+                    if (isDiagonalRed) {
+                        leftProj.setBreakthroughMode(extraLevel, breakthroughColor);
                     }
                     this.projectiles.push(leftProj);
                     
@@ -16473,20 +16476,21 @@
                     rightPos.x += 1;
                     rightPos.z -= 2;
                     const rightProj = new Projectile(this.scene, rightPos, rightDir, true);
-                    if (isBreakthroughActive) {
-                        rightProj.setBreakthroughMode(extraLevel, getBreakthroughColor());
+                    if (isDiagonalRed) {
+                        rightProj.setBreakthroughMode(extraLevel, breakthroughColor);
                     }
                     this.projectiles.push(rightProj);
                     
                     if (this.vfxManager) {
-                        const flashColor = isBreakthroughActive ? getBreakthroughColor() : 0x00ff88;
+                        const flashColor = isDiagonalRed ? breakthroughColor : 0x00ff88;
                         this.vfxManager.createMuzzleFlash(leftPos.clone(), leftDir.clone(), flashColor);
                         this.vfxManager.createMuzzleFlash(rightPos.clone(), rightDir.clone(), flashColor);
                     }
                 }
                 
-                // Level 3: さらに広角の弾（左右に30度）+ 追加の中央弾
+                // Level 3: さらに広角の弾（左右に30度）+ 追加の中央弾（extraLevel 3以上で赤くなる）
                 if (powerLevel >= 3) {
+                    const isWideRed = isBreakthroughUnlocked && extraLevel >= 3;
                     const wideAngle = 0.52; // 約30度
                     const leftWideDir = direction.clone();
                     leftWideDir.x = Math.sin(-wideAngle);
@@ -16502,8 +16506,8 @@
                     leftWidePos.x -= 2;
                     leftWidePos.z -= 2;
                     const leftWideProj = new Projectile(this.scene, leftWidePos, leftWideDir, true);
-                    if (isBreakthroughActive) {
-                        leftWideProj.setBreakthroughMode(extraLevel, getBreakthroughColor());
+                    if (isWideRed) {
+                        leftWideProj.setBreakthroughMode(extraLevel, breakthroughColor);
                     }
                     this.projectiles.push(leftWideProj);
                     
@@ -16511,8 +16515,8 @@
                     rightWidePos.x += 2;
                     rightWidePos.z -= 2;
                     const rightWideProj = new Projectile(this.scene, rightWidePos, rightWideDir, true);
-                    if (isBreakthroughActive) {
-                        rightWideProj.setBreakthroughMode(extraLevel, getBreakthroughColor());
+                    if (isWideRed) {
+                        rightWideProj.setBreakthroughMode(extraLevel, breakthroughColor);
                     }
                     this.projectiles.push(rightWideProj);
                     
@@ -16521,16 +16525,16 @@
                     topCenterPos.y += 0.5;
                     topCenterPos.z -= 2;
                     const topCenterProj = new Projectile(this.scene, topCenterPos, direction, true);
-                    if (isBreakthroughActive) {
-                        topCenterProj.setBreakthroughMode(extraLevel, getBreakthroughColor());
+                    if (isWideRed) {
+                        topCenterProj.setBreakthroughMode(extraLevel, breakthroughColor);
                     }
                     this.projectiles.push(topCenterProj);
                     
                     if (this.vfxManager) {
-                        const flashColor = isBreakthroughActive ? getBreakthroughColor() : 0xffff00;
+                        const flashColor = isWideRed ? breakthroughColor : 0xffff00;
                         this.vfxManager.createMuzzleFlash(leftWidePos.clone(), leftWideDir.clone(), flashColor);
                         this.vfxManager.createMuzzleFlash(rightWidePos.clone(), rightWideDir.clone(), flashColor);
-                        const centerFlash = isBreakthroughActive ? getBreakthroughColor() : 0x00ffff;
+                        const centerFlash = isWideRed ? breakthroughColor : 0x00ffff;
                         this.vfxManager.createMuzzleFlash(topCenterPos.clone(), direction.clone(), centerFlash);
                     }
                 }
@@ -16592,7 +16596,11 @@
                             }
                         } else if (this.player.powerBreakthroughUnlocked) {
                             // 限界突破がunlockされている場合、extraPowerLevelを上げる
-                            if (this.player.extraPowerLevel < 3) {
+                            // extraLevel 1: 中央の弾道が赤くなる
+                            // extraLevel 2: 左右の斜め弾道が赤くなる
+                            // extraLevel 3: 広角の弾道と追加中央弾が赤くなる
+                            // extraLevel 4: 基本の左右2発も赤くなる
+                            if (this.player.extraPowerLevel < 4) {
                                 this.player.extraPowerLevel++;
                                 
                                 // 赤いパワーアップ通知

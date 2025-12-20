@@ -2744,21 +2744,134 @@
                 mainBody.position.set(0, 0, 0);
                 this.mesh.add(mainBody);
                 
-                // 左翼（流線型）
-                const leftWingGeometry = new THREE.BoxGeometry(3.5, 0.3, 2.0);
-                const leftWing = new THREE.Mesh(leftWingGeometry, whiteMaterial);
-                leftWing.position.set(-2.5, 0, 0.3);
-                leftWing.rotation.z = -0.15;
-                leftWing.scale.set(1, 1, 0.8);
+                // 左翼（SR-71風スウェプトバックデルタウィング）
+                const leftWingShape = new THREE.Shape();
+                // 45度の後退角、ルートからチップへのテーパー
+                leftWingShape.moveTo(0, 0);           // 翼根元前端
+                leftWingShape.lineTo(-4.5, 2.5);      // 翼端前縁（45度後退）
+                leftWingShape.lineTo(-4.2, 3.2);      // 翼端後縁
+                leftWingShape.lineTo(-0.3, 1.8);      // 翼根元後端
+                leftWingShape.closePath();
+                
+                const wingExtrudeSettings = {
+                    steps: 1,
+                    depth: 0.25,
+                    bevelEnabled: true,
+                    bevelThickness: 0.08,
+                    bevelSize: 0.05,
+                    bevelSegments: 3
+                };
+                
+                // 翼のメタリックシルバーグレーマテリアル
+                const wingMaterial = new THREE.MeshStandardMaterial({
+                    color: 0xc8c8d0,
+                    metalness: 0.85,
+                    roughness: 0.25,
+                    emissive: 0x222233,
+                    emissiveIntensity: 0.1
+                });
+                
+                const leftWingGeometry = new THREE.ExtrudeGeometry(leftWingShape, wingExtrudeSettings);
+                const leftWing = new THREE.Mesh(leftWingGeometry, wingMaterial);
+                leftWing.rotation.x = -Math.PI / 2;
+                leftWing.position.set(-0.8, 0.05, 0.3);
                 this.mesh.add(leftWing);
                 
-                // 右翼（流線型）
-                const rightWingGeometry = new THREE.BoxGeometry(3.5, 0.3, 2.0);
-                const rightWing = new THREE.Mesh(rightWingGeometry, whiteMaterial);
-                rightWing.position.set(2.5, 0, 0.3);
-                rightWing.rotation.z = 0.15;
-                rightWing.scale.set(1, 1, 0.8);
+                // 左翼上面の微妙なリッジ（空気力学的ディテール）
+                const leftRidgeGeometry = new THREE.BoxGeometry(3.5, 0.06, 0.08);
+                const ridgeMaterial = new THREE.MeshStandardMaterial({
+                    color: 0x888899,
+                    metalness: 0.9,
+                    roughness: 0.3
+                });
+                const leftRidge = new THREE.Mesh(leftRidgeGeometry, ridgeMaterial);
+                leftRidge.position.set(-2.8, 0.18, 1.2);
+                leftRidge.rotation.y = -0.78; // 45度
+                this.mesh.add(leftRidge);
+                
+                // 左翼下のエンジンポッド（円筒形）
+                const enginePodGeometry = new THREE.CylinderGeometry(0.35, 0.4, 1.8, 12);
+                const enginePodMaterial = new THREE.MeshStandardMaterial({
+                    color: 0x555566,
+                    metalness: 0.9,
+                    roughness: 0.2
+                });
+                const leftEnginePod = new THREE.Mesh(enginePodGeometry, enginePodMaterial);
+                leftEnginePod.rotation.x = Math.PI / 2;
+                leftEnginePod.position.set(-2.5, -0.25, 1.0);
+                this.mesh.add(leftEnginePod);
+                
+                // 左エンジンポッドのインテーク
+                const podIntakeGeometry = new THREE.CylinderGeometry(0.25, 0.35, 0.3, 12);
+                const podIntakeMaterial = new THREE.MeshStandardMaterial({
+                    color: 0x222233,
+                    metalness: 0.95,
+                    roughness: 0.1
+                });
+                const leftPodIntake = new THREE.Mesh(podIntakeGeometry, podIntakeMaterial);
+                leftPodIntake.rotation.x = Math.PI / 2;
+                leftPodIntake.position.set(-2.5, -0.25, 0.0);
+                this.mesh.add(leftPodIntake);
+                
+                // 左翼のパネルライン
+                const wingPanelLineGeometry = new THREE.BoxGeometry(2.8, 0.02, 0.04);
+                const wingPanelMaterial = new THREE.MeshStandardMaterial({
+                    color: 0x444455,
+                    metalness: 0.8,
+                    roughness: 0.4
+                });
+                const leftPanelLine1 = new THREE.Mesh(wingPanelLineGeometry, wingPanelMaterial);
+                leftPanelLine1.position.set(-2.2, 0.16, 0.8);
+                leftPanelLine1.rotation.y = -0.78;
+                this.mesh.add(leftPanelLine1);
+                
+                const leftPanelLine2 = new THREE.Mesh(wingPanelLineGeometry, wingPanelMaterial);
+                leftPanelLine2.position.set(-2.6, 0.16, 1.6);
+                leftPanelLine2.rotation.y = -0.78;
+                this.mesh.add(leftPanelLine2);
+                
+                // 右翼（SR-71風スウェプトバックデルタウィング）
+                const rightWingShape = new THREE.Shape();
+                rightWingShape.moveTo(0, 0);
+                rightWingShape.lineTo(4.5, 2.5);
+                rightWingShape.lineTo(4.2, 3.2);
+                rightWingShape.lineTo(0.3, 1.8);
+                rightWingShape.closePath();
+                
+                const rightWingGeometry = new THREE.ExtrudeGeometry(rightWingShape, wingExtrudeSettings);
+                const rightWing = new THREE.Mesh(rightWingGeometry, wingMaterial.clone());
+                rightWing.rotation.x = -Math.PI / 2;
+                rightWing.position.set(0.8, 0.05, 0.3);
                 this.mesh.add(rightWing);
+                
+                // 右翼上面の微妙なリッジ
+                const rightRidge = new THREE.Mesh(leftRidgeGeometry, ridgeMaterial);
+                rightRidge.position.set(2.8, 0.18, 1.2);
+                rightRidge.rotation.y = 0.78;
+                this.mesh.add(rightRidge);
+                
+                // 右翼下のエンジンポッド
+                const rightEnginePod = new THREE.Mesh(enginePodGeometry, enginePodMaterial);
+                rightEnginePod.rotation.x = Math.PI / 2;
+                rightEnginePod.position.set(2.5, -0.25, 1.0);
+                this.mesh.add(rightEnginePod);
+                
+                // 右エンジンポッドのインテーク
+                const rightPodIntake = new THREE.Mesh(podIntakeGeometry, podIntakeMaterial);
+                rightPodIntake.rotation.x = Math.PI / 2;
+                rightPodIntake.position.set(2.5, -0.25, 0.0);
+                this.mesh.add(rightPodIntake);
+                
+                // 右翼のパネルライン
+                const rightPanelLine1 = new THREE.Mesh(wingPanelLineGeometry, wingPanelMaterial);
+                rightPanelLine1.position.set(2.2, 0.16, 0.8);
+                rightPanelLine1.rotation.y = 0.78;
+                this.mesh.add(rightPanelLine1);
+                
+                const rightPanelLine2 = new THREE.Mesh(wingPanelLineGeometry, wingPanelMaterial);
+                rightPanelLine2.position.set(2.6, 0.16, 1.6);
+                rightPanelLine2.rotation.y = 0.78;
+                this.mesh.add(rightPanelLine2);
                 
                 // 後部の尾翼（小さな垂直尾翼）
                 const tailFinGeometry = new THREE.BoxGeometry(0.3, 0.8, 1.2);
@@ -6355,15 +6468,19 @@
                 
                 // 高出力チャージレーザー用
                 this.fireTimer = 0;
-                this.fireCooldown = 0.6; // 頻度を上げる
+                this.fireCooldown = 10.0; // 10秒間隔で発射
                 this.chargeTimer = 0;
                 this.isCharging = false;
-                this.chargeTime = 1.0; // チャージ時間
+                this.chargeTime = 1.5; // チャージ時間
                 this.burstCount = 0;
-                this.burstMax = 3; // 3連射
+                this.burstMax = 1; // 1発のみ（連射しない）
                 this.burstCooldown = 0;
-                this.burstCooldownMax = 10.0; // レーザーのクールダウン（10秒に調整）
+                this.burstCooldownMax = 10.0; // レーザーのクールダウン（10秒）
                 this.laserBeam = null;
+                
+                // プレイヤー位置履歴（レーザー照準用）
+                this.playerPositionHistory = [];
+                this.positionHistoryMaxAge = 0.3; // 0.3秒分の履歴を保持
                 
                 // 動作パターン（より遠方で行動）
                 this.movementPattern = 'snipe';
@@ -6640,6 +6757,19 @@
                 this.time += deltaTime;
                 this.patternTimer += deltaTime;
                 
+                // プレイヤー位置履歴を更新（レーザー照準用）
+                if (this.player) {
+                    this.playerPositionHistory.push({
+                        position: this.player.position.clone(),
+                        time: this.time
+                    });
+                    // 古い履歴を削除
+                    while (this.playerPositionHistory.length > 0 && 
+                           this.time - this.playerPositionHistory[0].time > this.positionHistoryMaxAge) {
+                        this.playerPositionHistory.shift();
+                    }
+                }
+                
                 // パターン切り替え
                 if (this.patternTimer >= this.patternDuration) {
                     this.selectNewPattern();
@@ -6892,7 +7022,19 @@
             
             fireHighPowerLaser(projectiles) {
                 // 高出力の大型レーザーを発射
-                const dir = new THREE.Vector3().subVectors(this.player.position, this.position).normalize();
+                // 0.2秒前のプレイヤー位置を狙う（ギリギリ回避可能）
+                let targetPosition = this.player.position.clone();
+                if (this.playerPositionHistory.length > 0) {
+                    // 0.2秒前の位置を取得
+                    const targetTime = this.time - 0.2;
+                    for (let i = this.playerPositionHistory.length - 1; i >= 0; i--) {
+                        if (this.playerPositionHistory[i].time <= targetTime) {
+                            targetPosition = this.playerPositionHistory[i].position.clone();
+                            break;
+                        }
+                    }
+                }
+                const dir = new THREE.Vector3().subVectors(targetPosition, this.position).normalize();
                 const firePos = this.position.clone().add(new THREE.Vector3(0, -0.6, -4));
                 
                 // 高出力レーザー発射音を再生
@@ -7191,8 +7333,12 @@
                 this.chargeDuration = 1.5; // チャージ時間
                 this.isCharging = false;
                 this.chargeCooldown = 0;
-                this.chargeCooldownMax = 10.0; // レーザーのクールダウン（10秒に調整）
+                this.chargeCooldownMax = 10.0; // レーザーのクールダウン（10秒）
                 this.laserBeam = null;
+                
+                // プレイヤー位置履歴（レーザー照準用）
+                this.playerPositionHistory = [];
+                this.positionHistoryMaxAge = 0.3; // 0.3秒分の履歴を保持
                 
                 // テレポート用
                 this.teleportCooldown = 0;
@@ -7645,6 +7791,19 @@
                     this.chargeCooldown -= deltaTime;
                 }
                 
+                // プレイヤー位置履歴を更新（レーザー照準用）
+                if (this.player) {
+                    this.playerPositionHistory.push({
+                        position: this.player.position.clone(),
+                        time: this.time
+                    });
+                    // 古い履歴を削除
+                    while (this.playerPositionHistory.length > 0 && 
+                           this.time - this.playerPositionHistory[0].time > this.positionHistoryMaxAge) {
+                        this.playerPositionHistory.shift();
+                    }
+                }
+                
                 // テレポート中の処理
                 if (this.isTeleporting) {
                     this.teleportTimer += deltaTime;
@@ -7959,7 +8118,19 @@
             
             fireHighPowerLaser(projectiles) {
                 // 高出力の大型レーザーを発射
-                const dir = new THREE.Vector3().subVectors(this.player.position, this.position).normalize();
+                // 0.2秒前のプレイヤー位置を狙う（ギリギリ回避可能）
+                let targetPosition = this.player.position.clone();
+                if (this.playerPositionHistory.length > 0) {
+                    // 0.2秒前の位置を取得
+                    const targetTime = this.time - 0.2;
+                    for (let i = this.playerPositionHistory.length - 1; i >= 0; i--) {
+                        if (this.playerPositionHistory[i].time <= targetTime) {
+                            targetPosition = this.playerPositionHistory[i].position.clone();
+                            break;
+                        }
+                    }
+                }
+                const dir = new THREE.Vector3().subVectors(targetPosition, this.position).normalize();
                 const firePos = this.position.clone().add(new THREE.Vector3(0, 0, -4));
                 
                 // 高出力レーザー発射音を再生
@@ -15692,8 +15863,11 @@
                                     this.vfxManager.createKillMarker(enemy.position.clone());
                                 }
                                 
-                                // 1.75%の確率でHP回復アイテムドロップ
-                                if (Math.random() < 0.0175) {
+                                // EnemyAce3の場合は必ずHP回復アイテムをドロップ
+                                if (enemy.type === 'ace3') {
+                                    this.spawnHealthItem(enemy.position.clone());
+                                } else if (Math.random() < 0.0175) {
+                                    // その他の敵は1.75%の確率でドロップ
                                     this.spawnHealthItem(enemy.position.clone());
                                 }
                             }
@@ -17662,6 +17836,9 @@
                     this.player.invincible = false;
                     this.player.isBarrelRolling = false;
                     this.player.powerLevel = 0;
+                    // Power限界突破効果をリセット
+                    this.player.powerBreakthroughUnlocked = false;
+                    this.player.extraPowerLevel = 0;
                     if (this.player.mesh) {
                         this.player.mesh.position.set(0, 0, 0);
                         this.player.mesh.rotation.set(0, 0, 0);

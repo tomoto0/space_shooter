@@ -2746,11 +2746,11 @@
                 
                 // 左翼（SR-71風スウェプトバックデルタウィング）
                 const leftWingShape = new THREE.Shape();
-                // 45度の後退角、ルートからチップへのテーパー
-                leftWingShape.moveTo(0, 0);           // 翼根元前端
-                leftWingShape.lineTo(-4.5, 2.5);      // 翼端前縁（45度後退）
-                leftWingShape.lineTo(-4.2, 3.2);      // 翼端後縁
-                leftWingShape.lineTo(-0.3, 1.8);      // 翼根元後端
+                // 翼根元から画面手前に向かって広がるデルタウィング
+                leftWingShape.moveTo(0, 0);           // 翼根元（機体中心）
+                leftWingShape.lineTo(-5.0, -3.5);     // 翼端前縁（画面手前下方外側）
+                leftWingShape.lineTo(-4.2, -4.2);     // 翼端後縁
+                leftWingShape.lineTo(0, -1.5);        // 翼根元後端
                 leftWingShape.closePath();
                 
                 const wingExtrudeSettings = {
@@ -2830,12 +2830,12 @@
                 leftPanelLine2.rotation.y = -0.78;
                 this.mesh.add(leftPanelLine2);
                 
-                // 右翼（SR-71風スウェプトバックデルタウィング）
+                // 右翼（画面手前に向かって広がるデルタウィング）
                 const rightWingShape = new THREE.Shape();
                 rightWingShape.moveTo(0, 0);
-                rightWingShape.lineTo(4.5, 2.5);
-                rightWingShape.lineTo(4.2, 3.2);
-                rightWingShape.lineTo(0.3, 1.8);
+                rightWingShape.lineTo(5.0, -3.5);
+                rightWingShape.lineTo(4.2, -4.2);
+                rightWingShape.lineTo(0, -1.5);
                 rightWingShape.closePath();
                 
                 const rightWingGeometry = new THREE.ExtrudeGeometry(rightWingShape, wingExtrudeSettings);

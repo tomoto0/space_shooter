@@ -2744,13 +2744,13 @@
                 mainBody.position.set(0, 0, 0);
                 this.mesh.add(mainBody);
                 
-                // 左翼（機体後方に向かって広がるデルタウィング）
+                // 左翼（SR-71風スウェプトバックデルタウィング）
                 const leftWingShape = new THREE.Shape();
-                // 機体根元から後方に向かって広がる三角形
-                leftWingShape.moveTo(0, 0);           // 翼根元（機体中心付近）
-                leftWingShape.lineTo(-5.5, 3.5);      // 翼端前縁（後方下方外側）
-                leftWingShape.lineTo(-4.8, 4.2);      // 翼端後縁
-                leftWingShape.lineTo(0, 1.5);         // 翼根元後端
+                // 45度の後退角、ルートからチップへのテーパー
+                leftWingShape.moveTo(0, 0);           // 翼根元前端
+                leftWingShape.lineTo(-4.5, 2.5);      // 翼端前縁（45度後退）
+                leftWingShape.lineTo(-4.2, 3.2);      // 翼端後縁
+                leftWingShape.lineTo(-0.3, 1.8);      // 翼根元後端
                 leftWingShape.closePath();
                 
                 const wingExtrudeSettings = {
@@ -2785,7 +2785,7 @@
                     roughness: 0.3
                 });
                 const leftRidge = new THREE.Mesh(leftRidgeGeometry, ridgeMaterial);
-                leftRidge.position.set(-3.2, 0.18, 1.8);
+                leftRidge.position.set(-2.8, 0.18, 1.2);
                 leftRidge.rotation.y = -0.78; // 45度
                 this.mesh.add(leftRidge);
                 
@@ -2798,7 +2798,7 @@
                 });
                 const leftEnginePod = new THREE.Mesh(enginePodGeometry, enginePodMaterial);
                 leftEnginePod.rotation.x = Math.PI / 2;
-                leftEnginePod.position.set(-3.2, -0.25, 2.0);
+                leftEnginePod.position.set(-2.5, -0.25, 1.0);
                 this.mesh.add(leftEnginePod);
                 
                 // 左エンジンポッドのインテーク
@@ -2810,33 +2810,32 @@
                 });
                 const leftPodIntake = new THREE.Mesh(podIntakeGeometry, podIntakeMaterial);
                 leftPodIntake.rotation.x = Math.PI / 2;
-                leftPodIntake.position.set(-3.2, -0.25, 1.0);
+                leftPodIntake.position.set(-2.5, -0.25, 0.0);
                 this.mesh.add(leftPodIntake);
                 
                 // 左翼のパネルライン
-                const wingPanelLineGeometry = new THREE.BoxGeometry(3.5, 0.02, 0.04);
+                const wingPanelLineGeometry = new THREE.BoxGeometry(2.8, 0.02, 0.04);
                 const wingPanelMaterial = new THREE.MeshStandardMaterial({
                     color: 0x444455,
                     metalness: 0.8,
                     roughness: 0.4
                 });
                 const leftPanelLine1 = new THREE.Mesh(wingPanelLineGeometry, wingPanelMaterial);
-                leftPanelLine1.position.set(-2.5, 0.16, 1.2);
+                leftPanelLine1.position.set(-2.2, 0.16, 0.8);
                 leftPanelLine1.rotation.y = -0.78;
                 this.mesh.add(leftPanelLine1);
                 
                 const leftPanelLine2 = new THREE.Mesh(wingPanelLineGeometry, wingPanelMaterial);
-                leftPanelLine2.position.set(-3.5, 0.16, 2.2);
+                leftPanelLine2.position.set(-2.6, 0.16, 1.6);
                 leftPanelLine2.rotation.y = -0.78;
                 this.mesh.add(leftPanelLine2);
                 
-                // 右翼（機体後方に向かって広がるデルタウィング）
+                // 右翼（SR-71風スウェプトバックデルタウィング）
                 const rightWingShape = new THREE.Shape();
-                // 機体根元から後方に向かって広がる三角形（左翼を鈗画）
                 rightWingShape.moveTo(0, 0);
-                rightWingShape.lineTo(5.5, 3.5);
-                rightWingShape.lineTo(4.8, 4.2);
-                rightWingShape.lineTo(0, 1.5);
+                rightWingShape.lineTo(4.5, 2.5);
+                rightWingShape.lineTo(4.2, 3.2);
+                rightWingShape.lineTo(0.3, 1.8);
                 rightWingShape.closePath();
                 
                 const rightWingGeometry = new THREE.ExtrudeGeometry(rightWingShape, wingExtrudeSettings);
@@ -2847,30 +2846,30 @@
                 
                 // 右翼上面の微妙なリッジ
                 const rightRidge = new THREE.Mesh(leftRidgeGeometry, ridgeMaterial);
-                rightRidge.position.set(3.2, 0.18, 1.8);
+                rightRidge.position.set(2.8, 0.18, 1.2);
                 rightRidge.rotation.y = 0.78;
                 this.mesh.add(rightRidge);
                 
                 // 右翼下のエンジンポッド
                 const rightEnginePod = new THREE.Mesh(enginePodGeometry, enginePodMaterial);
                 rightEnginePod.rotation.x = Math.PI / 2;
-                rightEnginePod.position.set(3.2, -0.25, 2.0);
+                rightEnginePod.position.set(2.5, -0.25, 1.0);
                 this.mesh.add(rightEnginePod);
                 
                 // 右エンジンポッドのインテーク
                 const rightPodIntake = new THREE.Mesh(podIntakeGeometry, podIntakeMaterial);
                 rightPodIntake.rotation.x = Math.PI / 2;
-                rightPodIntake.position.set(3.2, -0.25, 1.0);
+                rightPodIntake.position.set(2.5, -0.25, 0.0);
                 this.mesh.add(rightPodIntake);
                 
                 // 右翼のパネルライン
                 const rightPanelLine1 = new THREE.Mesh(wingPanelLineGeometry, wingPanelMaterial);
-                rightPanelLine1.position.set(2.5, 0.16, 1.2);
+                rightPanelLine1.position.set(2.2, 0.16, 0.8);
                 rightPanelLine1.rotation.y = 0.78;
                 this.mesh.add(rightPanelLine1);
                 
                 const rightPanelLine2 = new THREE.Mesh(wingPanelLineGeometry, wingPanelMaterial);
-                rightPanelLine2.position.set(3.5, 0.16, 2.2);
+                rightPanelLine2.position.set(2.6, 0.16, 1.6);
                 rightPanelLine2.rotation.y = 0.78;
                 this.mesh.add(rightPanelLine2);
                 

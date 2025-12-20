@@ -2928,6 +2928,24 @@
                 cockpit.position.set(0, 0.5, -1.5);
                 this.mesh.add(cockpit);
                 
+                // コックピット両横の隙間を埋めるフィレット（左側）
+                const leftCockpitFilletGeometry = new THREE.BoxGeometry(0.35, 0.45, 1.0);
+                const filletMaterial = new THREE.MeshStandardMaterial({
+                    color: 0xffffff,
+                    metalness: 0.8,
+                    roughness: 0.15,
+                    emissive: 0xffffff,
+                    emissiveIntensity: 0.08
+                });
+                const leftCockpitFillet = new THREE.Mesh(leftCockpitFilletGeometry, filletMaterial);
+                leftCockpitFillet.position.set(-0.45, 0.35, -1.3);
+                this.mesh.add(leftCockpitFillet);
+                
+                // コックピット両横の隙間を埋めるフィレット（右側）
+                const rightCockpitFillet = new THREE.Mesh(leftCockpitFilletGeometry, filletMaterial.clone());
+                rightCockpitFillet.position.set(0.45, 0.35, -1.3);
+                this.mesh.add(rightCockpitFillet);
+                
                 // パネルライン（胴体上部の装飾）
                 const panelLineMaterial = new THREE.MeshStandardMaterial({
                     color: 0x222233,
@@ -2966,6 +2984,46 @@
                     const thinLine = new THREE.Mesh(thinHorizontalGeometry, panelLineMaterial);
                     thinLine.position.set(0, 0.15 + k * 0.15, 0);
                     this.mesh.add(thinLine);
+                }
+                
+                // 胴体表面の微細なメタリック紋様
+                const bodyMetallicPatternMaterial = new THREE.MeshStandardMaterial({
+                    color: 0xf0f0f5,
+                    metalness: 0.85,
+                    roughness: 0.08,
+                    emissive: 0x888899,
+                    emissiveIntensity: 0.05
+                });
+                
+                // 胴体上部の細かい紋様パネル（複数条）
+                const bodyPatternGeometry = new THREE.BoxGeometry(2.8, 0.03, 4.0);
+                for (let i = 0; i < 5; i++) {
+                    const bodyPattern = new THREE.Mesh(bodyPatternGeometry, bodyMetallicPatternMaterial);
+                    bodyPattern.position.set(0, 0.25 + i * 0.15, 0);
+                    this.mesh.add(bodyPattern);
+                }
+                
+                // 翼表面の微細なメタリック紋様
+                const wingMetallicPatternMaterial = new THREE.MeshStandardMaterial({
+                    color: 0xf5f5fa,
+                    metalness: 0.9,
+                    roughness: 0.06,
+                    emissive: 0x999aaa,
+                    emissiveIntensity: 0.04
+                });
+                
+                // 翼上面の細かい紋様パネル（複数条）
+                const wingPatternGeometry = new THREE.BoxGeometry(3.8, 0.02, 0.08);
+                for (let j = 0; j < 8; j++) {
+                    const leftWingPattern = new THREE.Mesh(wingPatternGeometry, wingMetallicPatternMaterial);
+                    leftWingPattern.position.set(-2.0, 0.30 + j * 0.25, 0.15);
+                    leftWingPattern.rotation.y = -0.78;
+                    this.mesh.add(leftWingPattern);
+                    
+                    const rightWingPattern = new THREE.Mesh(wingPatternGeometry, wingMetallicPatternMaterial.clone());
+                    rightWingPattern.position.set(2.0, 0.30 + j * 0.25, 0.15);
+                    rightWingPattern.rotation.y = 0.78;
+                    this.mesh.add(rightWingPattern);
                 }
                 
                 // エアインテーク（左右）

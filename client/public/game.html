@@ -2746,20 +2746,21 @@
                 
                 // 左翼（SR-71風スウェプトバックデルタウィング）
                 const leftWingShape = new THREE.Shape();
-                // 后退角45度程度の三角翼 - 胴体先端（コックピットあたり）からエンジン噴射口あたりまでを接続部分としたコンパクトな三角翼
-                // 位置調整: 底辺（エンジン噴射口の辺）をエンジン噴射口と水平に配置、翼を大きく
-                leftWingShape.moveTo(-0.2, -1.2);     // 胴体先端（コックピットあたり）
-                leftWingShape.lineTo(-2.2, 0.8);      // 接続部後端（エンジン噴射口あたり - 水平位置）
-                leftWingShape.lineTo(-4.0, -2.2);     // 翼端（画面手前Z負方向）
+                // 后退角45度程度の三角翼 - 胴体先端（コックピットあたり）からエンジン噴射口あたりまでを接続部分とした柟性な形状
+                // 位置調整: 底辺（エンジン噴射口の辺）をエンジン噴射口と完全に水平に配置、コックピット近くで翼頂点が露出しない柟性な形状
+                leftWingShape.moveTo(-0.1, -1.0);     // 胴体先端（コックピットあたり）
+                leftWingShape.lineTo(-0.8, 0.0);      // 接続部中閣（柟性な接続）
+                leftWingShape.lineTo(-2.2, 1.0);      // 接続部後端（エンジン噴射口あたり - 完全に水平）
+                leftWingShape.lineTo(-4.2, -1.8);     // 翼端（画面手前Z負方向）
                 leftWingShape.closePath();
                 
                 const wingExtrudeSettings = {
-                    steps: 1,
-                    depth: 0.25,
+                    steps: 2,
+                    depth: 0.5,
                     bevelEnabled: true,
-                    bevelThickness: 0.08,
-                    bevelSize: 0.05,
-                    bevelSegments: 3
+                    bevelThickness: 0.12,
+                    bevelSize: 0.08,
+                    bevelSegments: 4
                 };
                 
                 // 翼の色を胴体と同じ白色に統一
@@ -2774,32 +2775,32 @@
                 const leftWingGeometry = new THREE.ExtrudeGeometry(leftWingShape, wingExtrudeSettings);
                 const leftWing = new THREE.Mesh(leftWingGeometry, wingMaterial);
                 leftWing.rotation.x = -Math.PI / 2;
-                leftWing.position.set(-0.8, 0.05, -0.2);
+                leftWing.position.set(-0.6, 0.08, 0.0);
                 this.mesh.add(leftWing);
                 
                 // 左翼上面のエッジライト（立体感強調）
-                const leftEdgeLightGeometry = new THREE.BoxGeometry(4.2, 0.04, 0.06);
+                const leftEdgeLightGeometry = new THREE.BoxGeometry(4.5, 0.05, 0.08);
                 const edgeLightMaterial = new THREE.MeshStandardMaterial({
                     color: 0xccccdd,
                     metalness: 0.95,
                     roughness: 0.1,
-                    emissive: 0x666677,
-                    emissiveIntensity: 0.15
+                    emissive: 0x777788,
+                    emissiveIntensity: 0.2
                 });
                 const leftEdgeLight = new THREE.Mesh(leftEdgeLightGeometry, edgeLightMaterial);
-                leftEdgeLight.position.set(-2.2, 0.22, -0.3);
+                leftEdgeLight.position.set(-2.2, 0.28, 0.2);
                 leftEdgeLight.rotation.y = -0.78;
                 this.mesh.add(leftEdgeLight);
                 
                 // 左翼上面の中孤リッジ（空気力学的ディテール）
-                const leftRidgeGeometry = new THREE.BoxGeometry(4.2, 0.06, 0.08);
+                const leftRidgeGeometry = new THREE.BoxGeometry(4.5, 0.08, 0.1);
                 const ridgeMaterial = new THREE.MeshStandardMaterial({
                     color: 0x999aaa,
                     metalness: 0.85,
                     roughness: 0.25
                 });
                 const leftRidge = new THREE.Mesh(leftRidgeGeometry, ridgeMaterial);
-                leftRidge.position.set(-2.2, 0.18, 0.0);
+                leftRidge.position.set(-2.2, 0.22, 0.2);
                 leftRidge.rotation.y = -0.78;
                 this.mesh.add(leftRidge);
                 
@@ -2828,51 +2829,52 @@
                 this.mesh.add(leftPodIntake);
                 
                 // 左翼の細かいパネルライン（複数条で立体感を強調）
-                const wingPanelLineGeometry = new THREE.BoxGeometry(3.8, 0.015, 0.03);
+                const wingPanelLineGeometry = new THREE.BoxGeometry(4.0, 0.02, 0.04);
                 const wingPanelMaterial = new THREE.MeshStandardMaterial({
                     color: 0x555566,
                     metalness: 0.85,
                     roughness: 0.35
                 });
                 const leftPanelLine1 = new THREE.Mesh(wingPanelLineGeometry, wingPanelMaterial);
-                leftPanelLine1.position.set(-2.0, 0.165, -0.5);
+                leftPanelLine1.position.set(-2.0, 0.22, -0.2);
                 leftPanelLine1.rotation.y = -0.78;
                 this.mesh.add(leftPanelLine1);
                 
                 const leftPanelLine2 = new THREE.Mesh(wingPanelLineGeometry, wingPanelMaterial);
-                leftPanelLine2.position.set(-2.4, 0.165, 0.2);
+                leftPanelLine2.position.set(-2.4, 0.22, 0.3);
                 leftPanelLine2.rotation.y = -0.78;
                 this.mesh.add(leftPanelLine2);
                 
                 const leftPanelLine3 = new THREE.Mesh(wingPanelLineGeometry, wingPanelMaterial);
-                leftPanelLine3.position.set(-2.8, 0.165, 0.9);
+                leftPanelLine3.position.set(-2.8, 0.22, 0.8);
                 leftPanelLine3.rotation.y = -0.78;
                 this.mesh.add(leftPanelLine3);
                 
                 // 右翼（后退角45度程度の三角翼 - 胴体先端（コックピットあたり）からエンジン噴射口あたりまでを接続部分としたコンパクトな三角翼）
                 const rightWingShape = new THREE.Shape();
-                // 后退角45度程度の三角翼 - 胴体先端（コックピットあたり）からエンジン噴射口あたりまでを接続部分としたコンパクトな三角翼
-                // 位置調整: 底辺（エンジン噴射口の辺）をエンジン噴射口と水平に配置、翼を大きく
-                rightWingShape.moveTo(0.2, -1.2);     // 胴体先端（コックピットあたり）
-                rightWingShape.lineTo(2.2, 0.8);      // 接続部後端（エンジン噴射口あたり - 水平位置）
-                rightWingShape.lineTo(4.0, -2.2);     // 翼端（画面手前Z負方向）
+                // 后退角45度程度の三角翼 - 胴体先端（コックピットあたり）からエンジン噴射口あたりまでを接続部分とした柟性な形状
+                // 位置調整: 底辺（エンジン噴射口の辺）をエンジン噴射口と完全に水平に配置、コックピット近くで翼頂点が露出しない柟性な形状
+                rightWingShape.moveTo(0.1, -1.0);     // 胴体先端（コックピットあたり）
+                rightWingShape.lineTo(0.8, 0.0);      // 接続部中閣（柟性な接続）
+                rightWingShape.lineTo(2.2, 1.0);      // 接続部後端（エンジン噴射口あたり - 完全に水平）
+                rightWingShape.lineTo(4.2, -1.8);     // 翼端（画面手前Z負方向）
                 rightWingShape.closePath();
                 
                 const rightWingGeometry = new THREE.ExtrudeGeometry(rightWingShape, wingExtrudeSettings);
                 const rightWing = new THREE.Mesh(rightWingGeometry, wingMaterial.clone());
                 rightWing.rotation.x = -Math.PI / 2;
-                rightWing.position.set(0.8, 0.05, -0.2);
+                rightWing.position.set(0.6, 0.08, 0.0);
                 this.mesh.add(rightWing);
                 
                 // 右翼上面のエッジライト（立体感強調）
                 const rightEdgeLight = new THREE.Mesh(leftEdgeLightGeometry, edgeLightMaterial);
-                rightEdgeLight.position.set(2.2, 0.22, -0.3);
+                rightEdgeLight.position.set(2.2, 0.28, 0.2);
                 rightEdgeLight.rotation.y = 0.78;
                 this.mesh.add(rightEdgeLight);
                 
                 // 右翼上面の中孤リッジ
                 const rightRidge = new THREE.Mesh(leftRidgeGeometry, ridgeMaterial);
-                rightRidge.position.set(2.2, 0.18, 0.0);
+                rightRidge.position.set(2.2, 0.22, 0.2);
                 rightRidge.rotation.y = 0.78;
                 this.mesh.add(rightRidge);
                 
@@ -2890,17 +2892,17 @@
                 
                 // 右翼の細かいパネルライン（複数条で立体感を強調）
                 const rightPanelLine1 = new THREE.Mesh(wingPanelLineGeometry, wingPanelMaterial);
-                rightPanelLine1.position.set(2.0, 0.165, -0.5);
+                rightPanelLine1.position.set(2.0, 0.22, -0.2);
                 rightPanelLine1.rotation.y = 0.78;
                 this.mesh.add(rightPanelLine1);
                 
                 const rightPanelLine2 = new THREE.Mesh(wingPanelLineGeometry, wingPanelMaterial);
-                rightPanelLine2.position.set(2.4, 0.165, 0.2);
+                rightPanelLine2.position.set(2.4, 0.22, 0.3);
                 rightPanelLine2.rotation.y = 0.78;
                 this.mesh.add(rightPanelLine2);
                 
                 const rightPanelLine3 = new THREE.Mesh(wingPanelLineGeometry, wingPanelMaterial);
-                rightPanelLine3.position.set(2.8, 0.165, 0.9);
+                rightPanelLine3.position.set(2.8, 0.22, 0.8);
                 rightPanelLine3.rotation.y = 0.78;
                 this.mesh.add(rightPanelLine3);
                 

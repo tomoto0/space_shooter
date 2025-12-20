@@ -2746,11 +2746,11 @@
                 
                 // 左翼（SR-71風スウェプトバックデルタウィング）
                 const leftWingShape = new THREE.Shape();
-                // 翼根元から画面手前に向かって広がるデルタウィング
-                leftWingShape.moveTo(0, 0);           // 翼根元（機体中心）
-                leftWingShape.lineTo(-5.0, -3.5);     // 翼端前縁（画面手前下方外側）
-                leftWingShape.lineTo(-4.2, -4.2);     // 翼端後縁
-                leftWingShape.lineTo(0, -1.5);        // 翼根元後端
+                // SR-71風三角形デルタウィング
+                leftWingShape.moveTo(0, 0.5);         // 翼接続部前端
+                leftWingShape.lineTo(-2.5, 0.5);      // 翼接続部後端
+                leftWingShape.lineTo(-4.5, -3.5);     // 翼端前縁
+                leftWingShape.lineTo(-3.5, -4.0);     // 翼端後縁
                 leftWingShape.closePath();
                 
                 const wingExtrudeSettings = {
@@ -2774,7 +2774,7 @@
                 const leftWingGeometry = new THREE.ExtrudeGeometry(leftWingShape, wingExtrudeSettings);
                 const leftWing = new THREE.Mesh(leftWingGeometry, wingMaterial);
                 leftWing.rotation.x = -Math.PI / 2;
-                leftWing.position.set(-0.8, 0.05, 0.3);
+                leftWing.position.set(-1.2, 0.05, 0.5);
                 this.mesh.add(leftWing);
                 
                 // 左翼上面の微妙なリッジ（空気力学的ディテール）
@@ -2830,18 +2830,18 @@
                 leftPanelLine2.rotation.y = -0.78;
                 this.mesh.add(leftPanelLine2);
                 
-                // 右翼（画面手前に向かって広がるデルタウィング）
+                // 右翼（SR-71風三角形デルタウィング）
                 const rightWingShape = new THREE.Shape();
-                rightWingShape.moveTo(0, 0);
-                rightWingShape.lineTo(5.0, -3.5);
-                rightWingShape.lineTo(4.2, -4.2);
-                rightWingShape.lineTo(0, -1.5);
+                rightWingShape.moveTo(0, 0.5);
+                rightWingShape.lineTo(2.5, 0.5);
+                rightWingShape.lineTo(4.5, -3.5);
+                rightWingShape.lineTo(3.5, -4.0);
                 rightWingShape.closePath();
                 
                 const rightWingGeometry = new THREE.ExtrudeGeometry(rightWingShape, wingExtrudeSettings);
                 const rightWing = new THREE.Mesh(rightWingGeometry, wingMaterial.clone());
                 rightWing.rotation.x = -Math.PI / 2;
-                rightWing.position.set(0.8, 0.05, 0.3);
+                rightWing.position.set(1.2, 0.05, 0.5);
                 this.mesh.add(rightWing);
                 
                 // 右翼上面の微妙なリッジ

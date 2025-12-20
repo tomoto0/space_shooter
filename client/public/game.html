@@ -2750,8 +2750,8 @@
                 // 位置調整: 底辺（エンジン噴射口の辺）をエンジン噴射口と完全に水平に配置、コックピット近くで翼頂点が露出しない柟性な形状
                 leftWingShape.moveTo(-0.1, -1.0);     // 胴体先端（コックピットあたり）
                 leftWingShape.lineTo(-0.8, 0.0);      // 接続部中閣（柟性な接続）
-                leftWingShape.lineTo(-2.2, 1.15);     // 接続部後端（エンジン噴射口あたり - 完全に水平）
-                leftWingShape.lineTo(-4.2, -1.5);     // 翼端（画面手前Z負方向）
+                leftWingShape.lineTo(-2.2, 1.08);     // 接続部後端（エンジン噴射口あたり - 完全に水平に微調整）
+                leftWingShape.lineTo(-4.2, -1.52);    // 翼端（画面手前Z負方向 - 水平微調整）
                 leftWingShape.closePath();
                 
                 const wingExtrudeSettings = {
@@ -2856,8 +2856,8 @@
                 // 位置調整: 底辺（エンジン噴射口の辺）をエンジン噴射口と完全に水平に配置、コックピット近くで翼頂点が露出しない柟性な形状
                 rightWingShape.moveTo(0.1, -1.0);     // 胴体先端（コックピットあたり）
                 rightWingShape.lineTo(0.8, 0.0);      // 接続部中閣（柟性な接続）
-                rightWingShape.lineTo(2.2, 1.15);     // 接続部後端（エンジン噴射口あたり - 完全に水平）
-                rightWingShape.lineTo(4.2, -1.5);     // 翼端（画面手前Z負方向）
+                rightWingShape.lineTo(2.2, 1.08);     // 接続部後端（エンジン噴射口あたり - 完全に水平に微調整）
+                rightWingShape.lineTo(4.2, -1.52);    // 翼端（画面手前Z負方向 - 水平微調整）
                 rightWingShape.closePath();
                 
                 const rightWingGeometry = new THREE.ExtrudeGeometry(rightWingShape, wingExtrudeSettings);
@@ -3051,6 +3051,72 @@
                     this.mesh.add(pod);
                 });
 
+                // コックピット横と翼の隙間を埋めるフェアリング（左側）
+                const leftFairingGeometry = new THREE.BoxGeometry(0.4, 0.6, 1.2);
+                const fairingMaterial = new THREE.MeshStandardMaterial({
+                    color: 0xffffff,
+                    metalness: 0.8,
+                    roughness: 0.15,
+                    emissive: 0xffffff,
+                    emissiveIntensity: 0.08
+                });
+                const leftFairing = new THREE.Mesh(leftFairingGeometry, fairingMaterial);
+                leftFairing.position.set(-0.6, 0.15, -0.8);
+                this.mesh.add(leftFairing);
+                
+                // コックピット横と翼の隙間を埋めるフェアリング（右側）
+                const rightFairing = new THREE.Mesh(leftFairingGeometry, fairingMaterial.clone());
+                rightFairing.position.set(0.6, 0.15, -0.8);
+                this.mesh.add(rightFairing);
+                
+                // 翼の三角翼頂点あたりの隙間を埋めるストラット（左側）
+                const leftWingStrut = new THREE.BoxGeometry(0.3, 0.25, 0.8);
+                const strutMaterial = new THREE.MeshStandardMaterial({
+                    color: 0xffffff,
+                    metalness: 0.8,
+                    roughness: 0.15
+                });
+                const leftStrut = new THREE.Mesh(leftWingStrut, strutMaterial);
+                leftStrut.position.set(-1.8, 0.05, -1.2);
+                this.mesh.add(leftStrut);
+                
+                // 翼の三角翼頂点あたりの隙間を埋めるストラット（右側）
+                const rightStrut = new THREE.Mesh(leftWingStrut, strutMaterial.clone());
+                rightStrut.position.set(1.8, 0.05, -1.2);
+                this.mesh.add(rightStrut);
+                
+                // 翼厚み部分の装飾（左翼の側面ディテール）
+                const leftWingSideGeometry = new THREE.BoxGeometry(0.15, 0.4, 3.5);
+                const wingDetailMaterial = new THREE.MeshStandardMaterial({
+                    color: 0xddddee,
+                    metalness: 0.85,
+                    roughness: 0.2
+                });
+                const leftWingSide = new THREE.Mesh(leftWingSideGeometry, wingDetailMaterial);
+                leftWingSide.position.set(-3.5, 0.15, 0.0);
+                this.mesh.add(leftWingSide);
+                
+                // 翼厚み部分の装飾（右翼の側面ディテール）
+                const rightWingSide = new THREE.Mesh(leftWingSideGeometry, wingDetailMaterial.clone());
+                rightWingSide.position.set(3.5, 0.15, 0.0);
+                this.mesh.add(rightWingSide);
+                
+                // 翼厚み部分の縦方向パネルライン（左翼）
+                const wingVerticalPanelGeometry = new THREE.BoxGeometry(0.08, 0.35, 3.2);
+                const wingVerticalPanelMaterial = new THREE.MeshStandardMaterial({
+                    color: 0x555566,
+                    metalness: 0.85,
+                    roughness: 0.35
+                });
+                const leftWingVerticalPanel = new THREE.Mesh(wingVerticalPanelGeometry, wingVerticalPanelMaterial);
+                leftWingVerticalPanel.position.set(-3.0, 0.25, 0.0);
+                this.mesh.add(leftWingVerticalPanel);
+                
+                // 翼厚み部分の縦方向パネルライン（右翼）
+                const rightWingVerticalPanel = new THREE.Mesh(wingVerticalPanelGeometry, wingVerticalPanelMaterial.clone());
+                rightWingVerticalPanel.position.set(3.0, 0.25, 0.0);
+                this.mesh.add(rightWingVerticalPanel);
+                
                 // 武器マウント（ウィング下部）
                 const weaponGeometry = new THREE.CylinderGeometry(0.12, 0.12, 1.6, 6);
                 const weaponMaterial = new THREE.MeshStandardMaterial({

@@ -2750,8 +2750,8 @@
                 // 位置調整: 底辺（エンジン噴射口の辺）をエンジン噴射口と完全に水平に配置、コックピット近くで翼頂点が露出しない柟性な形状
                 leftWingShape.moveTo(-0.1, -1.0);     // 胴体先端（コックピットあたり）
                 leftWingShape.lineTo(-0.8, 0.0);      // 接続部中閣（柟性な接続）
-                leftWingShape.lineTo(-2.2, 1.0);      // 接続部後端（エンジン噴射口あたり - 完全に水平）
-                leftWingShape.lineTo(-4.2, -1.8);     // 翼端（画面手前Z負方向）
+                leftWingShape.lineTo(-2.2, 1.15);     // 接続部後端（エンジン噴射口あたり - 完全に水平）
+                leftWingShape.lineTo(-4.2, -1.5);     // 翼端（画面手前Z負方向）
                 leftWingShape.closePath();
                 
                 const wingExtrudeSettings = {
@@ -2856,8 +2856,8 @@
                 // 位置調整: 底辺（エンジン噴射口の辺）をエンジン噴射口と完全に水平に配置、コックピット近くで翼頂点が露出しない柟性な形状
                 rightWingShape.moveTo(0.1, -1.0);     // 胴体先端（コックピットあたり）
                 rightWingShape.lineTo(0.8, 0.0);      // 接続部中閣（柟性な接続）
-                rightWingShape.lineTo(2.2, 1.0);      // 接続部後端（エンジン噴射口あたり - 完全に水平）
-                rightWingShape.lineTo(4.2, -1.8);     // 翼端（画面手前Z負方向）
+                rightWingShape.lineTo(2.2, 1.15);     // 接続部後端（エンジン噴射口あたり - 完全に水平）
+                rightWingShape.lineTo(4.2, -1.5);     // 翼端（画面手前Z負方向）
                 rightWingShape.closePath();
                 
                 const rightWingGeometry = new THREE.ExtrudeGeometry(rightWingShape, wingExtrudeSettings);
@@ -2930,7 +2930,7 @@
                 
                 // パネルライン（胴体上部の装飾）
                 const panelLineMaterial = new THREE.MeshStandardMaterial({
-                    color: 0x666677,
+                    color: 0x222233,
                     metalness: 0.85,
                     roughness: 0.35
                 });
@@ -2942,14 +2942,30 @@
                 this.mesh.add(centerLine);
                 
                 // 左右のパネルライン
-                for (let i = 1; i <= 2; i++) {
+                for (let i = 1; i <= 3; i++) {
                     const leftLine = new THREE.Mesh(centerLineGeometry, panelLineMaterial);
-                    leftLine.position.set(-i * 0.8, 0.28, 0);
+                    leftLine.position.set(-i * 0.6, 0.28, 0);
                     this.mesh.add(leftLine);
                     
                     const rightLine = new THREE.Mesh(centerLineGeometry, panelLineMaterial);
-                    rightLine.position.set(i * 0.8, 0.28, 0);
+                    rightLine.position.set(i * 0.6, 0.28, 0);
                     this.mesh.add(rightLine);
+                }
+                
+                // 横方向の細かいパネルライン（横模様）
+                const horizontalPanelGeometry = new THREE.BoxGeometry(3.0, 0.04, 0.08);
+                for (let j = -2; j <= 2; j++) {
+                    const hPanel = new THREE.Mesh(horizontalPanelGeometry, panelLineMaterial);
+                    hPanel.position.set(0, 0.25 + j * 0.3, 0);
+                    this.mesh.add(hPanel);
+                }
+                
+                // 胴体上部の細かい横線紋様（横模様）
+                const thinHorizontalGeometry = new THREE.BoxGeometry(3.2, 0.02, 0.04);
+                for (let k = -3; k <= 3; k++) {
+                    const thinLine = new THREE.Mesh(thinHorizontalGeometry, panelLineMaterial);
+                    thinLine.position.set(0, 0.15 + k * 0.15, 0);
+                    this.mesh.add(thinLine);
                 }
                 
                 // エアインテーク（左右）

@@ -2746,11 +2746,10 @@
                 
                 // 左翼（SR-71風スウェプトバックデルタウィング）
                 const leftWingShape = new THREE.Shape();
-                // SR-71風三角形デルタウィング
-                leftWingShape.moveTo(0, 0.5);         // 翼接続部前端
-                leftWingShape.lineTo(-2.5, 0.5);      // 翼接続部後端
-                leftWingShape.lineTo(-4.5, -3.5);     // 翼端前縁
-                leftWingShape.lineTo(-3.5, -4.0);     // 翼端後縁
+                // 后退角45度程度の三角翼 - 胴体先端（コックピットあたり）からエンジン噴射口あたりまでを接続部分としたコンパクトな三角翼
+                leftWingShape.moveTo(-0.3, -1.5);     // 胴体先端（コックピットあたり）
+                leftWingShape.lineTo(-1.8, 0.5);      // 接続部後端（エンジン噴射口あたり）
+                leftWingShape.lineTo(-3.2, -2.5);     // 翼端（画面手前Z負方向）
                 leftWingShape.closePath();
                 
                 const wingExtrudeSettings = {
@@ -2762,19 +2761,19 @@
                     bevelSegments: 3
                 };
                 
-                // 翼のメタリックシルバーグレーマテリアル
+                // 翼の色を胴体と同じ白色に統一
                 const wingMaterial = new THREE.MeshStandardMaterial({
-                    color: 0xc8c8d0,
-                    metalness: 0.85,
-                    roughness: 0.25,
-                    emissive: 0x222233,
-                    emissiveIntensity: 0.1
+                    color: 0xffffff,
+                    metalness: 0.8,
+                    roughness: 0.15,
+                    emissive: 0xffffff,
+                    emissiveIntensity: 0.08
                 });
                 
                 const leftWingGeometry = new THREE.ExtrudeGeometry(leftWingShape, wingExtrudeSettings);
                 const leftWing = new THREE.Mesh(leftWingGeometry, wingMaterial);
                 leftWing.rotation.x = -Math.PI / 2;
-                leftWing.position.set(-1.2, 0.05, 0.5);
+                leftWing.position.set(-0.5, 0.05, -0.5);
                 this.mesh.add(leftWing);
                 
                 // 左翼上面の微妙なリッジ（空気力学的ディテール）
@@ -2830,18 +2829,17 @@
                 leftPanelLine2.rotation.y = -0.78;
                 this.mesh.add(leftPanelLine2);
                 
-                // 右翼（SR-71風三角形デルタウィング）
+                // 右翼（后退角45度程度の三角翼 - 胴体先端（コックピットあたり）からエンジン噴射口あたりまでを接続部分としたコンパクトな三角翼）
                 const rightWingShape = new THREE.Shape();
-                rightWingShape.moveTo(0, 0.5);
-                rightWingShape.lineTo(2.5, 0.5);
-                rightWingShape.lineTo(4.5, -3.5);
-                rightWingShape.lineTo(3.5, -4.0);
+                rightWingShape.moveTo(0.3, -1.5);     // 胴体先端（コックピットあたり）
+                rightWingShape.lineTo(1.8, 0.5);      // 接続部後端（エンジン噴射口あたり）
+                rightWingShape.lineTo(3.2, -2.5);     // 翼端（画面手前Z負方向）
                 rightWingShape.closePath();
                 
                 const rightWingGeometry = new THREE.ExtrudeGeometry(rightWingShape, wingExtrudeSettings);
                 const rightWing = new THREE.Mesh(rightWingGeometry, wingMaterial.clone());
                 rightWing.rotation.x = -Math.PI / 2;
-                rightWing.position.set(1.2, 0.05, 0.5);
+                rightWing.position.set(0.5, 0.05, -0.5);
                 this.mesh.add(rightWing);
                 
                 // 右翼上面の微妙なリッジ

@@ -370,3 +370,9 @@
 - [x] メタディスクリプション（50-160文字）を追加
 - [x] H1見出しをページタイトルとして追加
 - [x] H2見出しをセクション見出しとして追加
+
+
+## 現在進行中: Open Graph メタタグの追加
+- [x] Open Graph メタタグ（og:title, og:description, og:image, og:url, og:type）をindex.htmlに追加
+- [x] SNS共有用画像（1200x630px）を作成してpublic/フォルダにアップロード
+- [x] Twitter Card メタタグも追加してTwitter共有を最適化

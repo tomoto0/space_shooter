@@ -1,0 +1,1 @@
+ALTER TABLE `player_rankings` MODIFY COLUMN `id` bigint unsigned AUTO_INCREMENT NOT NULL;

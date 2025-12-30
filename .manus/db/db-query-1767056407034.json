@@ -1,0 +1,21 @@
+{
+  "query": "SHOW CREATE TABLE player_rankings;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway02.us-east-1.prod.aws.tidbcloud.com --port 4000 --user uNghJRV6HrXdbvr.10264a9fd124 --database 4XuxRByWVfrPTHcAYZDjRE --execute SHOW CREATE TABLE player_rankings;",
+  "rows": [
+    {
+      "Table": "player_rankings",
+      "Create Table": "CREATE TABLE `player_rankings` ("
+    }
+  ],
+  "messages": [
+    "  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,",
+    "  `player_name` text COLLATE utf8mb4_unicode_ci NOT NULL,",
+    "  `score` int(11) NOT NULL,",
+    "  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,",
+    "  PRIMARY KEY (`id`) /*T![clustered_index] CLUSTERED */",
+    ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
+  ],
+  "stdout": "Table\tCreate Table\nplayer_rankings\tCREATE TABLE `player_rankings` (\n  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,\n  `player_name` text COLLATE utf8mb4_unicode_ci NOT NULL,\n  `score` int(11) NOT NULL,\n  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,\n  PRIMARY KEY (`id`) /*T![clustered_index] CLUSTERED */\n) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci\n",
+  "stderr": "",
+  "execution_time_ms": 50
+}

@@ -376,3 +376,12 @@
 - [x] Open Graph メタタグ（og:title, og:description, og:image, og:url, og:type）をindex.htmlに追加
 - [x] SNS共有用画像（1200x630px）を作成してpublic/フォルダにアップロード
 - [x] Twitter Card メタタグも追加してTwitter共有を最適化
+
+
+## 現在進行中: プレイヤーランキング機能の実装
+- [x] データベーススキーマを作成してランキングテーブル（player_rankings）を追加
+- [x] ランキング取得APIエンドポイント（GET /api/trpc/getRankings）を作成
+- [x] スコア登録APIエンドポイント（POST /api/trpc/addScore）を作成
+- [x] Game Over画面にランキング表示（1位から100位までスクロール表示）を追加
+- [x] 100位以内のスコア達成時に名前入力ポップアップを表示
+- [x] 名前とスコアをManusデータベースに登録する機能を実装

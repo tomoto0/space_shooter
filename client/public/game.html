@@ -15840,24 +15840,20 @@
                         // Wave 5またはWave 11のボスを倒したらエンディング再生
                         if (this.currentWave === 5 || this.boss.waveNumber === 5) {
                             this.gameCleared = true;
-                            // 少し遅延させてからエンディング再生
+                            // 少し遅延させてからエンディング再生（Wave 5用ムービー）
                             if (this.gameRef) {
                                 setTimeout(() => {
-                                    this.gameRef.playEndingMovie();
+                                    this.gameRef.playEndingMovie(5);
                                 }, 3000);
                             } else {
                                 console.error('[WaveManager] gameRef is not set!');
                             }
                         } else if (this.currentWave === 11 || this.boss.waveNumber === 11 || this.boss.isFinalBoss) {
-                            // Wave 11の暗黒母艦を倒したらエンディング再生後Wave 12へ
+                            // Wave 11の暗黒母艦を倒したらエンディング再生後Wave 12へ（Wave 11用ムービー）
                             this.gameCleared = true;
                             if (this.gameRef) {
                                 setTimeout(() => {
-                                    this.gameRef.playEndingMovie(() => {
-                                        // エンディング後にWave 12へ
-                                        this.gameCleared = false;
-                                        this.waveActive = false;
-                                    });
+                                    this.gameRef.playEndingMovie(11);
                                 }, 3000);
                             } else {
                                 console.error('[WaveManager] gameRef is not set!');
@@ -18051,9 +18047,24 @@
                 this.returnToMenu();
             }
 
-            playEndingMovie() {
+            playEndingMovie(waveNumber = null) {
                 const container = document.getElementById('ending-movie-container');
                 const video = document.getElementById('ending-video');
+                
+                // Wave番号に応じて異なるエンディングムービーを選択
+                const currentWave = waveNumber || (this.waveManager ? this.waveManager.currentWave : 5);
+                let videoSource = 'ending_wave5.mp4'; // デフォルトはWave 5用
+                
+                if (currentWave === 11 || currentWave > 11) {
+                    videoSource = 'ending_wave11.mp4'; // Wave 11用（暗黒巨大戦闘母艦撃破後）
+                    console.log('[playEndingMovie] Playing Wave 11 ending movie (Dark Mothership defeated)');
+                } else {
+                    console.log('[playEndingMovie] Playing Wave 5 ending movie (Cosmic Emperor defeated)');
+                }
+                
+                // ビデオソースを動的に設定
+                video.querySelector('source').src = videoSource;
+                video.load(); // 新しいソースを読み込む
                 
                 // ムービー再生中フラグを設定
                 if (this.waveManager) {
@@ -18140,7 +18151,8 @@
                 
                 // 動画終了時の処理
                 video.onended = () => {
-                    console.log('[playEndingMovie] Movie ended, starting Wave 6 transition...');
+                    const endingWave = currentWave; // クロージャでキャプチャ
+                    console.log(`[playEndingMovie] Movie ended for Wave ${endingWave}`);
                     if (game.waveManager) {
                         game.waveManager.isMoviePlaying = false;
                     }
@@ -18151,12 +18163,57 @@
                         container.style.display = 'none';
                         
                         // Wave 5ボス撃破後の場合は限界突破選択画面を表示
-                        if (game.waveManager && game.waveManager.currentWave === 5) {
+                        if (endingWave === 5) {
                             game.showPowerBreakthroughScreen();
                             return;
                         }
                         
-                        // Wave 6を開始
+                        // Wave 11ボス（暗黒巨大戦闘母艦）撃破後の場合はWave 12へ
+                        if (endingWave === 11 || endingWave > 11) {
+                            console.log('[playEndingMovie] Wave 11 ending complete, transitioning to Wave 12...');
+                            game.state = GameState.PLAYING;
+                            if (game.waveManager) {
+                                game.waveManager.gameCleared = false;
+                                game.waveManager.paused = false;
+                                
+                                // 全ての敵弾を消去
+                                if (game.waveManager.projectiles) {
+                                    game.waveManager.projectiles.forEach(p => {
+                                        if (p && p.destroy) p.destroy();
+                                    });
+                                    game.waveManager.projectiles = [];
+                                }
+                                
+                                // プレイヤーのhealthを回復
+                                if (game.player) {
+                                    game.player.health = game.player.maxHealth;
+                                    game.player.invulnerable = false;
+                                    game.player.invulnerableTimer = 0;
+                                }
+                                
+                                // オーディオボリュームを復元
+                                if (game.audioManager) {
+                                    game.audioManager.setMasterVolume(game.savedMasterVolume || 0.5);
+                                    if (game.audioManager.sfxGain) {
+                                        game.audioManager.sfxGain.gain.value = (game.savedSfxVolume || 0.7) * (game.savedMasterVolume || 0.5);
+                                    }
+                                }
+                                
+                                // Wave 12を開始
+                                console.log('[playEndingMovie] Starting Wave 12...');
+                                game.waveManager.startWave(12);
+                            }
+                            
+                            // Congratulationsを表示
+                            setTimeout(() => {
+                                if (game.waveManager) {
+                                    game.waveManager.showGameClearAnnouncement();
+                                }
+                            }, 500);
+                            return;
+                        }
+                        
+                        // その他の場合（通常はWave 6を開始）
                         console.log('[playEndingMovie] Setting game state to PLAYING...');
                         game.state = GameState.PLAYING;
                         if (game.waveManager) {

@@ -1,6 +1,7 @@
 import express from 'express';
 import { createServer } from 'http';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
 import { appRouter } from './router.js';
@@ -15,7 +16,22 @@ async function startServer() {
   // Add JSON body parser
   app.use(express.json());
 
-  // tRPC endpoint
+  // OGP image endpoint - MUST be registered BEFORE tRPC middleware
+  // Using /api/trpc prefix to bypass Cloudflare's static file caching
+  app.get('/api/trpc/og-image', (_req, res) => {
+    const imgPath = path.resolve(__dirname, '..', 'client', 'public', 'og-image.jpg');
+    const prodImgPath = path.resolve(__dirname, 'public', 'og-image.jpg');
+    const filePath = fs.existsSync(imgPath) ? imgPath : prodImgPath;
+    if (fs.existsSync(filePath)) {
+      res.setHeader('Content-Type', 'image/jpeg');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      res.sendFile(filePath);
+    } else {
+      res.status(404).send('Not found');
+    }
+  });
+
+  // tRPC endpoint (registered AFTER og-image route)
   app.use(
     '/api/trpc',
     createExpressMiddleware({

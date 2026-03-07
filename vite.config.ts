@@ -5,8 +5,41 @@ import fs from "node:fs";
 import path from "path";
 import { defineConfig } from "vite";
 import { vitePluginManusRuntime } from "vite-plugin-manus-runtime";
+import type { Plugin } from "vite";
 
-const plugins = [react(), tailwindcss(), jsxLocPlugin(), vitePluginManusRuntime()];
+// Plugin to serve og-image.jpg with correct Content-Type for social media crawlers
+function ogImagePlugin(): Plugin {
+  return {
+    name: "og-image-server",
+    configureServer(server) {
+      server.middlewares.use("/api/trpc/og-image", (_req, res, next) => {
+        const imgPath = path.resolve(
+          import.meta.dirname,
+          "client",
+          "public",
+          "og-image.jpg"
+        );
+        if (fs.existsSync(imgPath)) {
+          const img = fs.readFileSync(imgPath);
+          res.setHeader("Content-Type", "image/jpeg");
+          res.setHeader("Cache-Control", "public, max-age=86400");
+          res.setHeader("Content-Length", img.length);
+          res.end(img);
+        } else {
+          next();
+        }
+      });
+    },
+  };
+}
+
+const plugins = [
+  react(),
+  tailwindcss(),
+  jsxLocPlugin(),
+  vitePluginManusRuntime(),
+  ogImagePlugin(),
+];
 
 export default defineConfig({
   plugins,

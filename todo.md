@@ -397,3 +397,13 @@
 - [x] Wave 5ボス撃破時にムービー番号を渡すように修正
 - [x] Wave 11ボス撃破時にムービー番号を渡すように修正
 - [x] 動作確認とチェックポイント保存
+
+## OGPメタタグの包括的設定
+- [x] 現在のOGPメタタグ設定を確認
+- [x] OGP専用画像を最適化してCDNにアップロード（6.7MB→1880KB）
+- [x] Facebook向けOGPメタタグを設定（og:title, og:description, og:image, og:image:secure_url, og:image:type, og:image:alt, og:url, og:type, og:locale, og:locale:alternate, og:site_name）
+- [x] X(Twitter)向けメタタグを設定（twitter:card: summary_large_image, twitter:title, twitter:description, twitter:image, twitter:image:alt）
+- [x] LINE向けメタタグを設定（og:タグで対応、og:locale: ja_JP設定済み）
+- [x] その他の主要SNS向けメタタグを設定（canonical URL, JSON-LD構造化データ, apple-mobile-web-appメタタグ）
+- [x] game.htmlにも同様のOGPメタタグを追加
+- [x] 動作確認とチェックポイント保存

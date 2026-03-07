@@ -3,9 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="description" content="STELLAR ASSAULT is an immersive 3D space shooter game. Battle through waves of enemies and bosses in this intense arcade experience. Play now in your browser!">
-    <meta name="keywords" content="space shooter, 3D game, arcade, webgl, three.js, browser game, action">
+    <meta name="description" content="STELLAR ASSAULTは、迫力の3Dスペースシューターアーケードゲームです。敵の大群と戦い、パワーアップを集め、壮大なボス戦を生き延びよう。ブラウザで今すぐプレイ！">
+    <meta name="keywords" content="space shooter, 3D game, arcade, webgl, three.js, browser game, action, スペースシューター, アーケードゲーム">
     <title>STELLAR ASSAULT - 3D Space Shooter</title>
+    <link rel="canonical" href="https://spaceshoot.manus.space/game.html" />
+
+    <!-- Open Graph Protocol (Facebook / LINE / etc.) -->
+    <meta property="og:title" content="STELLAR ASSAULT - 3D Space Shooter" />
+    <meta property="og:description" content="迫力の3Dスペースシューターアーケードゲーム。敵の大群と戦い、パワーアップを集め、壮大なボス戦を生き延びよう。ブラウザで今すぐプレイ！" />
+    <meta property="og:image" content="https://d2xsxph8kpxj0f.cloudfront.net/310419663027084947/4XuxRByWVfrPTHcAYZDjRE/og-image_a09c9eb2.jpg" />
+    <meta property="og:image:secure_url" content="https://d2xsxph8kpxj0f.cloudfront.net/310419663027084947/4XuxRByWVfrPTHcAYZDjRE/og-image_a09c9eb2.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="STELLAR ASSAULT - 3D宇宙空間で繰り広げられる迫力のスペースシューターゲーム" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://spaceshoot.manus.space/game.html" />
+    <meta property="og:site_name" content="STELLAR ASSAULT" />
+    <meta property="og:locale" content="ja_JP" />
+    <meta property="og:locale:alternate" content="en_US" />
+
+    <!-- Twitter (X) Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="STELLAR ASSAULT - 3D Space Shooter" />
+    <meta name="twitter:description" content="迫力の3Dスペースシューターアーケードゲーム。敵の大群と戦い、パワーアップを集め、壮大なボス戦を生き延びよう！" />
+    <meta name="twitter:image" content="https://d2xsxph8kpxj0f.cloudfront.net/310419663027084947/4XuxRByWVfrPTHcAYZDjRE/og-image_a09c9eb2.jpg" />
+    <meta name="twitter:image:alt" content="STELLAR ASSAULT - 3D宇宙空間で繰り広げられる迫力のスペースシューターゲーム" />
     <style>
         * {
             margin: 0;
@@ -1552,7 +1575,7 @@
     <!-- Opening Movie Container -->
     <div id="opening-movie-container">
         <video id="opening-video" playsinline>
-            <source src="opening.mp4" type="video/mp4">
+            <source src="https://d2xsxph8kpxj0f.cloudfront.net/310419663027084947/4XuxRByWVfrPTHcAYZDjRE/opening_4208b33d.mp4" type="video/mp4">
         </video>
     </div>
     
@@ -14752,17 +14775,17 @@
             initBGM() {
                 // ローカルのBGMファイル
                 this.bgmTracks = {
-                    1: 'audio/bgm_wave1.mp3',
-                    2: 'audio/bgm_wave2.mp3',
-                    3: 'audio/bgm_wave3.mp3',
-                    4: 'audio/bgm_wave4.mp3',
-                    5: 'audio/bgm_wave5.mp3',
-                    6: 'audio/bgm_wave6.mp3',   // Blazing Stars - 荘厳な宇宙系BGM
-                    7: 'audio/bgm_wave7.mp3',   // Light Years - 宇宙旅行
-                    8: 'audio/bgm_wave8.mp3',   // Trouble On Mercury - 緊張感
-                    9: 'audio/bgm_wave9.mp3',   // Cold Moon - 寂寥とした宇宙
-                    10: 'audio/bgm_wave10.mp3',  // Steamtech Mayhem - テクノバトル
-                    11: 'wave11_boss.mp3'  // Battle Theme A - 最終ボス戦用エピックバトル
+                    1: 'https://d2xsxph8kpxj0f.cloudfront.net/310419663027084947/4XuxRByWVfrPTHcAYZDjRE/bgm_wave1_d1c69f48.mp3',
+                    2: 'https://d2xsxph8kpxj0f.cloudfront.net/310419663027084947/4XuxRByWVfrPTHcAYZDjRE/bgm_wave2_27365d72.mp3',
+                    3: 'https://d2xsxph8kpxj0f.cloudfront.net/310419663027084947/4XuxRByWVfrPTHcAYZDjRE/bgm_wave3_0de929bb.mp3',
+                    4: 'https://d2xsxph8kpxj0f.cloudfront.net/310419663027084947/4XuxRByWVfrPTHcAYZDjRE/bgm_wave4_13f84815.mp3',
+                    5: 'https://d2xsxph8kpxj0f.cloudfront.net/310419663027084947/4XuxRByWVfrPTHcAYZDjRE/bgm_wave5_e3782674.mp3',
+                    6: 'https://d2xsxph8kpxj0f.cloudfront.net/310419663027084947/4XuxRByWVfrPTHcAYZDjRE/bgm_wave6_269daed7.mp3',   // Blazing Stars - 荘厳な宇宙系BGM
+                    7: 'https://d2xsxph8kpxj0f.cloudfront.net/310419663027084947/4XuxRByWVfrPTHcAYZDjRE/bgm_wave7_cc571b88.mp3',   // Light Years - 宇宙旅行
+                    8: 'https://d2xsxph8kpxj0f.cloudfront.net/310419663027084947/4XuxRByWVfrPTHcAYZDjRE/bgm_wave8_13c6c658.mp3',   // Trouble On Mercury - 緊張感
+                    9: 'https://d2xsxph8kpxj0f.cloudfront.net/310419663027084947/4XuxRByWVfrPTHcAYZDjRE/bgm_wave9_a5836872.mp3',   // Cold Moon - 寂寥とした宇宙
+                    10: 'https://d2xsxph8kpxj0f.cloudfront.net/310419663027084947/4XuxRByWVfrPTHcAYZDjRE/bgm_wave10_8c3039c7.mp3',  // Steamtech Mayhem - テクノバトル
+                    11: 'https://d2xsxph8kpxj0f.cloudfront.net/310419663027084947/4XuxRByWVfrPTHcAYZDjRE/wave11_boss_e9ce903e.mp3'  // Battle Theme A - 最終ボス戦用エピックバトル
                 };
                 
                 this.currentBGM = null;
@@ -18053,10 +18076,10 @@
                 
                 // Wave番号に応じて異なるエンディングムービーを選択
                 const currentWave = waveNumber || (this.waveManager ? this.waveManager.currentWave : 5);
-                let videoSource = 'ending_wave5.mp4'; // デフォルトはWave 5用
+                let videoSource = 'https://d2xsxph8kpxj0f.cloudfront.net/310419663027084947/4XuxRByWVfrPTHcAYZDjRE/ending_wave5_4116afe5.mp4'; // デフォルトはWave 5用
                 
                 if (currentWave === 11 || currentWave > 11) {
-                    videoSource = 'ending_wave11.mp4'; // Wave 11用（暗黒巨大戦闘母艦撃破後）
+                    videoSource = 'https://d2xsxph8kpxj0f.cloudfront.net/310419663027084947/4XuxRByWVfrPTHcAYZDjRE/ending_wave11_8d769667.mp4'; // Wave 11用（暗黒巨大戦闘母艦撃破後）
                     console.log('[playEndingMovie] Playing Wave 11 ending movie (Dark Mothership defeated)');
                 } else {
                     console.log('[playEndingMovie] Playing Wave 5 ending movie (Cosmic Emperor defeated)');

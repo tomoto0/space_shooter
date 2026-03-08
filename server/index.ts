@@ -18,7 +18,8 @@ async function startServer() {
 
   // OGP image endpoint - MUST be registered BEFORE tRPC middleware
   // Using /api/trpc prefix to bypass Cloudflare's static file caching
-  app.get('/api/trpc/og-image', (_req, res) => {
+  // Also serve at v2 URL to force X/Twitter cache refresh
+  app.get(['/api/trpc/og-image', '/api/trpc/og-image-v2'], (_req, res) => {
     const imgPath = path.resolve(__dirname, '..', 'client', 'public', 'og-image.jpg');
     const prodImgPath = path.resolve(__dirname, 'public', 'og-image.jpg');
     const filePath = fs.existsSync(imgPath) ? imgPath : prodImgPath;

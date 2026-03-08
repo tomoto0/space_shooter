@@ -12,7 +12,8 @@ function ogImagePlugin(): Plugin {
   return {
     name: "og-image-server",
     configureServer(server) {
-      server.middlewares.use("/api/trpc/og-image", (_req, res, next) => {
+      // Serve at both URLs to support cache-busting for X/Twitter
+      const serveOgImage = (_req: any, res: any, next: any) => {
         const imgPath = path.resolve(
           import.meta.dirname,
           "client",
@@ -28,7 +29,9 @@ function ogImagePlugin(): Plugin {
         } else {
           next();
         }
-      });
+      };
+      server.middlewares.use("/api/trpc/og-image", serveOgImage);
+      server.middlewares.use("/api/trpc/og-image-v2", serveOgImage);
     },
   };
 }

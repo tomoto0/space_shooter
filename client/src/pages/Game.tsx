@@ -52,7 +52,7 @@ export default function Game() {
   return (
     <div className="w-screen h-screen overflow-hidden bg-black relative">
       <h1 className="sr-only">STELLAR ASSAULT - 3D Space Shooter</h1>
-      <h2 className="sr-only">Intense arcade space combat game with waves of enemies and epic boss battles</h2>
+      <h2 style={{position:'absolute',left:'-9999px',top:'auto',width:'1px',height:'1px',overflow:'hidden'}}>Intense arcade space combat game with waves of enemies and epic boss battles</h2>
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-black z-10 text-green-500 font-mono">
           <div className="flex flex-col items-center gap-4">
